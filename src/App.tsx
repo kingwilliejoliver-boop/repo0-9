@@ -5,7 +5,7 @@ import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryWorldwideTee from "./assets/templates/raspberry-worldwide-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import lossesToWinsTee from "./assets/templates/losses-to-wins-tee.jpg";
-import blankDigitalMockup from "./assets/templates/blank-digital-mockup.png";
+import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -523,7 +523,7 @@ function LandingPage({ onStart }: { onStart: () => void }) {
           </p>
         </div>
         <div className="w-full max-w-[420px]">
-          <BeforeAfterSlider beforeSrc={blankDigitalMockup} afterSrc={raspberryHillsTee} />
+          <BeforeAfterSlider beforeSrc={raspberryHillsMockup} afterSrc={raspberryHillsTee} />
         </div>
       </section>
 
