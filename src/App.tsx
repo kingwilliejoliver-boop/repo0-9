@@ -488,7 +488,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
 function LandingPage({ onStart }: { onStart: () => void }) {
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-white">
-      <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-[#ebebeb] flex-shrink-0">
+      <header className="flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0">
         <BrandLockup />
         <button
           type="button"
@@ -511,7 +511,6 @@ function LandingPage({ onStart }: { onStart: () => void }) {
         </div>
         <div className="w-full max-w-[420px]">
           <BeforeAfterSlider beforeSrc={blankDigitalMockup} afterSrc={raspberryHillsTee} />
-          <p className="text-[#aaa] text-sm text-center mt-4">Drag to compare your mockup with the applied look.</p>
         </div>
       </section>
 
