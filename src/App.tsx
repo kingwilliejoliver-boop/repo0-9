@@ -536,7 +536,7 @@ function LandingPage({ onStart }: { onStart: () => void }) {
           ].map((step) => (
             <div key={step.n} className="text-center sm:text-left">
               <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em]">{step.n}</p>
-              <h2 className="mt-2 text-[15px] font-semibold text-[#111] tracking-tight">{step.title}</h2>
+              <h2 className="mt-2 text-[18px] sm:text-[20px] font-semibold text-[#111] tracking-tight">{step.title}</h2>
               <p className="mt-1.5 text-sm text-[#888] leading-relaxed">{step.body}</p>
             </div>
           ))}
