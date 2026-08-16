@@ -6,6 +6,7 @@ import raspberryWorldwideTee from "./assets/templates/raspberry-worldwide-tee.jp
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import lossesToWinsTee from "./assets/templates/losses-to-wins-tee.jpg";
 import blankDigitalMockup from "./assets/templates/blank-digital-mockup.png";
+import shotfarmLogo from "./assets/shotfarm-logo.png";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,14 @@ function IconHome() {
       <path d="M3 10.5L12 3l9 7.5" />
       <path d="M5 10v10h14V10" />
     </svg>
+  );
+}
+function BrandLockup() {
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <img src={shotfarmLogo} alt="" width={32} height={32} className="w-8 h-8 rounded-[8px] flex-shrink-0" />
+      <p className="text-[#111] font-700 text-lg leading-none tracking-wide">ShotFarm</p>
+    </div>
   );
 }
 
@@ -436,14 +445,7 @@ function LandingPage({ onStart }: { onStart: () => void }) {
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-white">
       <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-[#ebebeb] flex-shrink-0">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-[#111] flex items-center justify-center text-white flex-shrink-0">
-            <IconSpark />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[#111] font-700 text-lg leading-none tracking-wide">ShotFarm</p>
-          </div>
-        </div>
+        <BrandLockup />
         <button
           type="button"
           onClick={onStart}
@@ -662,14 +664,7 @@ export default function App() {
         >
           <IconMenu />
         </button>
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-[#111] flex items-center justify-center text-white flex-shrink-0">
-            <IconSpark />
-          </div>
-          <div className="min-w-0">
-            <p  className="text-[#111] font-700 text-lg leading-none tracking-wide">ShotFarm</p>
-          </div>
-        </div>
+        <BrandLockup />
       </header>
 
       {/* ── Mobile menu overlay ────────────────────────────────────────── */}
@@ -691,14 +686,7 @@ export default function App() {
 
         {/* Logo */}
         <div className="px-5 pt-6 pb-5 border-b border-[#ebebeb] flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-[#111] flex items-center justify-center text-white flex-shrink-0">
-              <IconSpark />
-            </div>
-            <div>
-              <p  className="text-[#111] font-700 text-lg leading-none tracking-wide">ShotFarm</p>
-            </div>
-          </div>
+          <BrandLockup />
           <button
             type="button"
             aria-label="Close menu"
