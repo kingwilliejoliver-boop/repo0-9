@@ -133,13 +133,13 @@ const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
 const FREE_USED_KEY = "shotfarm-free-used";
 
-function seedTestAccountUsedUp() {
+function seedTestAccountCredits() {
   try {
-    localStorage.setItem(FREE_USED_KEY, String(FREE_IMAGE_LIMIT));
+    localStorage.setItem(FREE_USED_KEY, "0");
   } catch {
     /* ignore quota / private mode */
   }
-  return FREE_IMAGE_LIMIT;
+  return 0;
 }
 
 const PLANS = [
@@ -181,6 +181,41 @@ function Pill({ label, active, onClick }: { label: string; active: boolean; onCl
     >
       {label}
     </button>
+  );
+}
+
+function LibraryCard({
+  tpl,
+  onPreview,
+  onUse,
+}: {
+  tpl: typeof TEMPLATES[0];
+  onPreview: () => void;
+  onUse: () => void;
+}) {
+  return (
+    <article className="group flex flex-col">
+      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#f4f4f4]">
+        <button type="button" onClick={onPreview} className="absolute inset-0 cursor-pointer">
+          <img
+            src={imageSrc(tpl.img, 700)}
+            alt={tpl.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        </button>
+        <button
+          type="button"
+          onClick={onUse}
+          className="absolute bottom-3 right-3 z-10 px-3 py-1.5 rounded-lg bg-white/90 text-[11px] font-semibold text-[#111] tracking-wide hover:bg-white cursor-pointer shadow-sm"
+        >
+          Use look
+        </button>
+      </div>
+      <div className="pt-2.5 px-0.5">
+        <p className="text-[13px] font-medium text-[#111] leading-tight">{tpl.name}</p>
+        <p className="text-[11px] text-[#888] mt-0.5">{tpl.shot} · {tpl.garment}</p>
+      </div>
+    </article>
   );
 }
 
@@ -558,6 +593,96 @@ function LookPreview({
   );
 }
 
+function LibraryPage({
+  templates,
+  total,
+  query,
+  onQuery,
+  shotFilter,
+  onShotFilter,
+  onPreview,
+  onUse,
+  onStart,
+}: {
+  templates: typeof TEMPLATES;
+  total: number;
+  query: string;
+  onQuery: (q: string) => void;
+  shotFilter: (typeof SHOT_FILTERS)[number];
+  onShotFilter: (shot: (typeof SHOT_FILTERS)[number]) => void;
+  onPreview: (id: number) => void;
+  onUse: (id: number) => void;
+  onStart: () => void;
+}) {
+  return (
+    <div className="flex-1 flex flex-col min-h-0 bg-white">
+      <header className="flex-shrink-0 px-5 sm:px-8 pt-6 pb-5 border-b border-[#ebebeb]">
+        <div className="flex items-start sm:items-end justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-700 text-[#111] tracking-wide uppercase">Looks</h1>
+            <p className="text-[#aaa] text-sm mt-0.5">The set we apply to your mockup.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onStart}
+            className="flex-shrink-0 px-3.5 py-2 rounded-lg border border-[#e8e8e8] text-[#111] text-sm font-medium hover:border-[#111] cursor-pointer transition-colors"
+          >
+            Apply a look
+          </button>
+        </div>
+        <div className="relative mt-5">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bbb] pointer-events-none">
+            <IconSearch />
+          </span>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => onQuery(e.target.value)}
+            placeholder="Search looks"
+            className="w-full rounded-lg bg-[#fafafa] border border-[#e8e8e8] pl-9 pr-3 py-2.5 text-sm text-[#111] placeholder:text-[#ccc] focus:border-[#999] focus:bg-white focus:outline-none"
+          />
+        </div>
+        <div className="flex items-center justify-between gap-3 mt-3">
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5 -mx-0.5 px-0.5">
+            {SHOT_FILTERS.map((shot) => (
+              <Pill key={shot} label={shot} active={shotFilter === shot} onClick={() => onShotFilter(shot)} />
+            ))}
+          </div>
+          <span className="text-[11px] text-[#bbb] flex-shrink-0">{templates.length} of {total}</span>
+        </div>
+      </header>
+
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {templates.length === 0 ? (
+          <p className="text-sm text-[#aaa] py-16 text-center px-5">No looks match that. Try another shot type or search.</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 px-5 sm:px-8 py-6 sm:py-8">
+            {templates.map((tpl) => (
+              <LibraryCard
+                key={tpl.id}
+                tpl={tpl}
+                onPreview={() => onPreview(tpl.id)}
+                onUse={() => onUse(tpl.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex-shrink-0 border-t border-[#ebebeb] bg-white/95 backdrop-blur-sm px-5 sm:px-8 py-3 flex items-center justify-between gap-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <p className="text-[13px] text-[#888] leading-snug min-w-0">Upload a mockup to apply one of these looks.</p>
+        <button
+          type="button"
+          onClick={onStart}
+          className="flex-shrink-0 px-3.5 py-2 rounded-lg border border-[#111] text-[#111] text-sm font-medium hover:bg-[#111] hover:text-white cursor-pointer transition-colors"
+        >
+          Apply a look
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -571,7 +696,7 @@ export default function App() {
   const [result, setResult] = useState<string | null>(null);
   const [strength, setStrength] = useState(70);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [freeUsed, setFreeUsed] = useState(seedTestAccountUsedUp);
+  const [freeUsed, setFreeUsed] = useState(seedTestAccountCredits);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<(typeof PLANS)[number]["id"]>("pro");
   const [subscribed, setSubscribed] = useState(false);
@@ -735,8 +860,25 @@ export default function App() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-y-auto md:overflow-hidden">
+      <div className={`flex-1 flex flex-col min-h-0 ${page === "library" ? "overflow-hidden" : "md:flex-row overflow-y-auto md:overflow-hidden"}`}>
 
+      {page === "library" ? (
+        <LibraryPage
+          templates={filteredTemplates}
+          total={TEMPLATES.length}
+          query={lookQuery}
+          onQuery={setLookQuery}
+          shotFilter={shotFilter}
+          onShotFilter={setShotFilter}
+          onPreview={setPreviewId}
+          onUse={(id) => {
+            setSelectedTemplate(id);
+            goTo("generate");
+          }}
+          onStart={() => goTo("generate")}
+        />
+      ) : (
+      <>
       {/* ── Control Panel ────────────────────────────────────────────────── */}
       <div className="w-full md:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-[#ebebeb] md:overflow-y-auto md:h-full bg-[#fafafa]">
 
@@ -948,6 +1090,8 @@ export default function App() {
           </div>
         </div>
       </main>
+      </>
+      )}
       </div>
         </>
       )}
@@ -958,6 +1102,7 @@ export default function App() {
           onUse={() => {
             setSelectedTemplate(previewLook.id);
             setPreviewId(null);
+            goTo("generate");
           }}
         />
       )}
