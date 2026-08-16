@@ -132,6 +132,21 @@ const SHOT_FILTERS = ["All", "Flat lay", "Hanger", "On body", "Studio"] as const
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
 const FREE_USED_KEY = "shotfarm-free-used";
+const PAGE_KEY = "shotfarm-page";
+
+type Page = "home" | "generate" | "library" | "history" | "settings";
+
+function readSavedPage(): Page {
+  try {
+    const saved = sessionStorage.getItem(PAGE_KEY);
+    if (saved === "home" || saved === "generate" || saved === "library" || saved === "history" || saved === "settings") {
+      return saved;
+    }
+  } catch {
+    /* ignore quota / private mode */
+  }
+  return "home";
+}
 
 function seedTestAccountCredits() {
   try {
@@ -154,8 +169,6 @@ const HISTORY = [
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
-
-type Page = "home" | "generate" | "library" | "history" | "settings";
 
 function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
@@ -694,7 +707,7 @@ function LibraryPage({
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [page, setPage] = useState<Page>("home");
+  const [page, setPage] = useState<Page>(readSavedPage);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(1);
   const [lookQuery, setLookQuery] = useState("");
   const [shotFilter, setShotFilter] = useState<(typeof SHOT_FILTERS)[number]>("All");
@@ -712,6 +725,11 @@ export default function App() {
   const goTo = (next: Page) => {
     setPage(next);
     setMenuOpen(false);
+    try {
+      sessionStorage.setItem(PAGE_KEY, next);
+    } catch {
+      /* ignore quota / private mode */
+    }
     if (next === "generate" && freeUsed >= FREE_IMAGE_LIMIT) setPaywallOpen(true);
     if (next === "home") setPaywallOpen(false);
   };
