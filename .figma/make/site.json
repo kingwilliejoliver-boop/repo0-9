@@ -1,0 +1,11 @@
+{
+  "title": "ShotFarm",
+  "description": "Generate custom app page designs using AI with templates, prompts, and reference images to streamline creative workflows and boost productivity.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
