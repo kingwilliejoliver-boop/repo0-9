@@ -126,6 +126,18 @@ const TEMPLATES = [
   { id: 4, name: "Raspberry Worldwide Tee", garment: "Tee", shot: "Flat lay", summary: "Washed charcoal tee with a weathered oval graphic.", prompt: "Faded charcoal oversized t-shirt flat lay on white, raw frayed hem and neckline, distressed holes, weathered orange-red RASPBERRY WORLDWIDE oval print, wired earbuds graphic overlay, Los Angeles streetwear product shot", img: raspberryWorldwideTee, aspect: "portrait" },
   { id: 5, name: "Raspberry Hills Tee", garment: "Tee", shot: "Flat lay", summary: "Oversized off-white tee, frayed collar, cracked vintage print.", prompt: "Oversized boxy off-white t-shirt flat lay on white, frayed ribbed collar, pinholes and raw uneven hem, cracked vintage Raspberry Hills collegiate print, blue RASPBERRY! bar, black star column, distressed streetwear product shot", img: raspberryHillsTee, aspect: "square" },
   { id: 6, name: "Losses to Wins Tee", garment: "Tee", shot: "On body", summary: "Boxy white tee with three vertical collage panels.", prompt: "On-body streetwear photo, boxy white graphic t-shirt, slightly cropped raw hem, three vertical skate-deck panels in pink black and seafoam, LOSSES 2 WINS branding, dice chains crosses collage print, camo trousers, urban editorial lighting", img: lossesToWinsTee, aspect: "portrait" },
+  { id: 7, name: "Clean Studio Tee", garment: "Tee", shot: "Studio", summary: "Placeholder. Minimal white tee, even retail light.", prompt: "Placeholder", img: saintDistressedTee, aspect: "portrait" },
+  { id: 8, name: "Dark Luxury Tee", garment: "Tee", shot: "Studio", summary: "Placeholder. Black tee, hard light, luxury product shot.", prompt: "Placeholder", img: distressedGraphicTee, aspect: "portrait" },
+  { id: 9, name: "Vintage Hoodie Hanger", garment: "Sweatshirt", shot: "Hanger", summary: "Placeholder. Washed hoodie on a hanger.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
+  { id: 10, name: "Clean Hoodie Flat", garment: "Sweatshirt", shot: "Flat lay", summary: "Placeholder. Neutral hoodie, top-down.", prompt: "Placeholder", img: raspberryHillsTee, aspect: "square" },
+  { id: 11, name: "On-Body Hoodie", garment: "Sweatshirt", shot: "On body", summary: "Placeholder. Boxy hoodie, street editorial.", prompt: "Placeholder", img: lossesToWinsTee, aspect: "portrait" },
+  { id: 12, name: "Dark Studio Hoodie", garment: "Sweatshirt", shot: "Studio", summary: "Placeholder. Black hoodie, studio sweep.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
+  { id: 13, name: "Black Tee Hanger", garment: "Tee", shot: "Hanger", summary: "Placeholder. Black graphic tee on a hanger.", prompt: "Placeholder", img: raspberryWorldwideTee, aspect: "portrait" },
+  { id: 14, name: "Distressed On-Body Tee", garment: "Tee", shot: "On body", summary: "Placeholder. Cropped distressed tee, on body.", prompt: "Placeholder", img: lossesToWinsTee, aspect: "portrait" },
+  { id: 15, name: "Washed Hoodie Flat", garment: "Sweatshirt", shot: "Flat lay", summary: "Placeholder. Faded hoodie, flat lay.", prompt: "Placeholder", img: raspberryWorldwideTee, aspect: "portrait" },
+  { id: 16, name: "Clean Tee Hanger", garment: "Tee", shot: "Hanger", summary: "Placeholder. Crisp white tee on a hanger.", prompt: "Placeholder", img: saintDistressedTee, aspect: "portrait" },
+  { id: 17, name: "Dark On-Body Tee", garment: "Tee", shot: "On body", summary: "Placeholder. Black tee, night street light.", prompt: "Placeholder", img: distressedGraphicTee, aspect: "portrait" },
+  { id: 18, name: "Minimal Hoodie Hanger", garment: "Sweatshirt", shot: "Hanger", summary: "Placeholder. No-print hoodie, hanger.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
 ];
 
 const SHOT_FILTERS = ["All", "Flat lay", "Hanger", "On body", "Studio"] as const;
@@ -223,6 +235,11 @@ function LibraryCard({
         >
           Use look
         </button>
+        {tpl.summary.startsWith("Placeholder") && (
+          <span className="absolute top-3 left-3 z-10 px-2 py-1 rounded-md bg-white/90 text-[10px] font-semibold text-[#888] tracking-wide">
+            Placeholder
+          </span>
+        )}
       </div>
       <div className="pt-2.5 px-0.5">
         <p className="text-[13px] font-medium text-[#111] leading-tight">{tpl.name}</p>
