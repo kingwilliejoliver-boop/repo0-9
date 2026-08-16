@@ -907,12 +907,6 @@ export default function App() {
       {/* ── Control Panel ────────────────────────────────────────────────── */}
       <div className="w-full md:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-[#ebebeb] md:overflow-y-auto md:h-full bg-[#fafafa]">
 
-        {/* Header */}
-        <div className="px-5 pt-6 pb-4 border-b border-[#ebebeb] bg-white">
-          <h1  className="text-2xl font-700 text-[#111] tracking-wide uppercase">Create a piece</h1>
-          <p className="text-[#aaa] text-sm mt-0.5">Upload your mockup, pick a look.<br />We apply the template for you.</p>
-        </div>
-
         <div className="flex-1 px-5 py-5 flex flex-col gap-6">
 
           <MockupDropzone
@@ -1007,31 +1001,16 @@ export default function App() {
       {/* ── Output ──────────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col min-h-[70vh] md:min-h-0 md:overflow-hidden bg-white">
 
-        {/* Top bar */}
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-[#ebebeb]">
-          <div className="min-w-0">
-            <h2  className="text-xl font-700 text-[#111] uppercase tracking-wide">Your piece</h2>
-            <p className="text-[#bbb] text-xs mt-0.5 truncate">
-              {generating
-                ? "Applying look…"
-                : result
-                  ? `${selectedLook?.name ?? "Look"} · ${aspectRatio}`
-                  : mockups.length === 0
-                    ? "Upload a mockup to get started"
-                    : "Ready when you are"}
-            </p>
+        {result && !generating && (
+          <div className="flex items-center justify-end gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-[#ebebeb]">
+            <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg border border-[#e8e8e8] text-[#555] text-sm hover:border-[#ccc] hover:text-[#111] transition-all cursor-pointer">
+              <IconShare /> <span className="hidden sm:inline">Share</span>
+            </button>
+            <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg bg-[#111] text-white text-sm hover:opacity-90 transition-all cursor-pointer">
+              <IconDownload /> <span className="hidden sm:inline">Download</span>
+            </button>
           </div>
-          {result && !generating && (
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg border border-[#e8e8e8] text-[#555] text-sm hover:border-[#ccc] hover:text-[#111] transition-all cursor-pointer">
-                <IconShare /> <span className="hidden sm:inline">Share</span>
-              </button>
-              <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg bg-[#111] text-white text-sm hover:opacity-90 transition-all cursor-pointer">
-                <IconDownload /> <span className="hidden sm:inline">Download</span>
-              </button>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Canvas */}
         <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-[#fafafa] min-h-[280px]">
