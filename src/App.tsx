@@ -793,6 +793,7 @@ export default function App() {
   const [selectedPlan, setSelectedPlan] = useState<(typeof PLANS)[number]["id"]>("starter");
   const [subscribed, setSubscribed] = useState(false);
   const [previewId, setPreviewId] = useState<number | null>(null);
+  const [lookSetIndex, setLookSetIndex] = useState(0);
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -828,6 +829,10 @@ export default function App() {
     };
   }, [menuOpen, paywallOpen, previewId]);
 
+  useEffect(() => {
+    setLookSetIndex(0);
+  }, [lookQuery, shotFilter]);
+
   const filteredTemplates = TEMPLATES.filter((t) => {
     const matchesShot = shotFilter === "All" || t.shot === shotFilter;
     const q = lookQuery.trim().toLowerCase();
@@ -839,6 +844,13 @@ export default function App() {
       t.garment.toLowerCase().includes(q);
     return matchesShot && matchesQuery;
   });
+
+  const lookPageCount = Math.max(1, Math.ceil(filteredTemplates.length / LOOKS_PER_PAGE));
+  const lookSafeIndex = Math.min(lookSetIndex, lookPageCount - 1);
+  const lookPages: (typeof TEMPLATES)[] = [];
+  for (let i = 0; i < filteredTemplates.length; i += LOOKS_PER_PAGE) {
+    lookPages.push(filteredTemplates.slice(i, i + LOOKS_PER_PAGE));
+  }
 
   const selectedLook = TEMPLATES.find((t) => t.id === selectedTemplate) ?? null;
   const previewLook = TEMPLATES.find((t) => t.id === previewId) ?? null;
@@ -1012,16 +1024,50 @@ export default function App() {
             {filteredTemplates.length === 0 ? (
               <p className="text-sm text-[#aaa] py-8 text-center">No looks match that. Try another shot type or search.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {filteredTemplates.map((tpl) => (
-                  <TemplateCard
-                    key={tpl.id}
-                    tpl={tpl}
-                    selected={selectedTemplate === tpl.id}
-                    onClick={() => setPreviewId(tpl.id)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="overflow-hidden">
+                  <div
+                    className="flex transition-transform duration-300 ease-out"
+                    style={{ transform: `translateX(-${lookSafeIndex * 100}%)` }}
+                  >
+                    {lookPages.map((pageLooks, i) => (
+                      <div key={i} className="w-full min-w-full flex-shrink-0 grid grid-cols-2 gap-2">
+                        {pageLooks.map((tpl) => (
+                          <TemplateCard
+                            key={tpl.id}
+                            tpl={tpl}
+                            selected={selectedTemplate === tpl.id}
+                            onClick={() => setPreviewId(tpl.id)}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {lookPageCount > 1 && (
+                  <div className="flex items-center justify-center gap-3 mt-3">
+                    <button
+                      type="button"
+                      aria-label="Previous looks"
+                      disabled={lookSafeIndex === 0}
+                      onClick={() => setLookSetIndex((n) => Math.max(0, n - 1))}
+                      className="w-8 h-8 rounded-full border border-[#e8e8e8] bg-white flex items-center justify-center text-[#111] hover:border-[#111] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <IconChevron dir="left" />
+                    </button>
+                    <span className="text-[11px] text-[#888] tabular-nums">{lookSafeIndex + 1} / {lookPageCount}</span>
+                    <button
+                      type="button"
+                      aria-label="Next looks"
+                      disabled={lookSafeIndex >= lookPageCount - 1}
+                      onClick={() => setLookSetIndex((n) => Math.min(lookPageCount - 1, n + 1))}
+                      className="w-8 h-8 rounded-full border border-[#e8e8e8] bg-white flex items-center justify-center text-[#111] hover:border-[#111] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <IconChevron dir="right" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
