@@ -143,8 +143,8 @@ function seedTestAccountCredits() {
 }
 
 const PLANS = [
-  { id: "starter" as const, name: "Starter", price: 19, images: 40, blurb: "Enough for a small drop", recommended: false },
-  { id: "pro" as const, name: "Pro", price: 49, images: 150, blurb: "For ongoing collections", recommended: true },
+  { id: "starter" as const, name: "Pack", price: 9, images: 20, blurb: "No monthly plan", interval: "once" as const, recommended: false },
+  { id: "pro" as const, name: "Pro", price: 49, images: 150, blurb: "For ongoing collections", interval: "month" as const, recommended: true },
 ];
 
 const HISTORY = [
@@ -356,7 +356,7 @@ function Paywall({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p  className="text-[#111] text-2xl font-700 tracking-wide uppercase">Keep creating</p>
-              <p className="text-[#888] text-sm mt-1.5 leading-relaxed">You've used your 3 free images. Subscribe to keep applying looks to your mockups.</p>
+              <p className="text-[#888] text-sm mt-1.5 leading-relaxed">You've used your 3 free images. Get more to keep applying looks to your mockups.</p>
             </div>
             <button
               type="button"
@@ -391,9 +391,14 @@ function Paywall({
                         <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-[#111] text-white">Best value</span>
                       )}
                     </div>
-                    <p className="text-xs text-[#888] mt-0.5">{p.images} images / month · {p.blurb}</p>
+                    <p className="text-xs text-[#888] mt-0.5">
+                      {p.interval === "once" ? `${p.images} images · ${p.blurb}` : `${p.images} images / month · ${p.blurb}`}
+                    </p>
                   </div>
-                  <p  className="text-[#111] text-xl font-700 tracking-wide">${p.price}<span className="text-xs font-medium text-[#aaa] tracking-normal">/mo</span></p>
+                  <p className="text-[#111] text-xl font-700 tracking-wide">
+                    ${p.price}
+                    {p.interval === "month" && <span className="text-xs font-medium text-[#aaa] tracking-normal">/mo</span>}
+                  </p>
                 </div>
               </button>
             );
@@ -410,7 +415,11 @@ function Paywall({
             CONTINUE WITH {plan.name.toUpperCase()}
           </button>
           <p className={`text-[11px] text-center mt-2.5 ${subscribed ? "text-[#111]" : "text-[#bbb]"}`}>
-            {subscribed ? "Checkout isn't connected yet — this is the subscribe step." : "Cancel anytime. Unused images don't roll over."}
+            {subscribed
+              ? "Checkout isn't connected yet — this is the pay step."
+              : plan.interval === "once"
+                ? "One-time. Credits don't expire."
+                : "Cancel anytime. Unused images don't roll over."}
           </p>
         </div>
       </div>
@@ -694,11 +703,10 @@ export default function App() {
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [strength, setStrength] = useState(70);
   const [menuOpen, setMenuOpen] = useState(false);
   const [freeUsed, setFreeUsed] = useState(seedTestAccountCredits);
   const [paywallOpen, setPaywallOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<(typeof PLANS)[number]["id"]>("pro");
+  const [selectedPlan, setSelectedPlan] = useState<(typeof PLANS)[number]["id"]>("starter");
   const [subscribed, setSubscribed] = useState(false);
   const [previewId, setPreviewId] = useState<number | null>(null);
 
@@ -933,37 +941,6 @@ export default function App() {
               </div>
             )}
           </div>
-
-          {selectedLook && (
-            <div className="rounded-xl p-3.5 bg-white border border-[#ebebeb]">
-              <p className="text-[10px] font-semibold text-[#aaa] uppercase tracking-widest mb-1.5">Selected look</p>
-              <p className="text-[#111] text-sm font-medium">{selectedLook.name}</p>
-              <p className="text-[#888] text-[11px] mt-0.5">{selectedLook.shot} · {selectedLook.garment}</p>
-              <p className="text-[#666] text-xs leading-relaxed mt-1">{selectedLook.summary}</p>
-            </div>
-          )}
-
-          {mockups.length > 0 && (
-            <div>
-              <div className="flex justify-between mb-2.5">
-                <Label>How close to this look</Label>
-                <span className="text-xs font-semibold text-[#111]">{strength}%</span>
-              </div>
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={strength}
-                onChange={(e) => setStrength(Number(e.target.value))}
-                className="w-full h-1 rounded-full appearance-none cursor-pointer"
-                style={{ background: `linear-gradient(to right, #111 ${strength}%, #e8e8e8 ${strength}%)` }}
-              />
-              <div className="flex justify-between mt-1.5">
-                <span className="text-[10px] text-[#ccc]">Keep my mockup</span>
-                <span className="text-[10px] text-[#ccc]">Match the look</span>
-              </div>
-            </div>
-          )}
 
           <div>
             <Label>Output size</Label>
