@@ -864,7 +864,7 @@ export default function App() {
             style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
           >
             <IconGenerate />
-            {generating ? "APPLYING LOOK…" : outOfCredits ? "SUBSCRIBE TO CONTINUE" : "APPLY THIS LOOK"}
+            {generating ? "APPLYING LOOK…" : "APPLY THIS LOOK"}
           </button>
           {!generating && (
             <p className="text-[11px] text-[#bbb] text-center mt-2">
