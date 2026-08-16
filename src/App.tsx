@@ -103,6 +103,13 @@ function IconHome() {
     </svg>
   );
 }
+function IconChevron({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {dir === "left" ? <polyline points="15 6 9 12 15 18" /> : <polyline points="9 6 15 12 9 18" />}
+    </svg>
+  );
+}
 function BrandLockup() {
   return (
     <div className="flex items-center gap-2.5 min-w-0">
@@ -140,6 +147,7 @@ const TEMPLATES = [
   { id: 18, name: "Minimal Hoodie Hanger", garment: "Sweatshirt", shot: "Hanger", summary: "Placeholder. No-print hoodie, hanger.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
 ];
 
+const LOOKS_PER_PAGE = 6;
 const SHOT_FILTERS = ["All", "Flat lay", "Hanger", "On body", "Studio"] as const;
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
@@ -652,6 +660,19 @@ function LibraryPage({
   onUse: (id: number) => void;
   onStart: () => void;
 }) {
+  const [setIndex, setSetIndex] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(templates.length / LOOKS_PER_PAGE));
+
+  useEffect(() => {
+    setSetIndex(0);
+  }, [query, shotFilter]);
+
+  const safeIndex = Math.min(setIndex, pageCount - 1);
+  const pages: (typeof TEMPLATES)[] = [];
+  for (let i = 0; i < templates.length; i += LOOKS_PER_PAGE) {
+    pages.push(templates.slice(i, i + LOOKS_PER_PAGE));
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-white">
       <header className="flex-shrink-0 px-5 sm:px-8 pt-6 pb-5 border-b border-[#ebebeb]">
@@ -694,15 +715,49 @@ function LibraryPage({
         {templates.length === 0 ? (
           <p className="text-sm text-[#aaa] py-16 text-center px-5">No looks match that. Try another shot type or search.</p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 px-5 sm:px-8 py-6 sm:py-8">
-            {templates.map((tpl) => (
-              <LibraryCard
-                key={tpl.id}
-                tpl={tpl}
-                onPreview={() => onPreview(tpl.id)}
-                onUse={() => onUse(tpl.id)}
-              />
-            ))}
+          <div className="px-5 sm:px-8 py-6 sm:py-8">
+            <div className="overflow-hidden">
+              <div
+                className="flex transition-transform duration-300 ease-out"
+                style={{ transform: `translateX(-${safeIndex * 100}%)` }}
+              >
+                {pages.map((pageLooks, i) => (
+                  <div key={i} className="w-full min-w-full flex-shrink-0 grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10">
+                    {pageLooks.map((tpl) => (
+                      <LibraryCard
+                        key={tpl.id}
+                        tpl={tpl}
+                        onPreview={() => onPreview(tpl.id)}
+                        onUse={() => onUse(tpl.id)}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {pageCount > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <button
+                  type="button"
+                  aria-label="Previous looks"
+                  disabled={safeIndex === 0}
+                  onClick={() => setSetIndex((n) => Math.max(0, n - 1))}
+                  className="w-10 h-10 rounded-full border border-[#e8e8e8] flex items-center justify-center text-[#111] hover:border-[#111] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <IconChevron dir="left" />
+                </button>
+                <span className="text-[12px] text-[#888] tabular-nums">{safeIndex + 1} / {pageCount}</span>
+                <button
+                  type="button"
+                  aria-label="Next looks"
+                  disabled={safeIndex >= pageCount - 1}
+                  onClick={() => setSetIndex((n) => Math.min(pageCount - 1, n + 1))}
+                  className="w-10 h-10 rounded-full border border-[#e8e8e8] flex items-center justify-center text-[#111] hover:border-[#111] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <IconChevron dir="right" />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
