@@ -39,8 +39,12 @@ function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number
   return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
 
+function withFitInstruction(prompt: string, aspectRatio: string) {
+  return `${prompt}\n\nOutput size is ${aspectRatio}. Fit the entire mockup from #2 inside this frame. Keep every part of the garment visible. Do not crop or zoom in. Add matching background from #2 if the photo does not already match this size.`;
+}
+
 const SYSTEM_PROMPT =
-  "You edit a locked product template photo. Keep image #2 as the exact same mockup photograph. Change only the garment color and printed artwork to match image #1. Never invent a new mockup, camera, background, or scene.";
+  "You edit a locked product template photo. Keep image #2 as the exact same mockup photograph. Change only the garment color and printed artwork to match image #1. Never invent a new mockup, camera, background, or scene. Fit the entire garment in the output frame. Never crop sleeves, hem, collar, hanger, or any part of the shirt. Do not zoom in. If extra space is needed for the output size, add matching background from #2.";
 
 function asImageDataUrl(value: unknown) {
   if (typeof value !== "string") return null;
@@ -112,7 +116,7 @@ export default async function handler(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: withImageRefs(prompt, mockups.length, lookImages.length),
+        prompt: withFitInstruction(withImageRefs(prompt, mockups.length, lookImages.length), aspectRatio),
         system_prompt: SYSTEM_PROMPT,
         image_urls: imageUrls,
         num_images: 1,

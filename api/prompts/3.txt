@@ -1,6 +1,6 @@
 Edit image #2. Do not create a new mockup.
 
-Image #2 is the locked template photo. The final image must look like the SAME photograph as #2: same camera, same crop, same distance, same angle, same background, same lighting, same shadows, same garment silhouette, same hang/flat-lay/studio presentation, same wrinkles, same fabric drape, same collar/sleeves/hem. If #2 is a black studio shot, keep that black studio. If #2 is a white flat lay, keep that white flat lay. Do not invent a different scene, set, or mockup style.
+Image #2 is the locked template photo. The final image must look like the SAME photograph as #2: same camera, same framing, same distance, same angle, same background, same lighting, same shadows, same garment silhouette, same hang/flat-lay/studio presentation, same wrinkles, same fabric drape, same collar/sleeves/hem. Keep the entire garment in frame. Do not crop or zoom in. If the output size differs from #2, add matching background from #2 — never cut off sleeves, hem, collar, or hanger. If #2 is a black studio shot, keep that black studio. If #2 is a white flat lay, keep that white flat lay. Do not invent a different scene, set, or mockup style.
 
 The only allowed change is the customer's product from image #1:
 - Use #1 only for shirt color and the exact printed artwork (logo, text, graphic, colors, spelling).
