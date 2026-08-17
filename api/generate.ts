@@ -31,13 +31,16 @@ function readLookPrompt(id: number) {
 function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number) {
   const refs: string[] = [];
   for (let i = 0; i < mockupCount; i += 1) {
-    refs.push(`#${i + 1} user's mockup${mockupCount > 1 ? ` ${i + 1}` : ""}`);
+    refs.push(`#${i + 1} customer design only — shirt color and print from this upload`);
   }
   for (let i = 0; i < lookRefCount; i += 1) {
-    refs.push(`#${mockupCount + i + 1} look reference${lookRefCount > 1 ? ` ${i + 1}` : ""}`);
+    refs.push(`#${mockupCount + i + 1} locked template photo — edit this image, keep this exact mockup`);
   }
   return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
+
+const SYSTEM_PROMPT =
+  "You edit a locked product template photo. Keep image #2 as the exact same mockup photograph. Change only the garment color and printed artwork to match image #1. Never invent a new mockup, camera, background, or scene.";
 
 function asImageDataUrl(value: unknown) {
   if (typeof value !== "string") return null;
@@ -110,6 +113,7 @@ export default async function handler(
       },
       body: JSON.stringify({
         prompt: withImageRefs(prompt, mockups.length, lookImages.length),
+        system_prompt: SYSTEM_PROMPT,
         image_urls: imageUrls,
         num_images: 1,
         aspect_ratio: aspectRatio,
