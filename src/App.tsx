@@ -5,6 +5,7 @@ import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryWorldwideTee from "./assets/templates/raspberry-worldwide-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import lossesToWinsTee from "./assets/templates/losses-to-wins-tee.jpg";
+import distressedFlatJeans from "./assets/templates/distressed-flat-jeans.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 
@@ -133,7 +134,7 @@ const TEMPLATES = [
   { id: 4, name: "Raspberry Worldwide Tee", garment: "Tee", shot: "Flat lay", summary: "Washed charcoal tee with a weathered oval graphic.", prompt: "Faded charcoal oversized t-shirt flat lay on white, raw frayed hem and neckline, distressed holes, weathered orange-red RASPBERRY WORLDWIDE oval print, wired earbuds graphic overlay, Los Angeles streetwear product shot", img: raspberryWorldwideTee, aspect: "portrait" },
   { id: 5, name: "Raspberry Hills Tee", garment: "Tee", shot: "Flat lay", summary: "Oversized off-white tee, frayed collar, cracked vintage print.", prompt: "Oversized boxy off-white t-shirt flat lay on white, frayed ribbed collar, pinholes and raw uneven hem, cracked vintage Raspberry Hills collegiate print, blue RASPBERRY! bar, black star column, distressed streetwear product shot", img: raspberryHillsTee, aspect: "square" },
   { id: 6, name: "Losses to Wins Tee", garment: "Tee", shot: "On body", summary: "Boxy white tee with three vertical collage panels.", prompt: "On-body streetwear photo, boxy white graphic t-shirt, slightly cropped raw hem, three vertical skate-deck panels in pink black and seafoam, LOSSES 2 WINS branding, dice chains crosses collage print, camo trousers, urban editorial lighting", img: lossesToWinsTee, aspect: "portrait" },
-  { id: 7, name: "Clean Studio Tee", garment: "Tee", shot: "Studio", summary: "Placeholder. Minimal white tee, even retail light.", prompt: "Placeholder", img: saintDistressedTee, aspect: "portrait" },
+  { id: 7, name: "Distressed Straight Jeans", garment: "Jeans", shot: "Flat lay", summary: "Vintage-wash straight jeans, heavy rips, raw hem.", prompt: "Straight-leg vintage wash blue denim jeans flat lay on gray concrete, heavy thigh and knee rips with frayed white threads, faded honeycombing, raw frayed hem, bright blue repair stitch at the knee, streetwear product shot", img: distressedFlatJeans, aspect: "portrait" },
   { id: 8, name: "Dark Luxury Tee", garment: "Tee", shot: "Studio", summary: "Placeholder. Black tee, hard light, luxury product shot.", prompt: "Placeholder", img: distressedGraphicTee, aspect: "portrait" },
   { id: 9, name: "Vintage Hoodie Hanger", garment: "Sweatshirt", shot: "Hanger", summary: "Placeholder. Washed hoodie on a hanger.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
   { id: 10, name: "Clean Hoodie Flat", garment: "Sweatshirt", shot: "Flat lay", summary: "Placeholder. Neutral hoodie, top-down.", prompt: "Placeholder", img: raspberryHillsTee, aspect: "square" },
@@ -148,10 +149,11 @@ const TEMPLATES = [
 ];
 
 const LOOKS_PER_PAGE = 6;
-const SHOT_FILTERS = ["All", "Flat lay", "Hanger", "On body", "Studio"] as const;
+const GARMENT_FILTERS = ["All", "Tee", "Sweatshirt", "Jeans"] as const;
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
 const FREE_USED_KEY = "shotfarm-free-used";
+const PAID_CREDITS_KEY = "shotfarm-paid-credits";
 const PAGE_KEY = "shotfarm-page";
 
 type Page = "home" | "generate" | "library" | "history" | "settings";
@@ -166,6 +168,23 @@ function readSavedPage(): Page {
     /* ignore quota / private mode */
   }
   return "home";
+}
+
+function readPaidCredits() {
+  try {
+    const n = Number(localStorage.getItem(PAID_CREDITS_KEY));
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writePaidCredits(next: number) {
+  try {
+    localStorage.setItem(PAID_CREDITS_KEY, String(next));
+  } catch {
+    /* ignore quota / private mode */
+  }
 }
 
 function seedTestAccountCredits() {
@@ -314,7 +333,7 @@ function MockupDropzone({ images, onAdd, onRemove }: { images: string[]; onAdd: 
         >
           <span className="text-[#bbb]"><IconUpload /></span>
           <span className="text-sm font-medium text-[#333]">Upload a photo of your garment</span>
-          <span className="text-xs text-[#aaa]">Front, flat lay, or on a hanger. Drag and drop works too.</span>
+          <span className="text-xs text-[#aaa]">Front, flat lay, or on a hanger.</span>
         </button>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -371,15 +390,26 @@ function Paywall({
   onSelectPlan,
   onClose,
   onSubscribe,
-  subscribed,
 }: {
   selectedPlan: (typeof PLANS)[number]["id"];
   onSelectPlan: (id: (typeof PLANS)[number]["id"]) => void;
   onClose: () => void;
-  onSubscribe: () => void;
-  subscribed: boolean;
+  onSubscribe: () => Promise<void> | void;
 }) {
-  const plan = PLANS.find((p) => p.id === selectedPlan) ?? PLANS[1];
+  const plan = PLANS.find((p) => p.id === selectedPlan) ?? PLANS[0];
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleContinue = async () => {
+    setError(null);
+    setBusy(true);
+    try {
+      await onSubscribe();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Checkout could not start.");
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6">
@@ -446,15 +476,16 @@ function Paywall({
         <div className="px-6 pb-6 pt-1">
           <button
             type="button"
-            onClick={onSubscribe}
-            className="w-full py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            onClick={handleContinue}
+            disabled={busy}
+            className="w-full py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
           >
-            CONTINUE WITH {plan.name.toUpperCase()}
+            {busy ? "REDIRECTING…" : `CONTINUE WITH ${plan.name.toUpperCase()}`}
           </button>
-          <p className={`text-[11px] text-center mt-2.5 ${subscribed ? "text-[#111]" : "text-[#bbb]"}`}>
-            {subscribed
-              ? "Checkout isn't connected yet — this is the pay step."
+          <p className={`text-[11px] text-center mt-2.5 ${error ? "text-[#111]" : "text-[#bbb]"}`}>
+            {error
+              ? error
               : plan.interval === "once"
                 ? "One-time. Credits don't expire."
                 : "Cancel anytime. Unused images don't roll over."}
@@ -517,15 +548,16 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
           </svg>
         </div>
       </div>
-      <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide uppercase">Mockup</span>
+      <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide uppercase">Your mockup</span>
       <span className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide uppercase">Look applied</span>
     </div>
   );
 }
 
-function LandingPage({ onStart }: { onStart: () => void }) {
+function LandingPage({ onStart, onLooks }: { onStart: () => void; onLooks: () => void }) {
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-white">
+    <div className="flex-1 min-h-0 overflow-y-auto bg-white">
+      <div className="min-h-full flex flex-col">
       <header className="flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0">
         <BrandLockup />
         <button
@@ -534,7 +566,7 @@ function LandingPage({ onStart }: { onStart: () => void }) {
           className="px-4 py-2 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
           style={{ letterSpacing: "0.04em" }}
         >
-          Start creating
+          Get started
         </button>
       </header>
 
@@ -573,11 +605,21 @@ function LandingPage({ onStart }: { onStart: () => void }) {
             className="px-5 py-2.5 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
             style={{ letterSpacing: "0.04em" }}
           >
-            Start creating
+            Get started
           </button>
           <p className="text-[12px] text-[#bbb] mt-3">3 free images to start</p>
         </div>
       </section>
+
+      <footer className="mt-auto px-6 pt-16 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-[12px] text-[#bbb]">© 2026 ShotFarm</p>
+        <nav className="flex items-center gap-5 text-[12px] text-[#888]">
+          <button type="button" onClick={onLooks} className="hover:text-[#111] cursor-pointer">Looks</button>
+          <button type="button" className="hover:text-[#111] cursor-pointer">Privacy</button>
+          <button type="button" className="hover:text-[#111] cursor-pointer">Terms</button>
+        </nav>
+      </footer>
+      </div>
     </div>
   );
 }
@@ -644,8 +686,8 @@ function LibraryPage({
   total,
   query,
   onQuery,
-  shotFilter,
-  onShotFilter,
+  garmentFilter,
+  onGarmentFilter,
   onPreview,
   onUse,
   onStart,
@@ -654,8 +696,8 @@ function LibraryPage({
   total: number;
   query: string;
   onQuery: (q: string) => void;
-  shotFilter: (typeof SHOT_FILTERS)[number];
-  onShotFilter: (shot: (typeof SHOT_FILTERS)[number]) => void;
+  garmentFilter: (typeof GARMENT_FILTERS)[number];
+  onGarmentFilter: (garment: (typeof GARMENT_FILTERS)[number]) => void;
   onPreview: (id: number) => void;
   onUse: (id: number) => void;
   onStart: () => void;
@@ -665,7 +707,7 @@ function LibraryPage({
 
   useEffect(() => {
     setSetIndex(0);
-  }, [query, shotFilter]);
+  }, [query, garmentFilter]);
 
   const safeIndex = Math.min(setIndex, pageCount - 1);
   const pages: (typeof TEMPLATES)[] = [];
@@ -703,8 +745,8 @@ function LibraryPage({
         </div>
         <div className="flex items-center justify-between gap-3 mt-3">
           <div className="flex gap-1.5 overflow-x-auto pb-0.5 -mx-0.5 px-0.5">
-            {SHOT_FILTERS.map((shot) => (
-              <Pill key={shot} label={shot} active={shotFilter === shot} onClick={() => onShotFilter(shot)} />
+            {GARMENT_FILTERS.map((garment) => (
+              <Pill key={garment} label={garment} active={garmentFilter === garment} onClick={() => onGarmentFilter(garment)} />
             ))}
           </div>
           <span className="text-[11px] text-[#bbb] flex-shrink-0">{templates.length} of {total}</span>
@@ -713,7 +755,7 @@ function LibraryPage({
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         {templates.length === 0 ? (
-          <p className="text-sm text-[#aaa] py-16 text-center px-5">No looks match that. Try another shot type or search.</p>
+          <p className="text-sm text-[#aaa] py-16 text-center px-5">No looks match that. Try another garment or search.</p>
         ) : (
           <div className="px-5 sm:px-8 py-6 sm:py-8">
             <div className="overflow-hidden">
@@ -782,16 +824,16 @@ export default function App() {
   const [page, setPage] = useState<Page>(readSavedPage);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(1);
   const [lookQuery, setLookQuery] = useState("");
-  const [shotFilter, setShotFilter] = useState<(typeof SHOT_FILTERS)[number]>("All");
+  const [garmentFilter, setGarmentFilter] = useState<(typeof GARMENT_FILTERS)[number]>("All");
   const [mockups, setMockups] = useState<string[]>([]);
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [freeUsed, setFreeUsed] = useState(seedTestAccountCredits);
+  const [paidCredits, setPaidCredits] = useState(readPaidCredits);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<(typeof PLANS)[number]["id"]>("starter");
-  const [subscribed, setSubscribed] = useState(false);
   const [previewId, setPreviewId] = useState<number | null>(null);
   const [lookSetIndex, setLookSetIndex] = useState(0);
 
@@ -803,7 +845,7 @@ export default function App() {
     } catch {
       /* ignore quota / private mode */
     }
-    if (next === "generate" && freeUsed >= FREE_IMAGE_LIMIT) setPaywallOpen(true);
+    if (next === "generate" && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
     if (next === "home") setPaywallOpen(false);
   };
 
@@ -831,10 +873,53 @@ export default function App() {
 
   useEffect(() => {
     setLookSetIndex(0);
-  }, [lookQuery, shotFilter]);
+  }, [lookQuery, garmentFilter]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (!sessionId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/confirm-checkout?session_id=${encodeURIComponent(sessionId)}`);
+        const data = await res.json();
+        if (cancelled || !data.ok) return;
+        if (data.plan === "pro") {
+          setPaidCredits((prev) => {
+            const next = prev + 150;
+            writePaidCredits(next);
+            return next;
+          });
+        } else {
+          setPaidCredits((prev) => {
+            const next = prev + 20;
+            writePaidCredits(next);
+            return next;
+          });
+        }
+        setPaywallOpen(false);
+        setPage("generate");
+        try {
+          sessionStorage.setItem(PAGE_KEY, "generate");
+        } catch {
+          /* ignore */
+        }
+      } catch {
+        /* checkout confirm failed */
+      } finally {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("session_id");
+        window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredTemplates = TEMPLATES.filter((t) => {
-    const matchesShot = shotFilter === "All" || t.shot === shotFilter;
+    const matchesGarment = garmentFilter === "All" || t.garment === garmentFilter;
     const q = lookQuery.trim().toLowerCase();
     const matchesQuery =
       q.length === 0 ||
@@ -842,7 +927,7 @@ export default function App() {
       t.summary.toLowerCase().includes(q) ||
       t.shot.toLowerCase().includes(q) ||
       t.garment.toLowerCase().includes(q);
-    return matchesShot && matchesQuery;
+    return matchesGarment && matchesQuery;
   });
 
   const lookPageCount = Math.max(1, Math.ceil(filteredTemplates.length / LOOKS_PER_PAGE));
@@ -855,7 +940,8 @@ export default function App() {
   const selectedLook = TEMPLATES.find((t) => t.id === selectedTemplate) ?? null;
   const previewLook = TEMPLATES.find((t) => t.id === previewId) ?? null;
   const freeLeft = Math.max(0, FREE_IMAGE_LIMIT - freeUsed);
-  const outOfCredits = freeLeft <= 0;
+  const imagesLeft = freeLeft + paidCredits;
+  const outOfCredits = imagesLeft <= 0;
   const canGenerate = mockups.length > 0 && selectedTemplate !== null && !generating && !outOfCredits;
 
   const handleGenerate = () => {
@@ -866,25 +952,47 @@ export default function App() {
     if (!canGenerate || !selectedLook) return;
     setGenerating(true);
     setResult(null);
+    const useFree = freeLeft > 0;
     setTimeout(() => {
       setResult(selectedLook.img);
-      setFreeUsed((prev) => {
-        const next = Math.min(FREE_IMAGE_LIMIT, prev + 1);
-        try {
-          localStorage.setItem(FREE_USED_KEY, String(next));
-        } catch {
-          /* ignore quota / private mode */
-        }
-        return next;
-      });
+      if (useFree) {
+        setFreeUsed((prev) => {
+          const next = Math.min(FREE_IMAGE_LIMIT, prev + 1);
+          try {
+            localStorage.setItem(FREE_USED_KEY, String(next));
+          } catch {
+            /* ignore quota / private mode */
+          }
+          return next;
+        });
+      } else {
+        setPaidCredits((prev) => {
+          const next = Math.max(0, prev - 1);
+          writePaidCredits(next);
+          return next;
+        });
+      }
       setGenerating(false);
     }, 3000);
+  };
+
+  const startCheckout = async () => {
+    const res = await fetch("/api/create-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: selectedPlan }),
+    });
+    const data = await res.json().catch(() => ({} as { url?: string; error?: string }));
+    if (!res.ok || !data.url) {
+      throw new Error(typeof data.error === "string" ? data.error : "Checkout could not start.");
+    }
+    window.location.href = data.url;
   };
 
   return (
     <div className="flex flex-col lg:flex-row h-dvh overflow-hidden bg-white font-sans">
       {page === "home" ? (
-        <LandingPage onStart={() => goTo("generate")} />
+        <LandingPage onStart={() => goTo("generate")} onLooks={() => goTo("library")} />
       ) : (
         <>
       {/* ── Mobile top bar ─────────────────────────────────────────────── */}
@@ -946,14 +1054,18 @@ export default function App() {
           {/* Credits */}
           <div className="mt-3 px-3 py-3 rounded-xl bg-[#f7f7f7]">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] text-[#888]">Free images</span>
-              <span className="text-[11px] font-semibold text-[#111]">{freeLeft} left</span>
+              <span className="text-[11px] text-[#888]">{paidCredits > 0 ? "Images" : "Free images"}</span>
+              <span className="text-[11px] font-semibold text-[#111]">{imagesLeft} left</span>
             </div>
             <div className="h-1 rounded-full bg-[#e8e8e8] overflow-hidden">
-              <div className="h-full rounded-full bg-[#111]" style={{ width: `${(freeLeft / FREE_IMAGE_LIMIT) * 100}%` }} />
+              <div className="h-full rounded-full bg-[#111]" style={{ width: `${Math.min(100, (imagesLeft / Math.max(imagesLeft, FREE_IMAGE_LIMIT)) * 100)}%` }} />
             </div>
             <p className="text-[10px] text-[#bbb] mt-1.5">
-              {outOfCredits ? "You've used your 3 free images" : `${freeUsed} / ${FREE_IMAGE_LIMIT} used · that's all for free`}
+              {paidCredits > 0
+                ? `${paidCredits} paid · ${freeLeft} free`
+                : outOfCredits
+                  ? "You've used your 3 free images"
+                  : `${freeUsed} / ${FREE_IMAGE_LIMIT} used · that's all for free`}
             </p>
             {outOfCredits && (
               <button
@@ -962,7 +1074,7 @@ export default function App() {
                 className="mt-2.5 w-full py-2 rounded-lg bg-[#111] text-white text-[11px] font-semibold tracking-wide cursor-pointer hover:opacity-90"
                 style={{ letterSpacing: "0.04em" }}
               >
-                SUBSCRIBE
+                GET MORE
               </button>
             )}
           </div>
@@ -977,8 +1089,8 @@ export default function App() {
           total={TEMPLATES.length}
           query={lookQuery}
           onQuery={setLookQuery}
-          shotFilter={shotFilter}
-          onShotFilter={setShotFilter}
+          garmentFilter={garmentFilter}
+          onGarmentFilter={setGarmentFilter}
           onPreview={setPreviewId}
           onUse={(id) => {
             setSelectedTemplate(id);
@@ -1017,12 +1129,12 @@ export default function App() {
               />
             </div>
             <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-0.5 px-0.5 mb-3">
-              {SHOT_FILTERS.map((shot) => (
-                <Pill key={shot} label={shot} active={shotFilter === shot} onClick={() => setShotFilter(shot)} />
+              {GARMENT_FILTERS.map((garment) => (
+                <Pill key={garment} label={garment} active={garmentFilter === garment} onClick={() => setGarmentFilter(garment)} />
               ))}
             </div>
             {filteredTemplates.length === 0 ? (
-              <p className="text-sm text-[#aaa] py-8 text-center">No looks match that. Try another shot type or search.</p>
+              <p className="text-sm text-[#aaa] py-8 text-center">No looks match that. Try another garment or search.</p>
             ) : (
               <>
                 <div className="overflow-hidden">
@@ -1105,11 +1217,11 @@ export default function App() {
           {!generating && (
             <p className="text-[11px] text-[#bbb] text-center mt-2">
               {outOfCredits
-                ? "You've used your 3 free images"
+                ? "Get more images to continue"
                 : mockups.length === 0
                   ? "Upload a mockup to continue"
                   : selectedTemplate
-                    ? `${freeLeft} free ${freeLeft === 1 ? "image" : "images"} left`
+                    ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
                     : "Pick a look to continue"}
             </p>
           )}
@@ -1202,8 +1314,7 @@ export default function App() {
           selectedPlan={selectedPlan}
           onSelectPlan={setSelectedPlan}
           onClose={() => setPaywallOpen(false)}
-          onSubscribe={() => setSubscribed(true)}
-          subscribed={subscribed}
+          onSubscribe={startCheckout}
         />
       )}
     </div>
