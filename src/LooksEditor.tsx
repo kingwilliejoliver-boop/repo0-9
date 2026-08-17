@@ -189,7 +189,7 @@ export default function LooksEditor({ thumbs }: { thumbs: Record<number, string>
             <div>
               <span className="text-[11px] text-[#888]">Prompt</span>
               <p className="text-[11px] text-[#bbb] mt-0.5 mb-2">
-                #1 is the shopper’s mockup at generate. Images you add here are #2, #3…
+                #1 is the shopper’s design and shirt color only. Images you add here are the template you edit — fabric, mockup style, and shot.
               </p>
               <div className="flex flex-wrap gap-2 mb-3">
                 <div className="w-[5.5rem] h-[5.5rem] rounded-lg border border-dashed border-[#ddd] bg-[#fafafa] flex flex-col items-center justify-center text-center px-1">

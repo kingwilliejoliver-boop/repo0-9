@@ -31,20 +31,20 @@ function readLookPrompt(id: number) {
 function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number) {
   const refs: string[] = [];
   for (let i = 0; i < mockupCount; i += 1) {
-    refs.push(`#${i + 1} customer design only — shirt color and print from this upload`);
+    refs.push(`#${i + 1} design swatch only — take shirt color and printed artwork from this image. Do not output this photo. Do not use its fabric, mockup, background, or shot.`);
   }
   for (let i = 0; i < lookRefCount; i += 1) {
-    refs.push(`#${mockupCount + i + 1} locked template photo — edit this image, keep this exact mockup`);
+    refs.push(`#${mockupCount + i + 1} locked template — this is the photograph you edit. Keep this fabric, mockup style, and shot type.`);
   }
   return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
 
 function withFitInstruction(prompt: string, aspectRatio: string) {
-  return `${prompt}\n\nOutput size is ${aspectRatio}. Fit the entire mockup from #2 inside this frame. Keep every part of the garment visible. Do not crop or zoom in. Add matching background from #2 if the photo does not already match this size.`;
+  return `${prompt}\n\nOutput size is ${aspectRatio}. Fit the entire #2 template mockup inside this frame. Keep every part of the #2 garment visible. Do not crop or zoom in. Add matching background from #2 if needed. Do not fit or output image #1.`;
 }
 
 const SYSTEM_PROMPT =
-  "You edit a locked product template photo. Keep image #2 as the exact same mockup photograph. Change only the garment color and printed artwork to match image #1. Never invent a new mockup, camera, background, or scene. Fit the entire garment in the output frame. Never crop sleeves, hem, collar, hanger, or any part of the shirt. Do not zoom in. If extra space is needed for the output size, add matching background from #2.";
+  "Edit the second image (the locked template). Return that same mockup photograph. Use the first image only as a design swatch for garment color and printed artwork. Never output the first image. Never put the first image on a new background. Keep the template's fabric, mockup style, shot type, camera, and background. Fit the entire template garment in frame. Do not crop or zoom in.";
 
 function asImageDataUrl(value: unknown) {
   if (typeof value !== "string") return null;

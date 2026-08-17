@@ -18,18 +18,29 @@ export type Look = {
 /**
  * Edit these in Settings while running locally. Save writes this file.
  */
-export const TEMPLATE_TRANSFER_PROMPT = `Edit image #2. Do not create a new mockup.
+export const TEMPLATE_TRANSFER_PROMPT = `You are editing image #2. Image #2 is the only photograph you may return.
 
-Image #2 is the locked template photo. The final image must look like the SAME photograph as #2: same camera, same framing, same distance, same angle, same background, same lighting, same shadows, same garment silhouette, same hang/flat-lay/studio presentation, same wrinkles, same fabric drape, same collar/sleeves/hem. Keep the entire garment in frame. Do not crop or zoom in. If the output size differs from #2, add matching background from #2 — never cut off sleeves, hem, collar, or hanger. If #2 is a black studio shot, keep that black studio. If #2 is a white flat lay, keep that white flat lay. Do not invent a different scene, set, or mockup style.
+Do not output image #1. Do not put image #1 on a new background. Do not restage, rephotograph, or rebuild the customer's mockup. Image #1 is not the base photo.
 
-The only allowed change is the customer's product from image #1:
-- Use #1 only for shirt color and the exact printed artwork (logo, text, graphic, colors, spelling).
-- Place that artwork where it sits on the customer's shirt in #1. Do not move it to where #2's graphic sits.
-- Do not copy #2's shirt color, graphic, logo, text, or brand.
+IMAGE #1 — DESIGN AND SHIRT COLOR ONLY
+Read image #1 for two things and ignore everything else:
+- Garment color
+- The printed artwork only: logo, text, graphic, colors, spelling, and where that print sits on the shirt
+Do not take fabric, distressing, wrinkles, drape, mockup style, shot type, camera, background, lighting, hanger, flat lay, studio setup, or silhouette from #1.
 
-The result should look as if someone took the physical shirt from #1 and photographed it in the exact setup of #2 — or as if #2's photo was kept and only the print and shirt color were swapped.
+IMAGE #2 — THE TEMPLATE YOU EDIT
+Start from image #2 and change only the color and the print. Keep everything else from #2:
+- Fabric and textile: wash, grain, weight, distressing, holes, fray
+- Mockup style
+- Shot type: flat lay, hanger, studio, or on-body — whatever #2 already is
+- Camera, angle, distance, framing
+- Background, lighting, shadows
+- Garment silhouette, collar, sleeves, hem, wrinkles, drape
+Keep the entire garment in frame. Do not crop or zoom in. If extra space is needed, add matching background from #2. If #2 is a black studio shot, keep that black studio. If #2 is a white flat lay, keep that white flat lay.
 
-Not a new design. Not a new mockup. Not a reinterpretation.
+Place #1's artwork where it sits on the customer's shirt in #1. Do not move it to where #2's graphic sits. Do not copy #2's shirt color, graphic, logo, text, or brand.
+
+The result is image #2 with a recolor and a new print from #1. It must still be the #2 mockup, not image #1 on a different background.
 `;
 
 /* looks:start */
