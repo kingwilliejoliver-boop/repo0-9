@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { clerkConfigured, requireUser } from "../lib/auth";
+import { databaseConfigured, refundCredit, spendCredit } from "../lib/db";
 
 export const config = {
   api: { bodyParser: { sizeLimit: "8mb" } },
@@ -66,6 +68,7 @@ function falMessage(data: unknown) {
 export default async function handler(
   req: {
     method?: string;
+    headers?: Record<string, unknown>;
     body?: { lookId?: number; mockup?: string; mockups?: string[]; lookImage?: string; lookImages?: string[]; aspectRatio?: string };
   },
   res: { status: (n: number) => { json: (b: unknown) => void } },
@@ -80,8 +83,26 @@ export default async function handler(
     return;
   }
 
+  if (!clerkConfigured() || !databaseConfigured()) {
+    res.status(500).json({ error: "Accounts are not configured. Add Clerk and DATABASE_URL on Vercel." });
+    return;
+  }
+
+  const user = await requireUser(req);
+  if (!user) {
+    res.status(401).json({ error: "Sign in to apply a look." });
+    return;
+  }
+
+  const reserved = await spendCredit(user.userId);
+  if (!reserved.ok) {
+    res.status(402).json({ error: "No images left.", code: "out_of_credits" });
+    return;
+  }
+
   const key = falKey();
   if (!key) {
+    await refundCredit(user.userId, reserved.usedFree);
     res.status(500).json({ error: "Fal is not configured. Add FAL_KEY on Vercel for Production, then Redeploy." });
     return;
   }
@@ -91,10 +112,12 @@ export default async function handler(
     .map(asImageDataUrl)
     .filter((src): src is string => Boolean(src));
   if (mockups.length === 0) {
+    await refundCredit(user.userId, reserved.usedFree);
     res.status(400).json({ error: "Upload a mockup and pick a look." });
     return;
   }
   if (!prompt) {
+    await refundCredit(user.userId, reserved.usedFree);
     res.status(400).json({ error: "This look has no prompt yet." });
     return;
   }
@@ -133,18 +156,25 @@ export default async function handler(
     };
 
     if (!fal.ok) {
+      await refundCredit(user.userId, reserved.usedFree);
       res.status(502).json({ error: falMessage(data) });
       return;
     }
 
     const image = data.images?.[0]?.url;
     if (!image) {
+      await refundCredit(user.userId, reserved.usedFree);
       res.status(502).json({ error: "Fal did not return an image. Try another mockup." });
       return;
     }
 
-    res.status(200).json({ image });
+    res.status(200).json({
+      image,
+      freeUsed: reserved.account.freeUsed,
+      paidCredits: reserved.account.paidCredits,
+    });
   } catch {
+    await refundCredit(user.userId, reserved.usedFree);
     res.status(500).json({ error: "Fal could not apply this look." });
   }
 }

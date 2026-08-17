@@ -1,10 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { SignInButton, UserButton, useAuth, useClerk } from "@clerk/react";
 import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
+import { clerkAppearance, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -307,13 +309,13 @@ function writePaidCredits(next: number) {
   }
 }
 
-function seedTestAccountCredits() {
+function readFreeUsed() {
   try {
-    localStorage.setItem(FREE_USED_KEY, "0");
+    const n = Number(localStorage.getItem(FREE_USED_KEY));
+    return Number.isFinite(n) && n > 0 ? Math.min(FREE_IMAGE_LIMIT, Math.floor(n)) : 0;
   } catch {
-    /* ignore quota / private mode */
+    return 0;
   }
-  return 0;
 }
 
 const PLANS = [
@@ -932,8 +934,46 @@ function LibraryPage({
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  if (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) return <AppWithClerk />;
+  return <AppShell session={localSession} />;
+}
+
+function AppWithClerk() {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { openSignIn } = useClerk();
+  const [account, setAccount] = useState<AccountSnap | null>(null);
+
+  const refreshAccount = useCallback(async () => {
+    if (!isSignedIn) {
+      setAccount(null);
+      return null;
+    }
+    const next = await fetchAccount(getToken);
+    setAccount(next);
+    return next;
+  }, [getToken, isSignedIn]);
+
+  useEffect(() => {
+    void refreshAccount();
+  }, [refreshAccount]);
+
+  const session: Session = {
+    configured: true,
+    ready: isLoaded,
+    signedIn: Boolean(isSignedIn),
+    getToken,
+    openSignIn: () => openSignIn({ appearance: clerkAppearance }),
+    account,
+    applyAccount: setAccount,
+    refreshAccount,
+  };
+
+  return <AppShell session={session} />;
+}
+
+function AppShell({ session }: { session: Session }) {
   const [page, setPage] = useState<Page>(readSavedPage);
-  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(1);
+  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [lookQuery, setLookQuery] = useState("");
   const [garmentFilter, setGarmentFilter] = useState<(typeof GARMENT_FILTERS)[number]>("All");
   const [mockups, setMockups] = useState<string[]>([]);
@@ -942,13 +982,17 @@ export default function App() {
   const [result, setResult] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [freeUsed, setFreeUsed] = useState(seedTestAccountCredits);
-  const [paidCredits, setPaidCredits] = useState(readPaidCredits);
+  const [localFreeUsed, setLocalFreeUsed] = useState(readFreeUsed);
+  const [localPaidCredits, setLocalPaidCredits] = useState(readPaidCredits);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<(typeof PLANS)[number]["id"]>("starter");
   const [previewId, setPreviewId] = useState<number | null>(null);
   const [lookSetIndex, setLookSetIndex] = useState(0);
   const [generateError, setGenerateError] = useState<string | null>(null);
+
+  const freeUsed = session.configured ? session.account?.freeUsed ?? 0 : localFreeUsed;
+  const paidCredits = session.configured ? session.account?.paidCredits ?? 0 : localPaidCredits;
+  const needsSignIn = session.configured && session.ready && !session.signedIn;
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -958,7 +1002,7 @@ export default function App() {
     } catch {
       /* ignore quota / private mode */
     }
-    if (next === "generate" && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
+    if (next === "generate" && !needsSignIn && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
     if (next === "home") setPaywallOpen(false);
   };
 
@@ -998,14 +1042,21 @@ export default function App() {
         const res = await fetch(`/api/confirm-checkout?session_id=${encodeURIComponent(sessionId)}`);
         const data = await res.json();
         if (cancelled || !data.ok) return;
-        if (data.plan === "pro") {
-          setPaidCredits((prev) => {
+        if (session.configured) {
+          for (let i = 0; i < 8; i += 1) {
+            const account = await session.refreshAccount();
+            if (account && account.paidCredits > 0) break;
+            await new Promise((resolve) => setTimeout(resolve, 700));
+            if (cancelled) return;
+          }
+        } else if (data.plan === "pro") {
+          setLocalPaidCredits((prev) => {
             const next = prev + 150;
             writePaidCredits(next);
             return next;
           });
         } else {
-          setPaidCredits((prev) => {
+          setLocalPaidCredits((prev) => {
             const next = prev + 20;
             writePaidCredits(next);
             return next;
@@ -1029,7 +1080,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [session.configured, session.refreshAccount]);
 
   const generateTemplates = TEMPLATES.filter((t) => garmentFilter === "All" || t.garment === garmentFilter);
   const filteredTemplates = generateTemplates.filter((t) => {
@@ -1057,9 +1108,9 @@ export default function App() {
   const outOfCredits = imagesLeft <= 0;
   const canGenerate = mockups.length > 0 && selectedTemplate !== null && !generating && !outOfCredits;
 
-  const spendCredit = (useFree: boolean) => {
+  const spendLocalCredit = (useFree: boolean) => {
     if (useFree) {
-      setFreeUsed((prev) => {
+      setLocalFreeUsed((prev) => {
         const next = Math.min(FREE_IMAGE_LIMIT, prev + 1);
         try {
           localStorage.setItem(FREE_USED_KEY, String(next));
@@ -1069,7 +1120,7 @@ export default function App() {
         return next;
       });
     } else {
-      setPaidCredits((prev) => {
+      setLocalPaidCredits((prev) => {
         const next = Math.max(0, prev - 1);
         writePaidCredits(next);
         return next;
@@ -1078,6 +1129,10 @@ export default function App() {
   };
 
   const handleGenerate = async () => {
+    if (needsSignIn) {
+      session.openSignIn();
+      return;
+    }
     if (outOfCredits) {
       setPaywallOpen(true);
       return;
@@ -1091,9 +1146,12 @@ export default function App() {
       const encodedMockups = await Promise.all(mockups.map((src) => toJpegDataUrl(src, 1280)));
       const lookSources = selectedLook.refs.length > 0 ? selectedLook.refs : [selectedLook.img];
       const lookImages = await Promise.all(lookSources.map((src) => toJpegDataUrl(src, 1280)));
+      const token = session.configured ? await session.getToken() : null;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           lookId: selectedLook.id,
           mockups: encodedMockups,
@@ -1101,7 +1159,18 @@ export default function App() {
           aspectRatio,
         }),
       });
-      const data = await res.json().catch(() => ({} as { image?: string; error?: string }));
+      const data = await res.json().catch(() => ({} as { image?: string; error?: string; code?: string; freeUsed?: number; paidCredits?: number }));
+      if (res.status === 401) {
+        session.openSignIn();
+        throw new Error("Sign in to apply a look.");
+      }
+      if (res.status === 402 || data.code === "out_of_credits") {
+        setPaywallOpen(true);
+        if (typeof data.freeUsed === "number" && typeof data.paidCredits === "number") {
+          session.applyAccount({ freeUsed: data.freeUsed, paidCredits: data.paidCredits });
+        }
+        throw new Error("No images left.");
+      }
       if (!res.ok || typeof data.image !== "string") {
         throw new Error(
           typeof data.error === "string"
@@ -1116,7 +1185,11 @@ export default function App() {
       } catch {
         setResult(data.image);
       }
-      spendCredit(useFree);
+      if (typeof data.freeUsed === "number" && typeof data.paidCredits === "number") {
+        session.applyAccount({ freeUsed: data.freeUsed, paidCredits: data.paidCredits });
+      } else if (!session.configured) {
+        spendLocalCredit(useFree);
+      }
     } catch (err) {
       setGenerateError(err instanceof Error ? err.message : "Nano could not apply this look.");
     } finally {
@@ -1125,12 +1198,23 @@ export default function App() {
   };
 
   const startCheckout = async () => {
+    if (needsSignIn) {
+      session.openSignIn();
+      return;
+    }
+    const token = session.configured ? await session.getToken() : null;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch("/api/create-checkout", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ plan: selectedPlan }),
     });
     const data = await res.json().catch(() => ({} as { url?: string; error?: string }));
+    if (res.status === 401) {
+      session.openSignIn();
+      throw new Error("Sign in to buy images.");
+    }
     if (!res.ok || !data.url) {
       throw new Error(typeof data.error === "string" ? data.error : "Checkout could not start.");
     }
@@ -1191,7 +1275,7 @@ export default function App() {
 
         {/* Nav */}
         <nav className="flex-1 p-3 flex flex-col gap-0.5">
-          <NavItem icon={<IconHome />} label="Home" active={page === "home"} onClick={() => goTo("home")} />
+          <NavItem icon={<IconHome />} label="Home" active={false} onClick={() => goTo("home")} />
           <NavItem icon={<IconGenerate />} label="Generate" active={page === "generate"} onClick={() => goTo("generate")} />
           <NavItem icon={<IconLibrary />} label="Templates" active={page === "library"} onClick={() => goTo("library")} />
           <NavItem icon={<IconHistory />} label="History" active={page === "history"} onClick={() => goTo("history")} />
@@ -1199,23 +1283,43 @@ export default function App() {
 
         <div className="p-3 border-t border-[#ebebeb] flex flex-col gap-0.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:pb-3">
           <NavItem icon={<IconSettings />} label="Settings" active={page === "settings"} onClick={() => goTo("settings")} />
-          {/* Credits */}
+          {session.configured && (
+            <div className="mt-2 px-1">
+              {session.signedIn ? (
+                <div className="flex items-center gap-2 px-2 py-1.5">
+                  <UserButton appearance={clerkAppearance} />
+                  <span className="text-[11px] text-[#888] truncate">Your account</span>
+                </div>
+              ) : (
+                <SignInButton mode="modal" appearance={clerkAppearance}>
+                  <button
+                    type="button"
+                    className="w-full py-2 rounded-lg border border-[#e8e8e8] text-[11px] font-semibold text-[#111] hover:border-[#ccc] cursor-pointer"
+                  >
+                    Sign in
+                  </button>
+                </SignInButton>
+              )}
+            </div>
+          )}
           <div className="mt-3 px-3 py-3 rounded-xl bg-[#f7f7f7]">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] text-[#888]">{paidCredits > 0 ? "Images" : "Free images"}</span>
-              <span className="text-[11px] font-semibold text-[#111]">{imagesLeft} left</span>
+              <span className="text-[11px] text-[#888]">{needsSignIn ? "Images" : paidCredits > 0 ? "Images" : "Free images"}</span>
+              <span className="text-[11px] font-semibold text-[#111]">{needsSignIn ? "—" : `${imagesLeft} left`}</span>
             </div>
             <div className="h-1 rounded-full bg-[#e8e8e8] overflow-hidden">
-              <div className="h-full rounded-full bg-[#111]" style={{ width: `${Math.min(100, (imagesLeft / Math.max(imagesLeft, FREE_IMAGE_LIMIT)) * 100)}%` }} />
+              <div className="h-full rounded-full bg-[#111]" style={{ width: needsSignIn ? "0%" : `${Math.min(100, (imagesLeft / Math.max(imagesLeft, FREE_IMAGE_LIMIT)) * 100)}%` }} />
             </div>
             <p className="text-[10px] text-[#bbb] mt-1.5">
-              {paidCredits > 0
-                ? `${paidCredits} paid · ${freeLeft} free`
-                : outOfCredits
-                  ? "You've used your 3 free images"
-                  : `${freeUsed} / ${FREE_IMAGE_LIMIT} used · that's all for free`}
+              {needsSignIn
+                ? "Sign in to keep your images"
+                : paidCredits > 0
+                  ? `${paidCredits} paid · ${freeLeft} free`
+                  : outOfCredits
+                    ? "You've used your 3 free images"
+                    : `${freeUsed} / ${FREE_IMAGE_LIMIT} used · that's all for free`}
             </p>
-            {outOfCredits && (
+            {!needsSignIn && outOfCredits && (
               <button
                 type="button"
                 onClick={() => setPaywallOpen(true)}
@@ -1366,19 +1470,21 @@ export default function App() {
             style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
           >
             <IconGenerate />
-            {generating ? "Applying look…" : "Apply this look"}
+            {generating ? "Applying look…" : needsSignIn ? "Sign in to apply" : "Apply this look"}
           </button>
           {!generating && (
             <p className={`text-[11px] text-center mt-2 ${generateError ? "text-[#111]" : "text-[#bbb]"}`}>
               {generateError
                 ? generateError
-                : outOfCredits
-                  ? "Get more images to continue"
-                  : mockups.length === 0
-                    ? "Upload a mockup to continue"
-                    : selectedTemplate
-                      ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
-                      : "Pick a look to continue"}
+                : needsSignIn
+                  ? "Your images stay on this account"
+                  : outOfCredits
+                    ? "Get more images to continue"
+                    : mockups.length === 0
+                      ? "Upload a mockup to continue"
+                      : selectedTemplate
+                        ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
+                        : "Pick a look to continue"}
             </p>
           )}
         </div>
