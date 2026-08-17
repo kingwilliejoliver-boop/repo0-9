@@ -21,6 +21,9 @@ export const clerkAppearance = {
     borderRadius: "0.75rem",
   },
   elements: {
+    rootBox: "w-full max-w-full",
+    cardBox: "w-full max-w-full shadow-none",
+    card: "w-full max-w-full shadow-none",
     modalBackdrop: "flex items-center justify-center p-5",
     modalContent: "mx-auto my-0",
   },

@@ -983,13 +983,13 @@ function AppWithClerk() {
     <>
       <AppShell session={session} />
       {signInOpen && !isSignedIn && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-5 bg-black/50">
-          <div className="relative max-h-[min(92dvh,40rem)] overflow-y-auto">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 overflow-hidden">
+          <div className="relative w-full max-w-[400px] max-h-[min(92dvh,40rem)] overflow-x-hidden overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <button
               type="button"
               aria-label="Close sign in"
               onClick={() => setSignInOpen(false)}
-              className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-white border border-[#e8e8e8] text-[#888] hover:text-[#111] cursor-pointer"
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-[#f4f4f4] text-[#888] hover:text-[#111] hover:bg-[#ebebeb] cursor-pointer"
             >
               ×
             </button>
