@@ -766,25 +766,15 @@ function LandingPage({
       <div className="min-h-full flex flex-col">
       <header className="flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0">
         <BrandLockup />
-        <div className="flex items-center gap-4">
-          {showSignIn ? (
-            <button
-              type="button"
-              onClick={onSignIn}
-              className="text-sm text-[#888] hover:text-[#111] cursor-pointer"
-            >
-              Sign in
-            </button>
-          ) : null}
+        {showSignIn ? (
           <button
             type="button"
-            onClick={onStart}
-            className="px-4 py-2 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
-            style={{ letterSpacing: "0.04em" }}
+            onClick={onSignIn}
+            className="text-sm text-[#888] hover:text-[#111] cursor-pointer"
           >
-            {startLabel}
+            Sign in
           </button>
-        </div>
+        ) : null}
       </header>
 
       <section className="flex flex-col items-center px-6 pt-12 pb-10 gap-10">
@@ -795,6 +785,14 @@ function LandingPage({
           <p className="mt-3 text-sm text-[#888] leading-relaxed">
             Upload a garment. Pick a template. We apply it for you.
           </p>
+          <button
+            type="button"
+            onClick={onStart}
+            className="mt-5 px-5 py-2.5 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
+            style={{ letterSpacing: "0.04em" }}
+          >
+            {startLabel}
+          </button>
         </div>
         <div className="w-full max-w-[420px]">
           <BeforeAfterSlider beforeSrc={raspberryHillsMockup} afterSrc={raspberryHillsTee} />
