@@ -677,6 +677,75 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
   );
 }
 
+const FAQS = [
+  {
+    q: "What is ShotFarm?",
+    a: "ShotFarm turns your garment mockup into a finished look. Upload a piece, pick a locked template, and we apply that shot style for you.",
+  },
+  {
+    q: "How does it work?",
+    a: "Upload a photo of your garment. Choose Saint Distressed Tee or Raspberry Hills Tee. We restyle your design onto that template — color and print from you, fabric and shot from the look.",
+  },
+  {
+    q: "Do I need a real photoshoot?",
+    a: "No. A digital mockup, flat lay, or hanger shot is enough. ShotFarm is built for brands that need the look without booking a studio.",
+  },
+  {
+    q: "How many free images do I get?",
+    a: "Every account gets 3 free images. After that, buy a Pack for 20 images or Pro for 150 images a month.",
+  },
+  {
+    q: "What do the paid plans include?",
+    a: "Pack is $9 for 20 images, one time. Pro is $49 a month for 150 images. Credits stay on your signed-in account so you can use them on any device.",
+  },
+  {
+    q: "Can I use the images in my store?",
+    a: "Yes. Download the JPEG and use it on your site, socials, or lookbook. You keep the rights to your design.",
+  },
+];
+
+function FaqSection() {
+  const [open, setOpen] = useState<number | null>(null);
+
+  return (
+    <section className="px-6 py-16">
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-[22px] sm:text-[24px] font-semibold text-[#111] tracking-tight text-center mb-8">FAQ</h2>
+        <div className="rounded-[26px] bg-[#f4f4f4] p-1 flex flex-col gap-0.5">
+          {FAQS.map((item, i) => {
+            const isOpen = open === i;
+            return (
+              <button
+                key={item.q}
+                type="button"
+                onClick={() => setOpen(isOpen ? null : i)}
+                className="w-full text-left rounded-3xl bg-white border border-[#ebebeb] px-6 py-6 cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex-1 text-[15px] font-medium text-[#111] leading-snug">{item.q}</span>
+                  <span className="relative w-7 h-7 rounded-full bg-[#f4f4f4] flex-shrink-0" aria-hidden>
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-[#111]" />
+                    <span
+                      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-[#111] transition-transform duration-200 ${
+                        isOpen ? "rotate-90 scale-y-0" : ""
+                      }`}
+                    />
+                  </span>
+                </div>
+                <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                  <div className="overflow-hidden">
+                    <p className="pt-4 text-sm text-[#555] leading-relaxed">{item.a}</p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function LandingPage({ onStart, onLooks }: { onStart: () => void; onLooks: () => void }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto bg-white">
@@ -708,16 +777,38 @@ function LandingPage({ onStart, onLooks }: { onStart: () => void; onLooks: () =>
       </section>
 
       <section className="px-6 py-16">
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <h2 className="text-[28px] sm:text-[32px] font-semibold text-[#111] tracking-tight leading-[1.15]">How it works</h2>
+          <p className="mt-3 text-sm text-[#888] leading-relaxed">
+            Upload a garment. Pick a template.<br />We apply it for you.
+          </p>
+        </div>
         <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
           {[
-            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough." },
-            { n: "02", title: "Pick a look", body: "Choose from our set templates." },
-            { n: "03", title: "We apply it", body: "Your piece comes back in that look." },
+            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: null as string | null, imgLabel: "Mockup example" },
+            { n: "02", title: "Pick a look", body: "Choose from our set templates.", img: null as string | null, imgLabel: "Look example" },
+            { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: null as string | null, imgLabel: "Result example" },
           ].map((step) => (
-            <div key={step.n} className="text-center sm:text-left">
-              <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em]">{step.n}</p>
-              <h2 className="mt-2 text-[18px] sm:text-[20px] font-semibold text-[#111] tracking-tight">{step.title}</h2>
-              <p className="mt-1.5 text-sm text-[#888] leading-relaxed">{step.body}</p>
+            <div key={step.n} className="text-center">
+              <div className="flex items-baseline justify-center gap-2">
+                <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em]">{step.n}</p>
+                <h2 className="text-[18px] sm:text-[20px] font-semibold text-[#111] tracking-tight">{step.title}</h2>
+              </div>
+              <p className="mt-0 mb-3 text-sm text-[#888] leading-snug">{step.body}</p>
+              {step.img ? (
+                <img
+                  src={step.img}
+                  alt={step.imgLabel}
+                  className="w-full aspect-square object-cover rounded-xl bg-[#f4f4f4]"
+                />
+              ) : (
+                <div
+                  className="w-full aspect-square rounded-xl bg-[#f4f4f4] border border-dashed border-[#ddd] flex items-center justify-center"
+                  aria-hidden
+                >
+                  <span className="text-[11px] text-[#bbb] tracking-[0.08em]">{step.imgLabel}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -733,6 +824,8 @@ function LandingPage({ onStart, onLooks }: { onStart: () => void; onLooks: () =>
           <p className="text-[12px] text-[#bbb] mt-3">3 free images to start</p>
         </div>
       </section>
+
+      <FaqSection />
 
       <footer className="mt-auto px-6 pt-16 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-[12px] text-[#bbb]">© 2026 ShotFarm</p>
