@@ -8,6 +8,7 @@ import lossesToWinsTee from "./assets/templates/losses-to-wins-tee.jpg";
 import distressedFlatJeans from "./assets/templates/distressed-flat-jeans.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
+import { LOOKS } from "./looks";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -127,26 +128,47 @@ function imageSrc(img: string, size = 400) {
   return `https://images.unsplash.com/${img}?w=${size}&h=${size}&fit=crop&auto=format`;
 }
 
-const TEMPLATES = [
-  { id: 1, name: "Distressed Graphic Tee", garment: "Tee", shot: "Hanger", summary: "Vintage cream tee, raw hem, punk collage print.", prompt: "Vintage distressed cream graphic t-shirt on a hanger, raw cut hem, punk collage print, live fast die loud, high-contrast black and white photo, grunge fashion editorial, industrial brick backdrop", img: distressedGraphicTee, aspect: "portrait" },
-  { id: 2, name: "Oversized Graphic Sweatshirt", garment: "Sweatshirt", shot: "Studio", summary: "Boxy heather gray sweatshirt with a faded chest graphic.", prompt: "Oversized boxy heather gray sweatshirt on a mannequin, raw-cut hem, dropped shoulders, faded UNDERSTAND graffiti chest print, streetwear editorial, retail lighting, dark denim", img: oversizedGraphicSweatshirt, aspect: "portrait" },
-  { id: 3, name: "Saint Distressed Tee", garment: "Tee", shot: "Studio", summary: "Cropped off-white tee, frayed edges, faded icon print.", prompt: "Oversized cropped off-white t-shirt on black background, raw frayed neckline, moth-eaten holes, faded SAINT MXXXXXX arched serif print, distressed religious icon graphic, luxury vintage streetwear product shot", img: saintDistressedTee, aspect: "portrait" },
-  { id: 4, name: "Raspberry Worldwide Tee", garment: "Tee", shot: "Flat lay", summary: "Washed charcoal tee with a weathered oval graphic.", prompt: "Faded charcoal oversized t-shirt flat lay on white, raw frayed hem and neckline, distressed holes, weathered orange-red RASPBERRY WORLDWIDE oval print, wired earbuds graphic overlay, Los Angeles streetwear product shot", img: raspberryWorldwideTee, aspect: "portrait" },
-  { id: 5, name: "Raspberry Hills Tee", garment: "Tee", shot: "Flat lay", summary: "Oversized off-white tee, frayed collar, cracked vintage print.", prompt: "Oversized boxy off-white t-shirt flat lay on white, frayed ribbed collar, pinholes and raw uneven hem, cracked vintage Raspberry Hills collegiate print, blue RASPBERRY! bar, black star column, distressed streetwear product shot", img: raspberryHillsTee, aspect: "square" },
-  { id: 6, name: "Losses to Wins Tee", garment: "Tee", shot: "On body", summary: "Boxy white tee with three vertical collage panels.", prompt: "On-body streetwear photo, boxy white graphic t-shirt, slightly cropped raw hem, three vertical skate-deck panels in pink black and seafoam, LOSSES 2 WINS branding, dice chains crosses collage print, camo trousers, urban editorial lighting", img: lossesToWinsTee, aspect: "portrait" },
-  { id: 7, name: "Distressed Straight Jeans", garment: "Jeans", shot: "Flat lay", summary: "Vintage-wash straight jeans, heavy rips, raw hem.", prompt: "Straight-leg vintage wash blue denim jeans flat lay on gray concrete, heavy thigh and knee rips with frayed white threads, faded honeycombing, raw frayed hem, bright blue repair stitch at the knee, streetwear product shot", img: distressedFlatJeans, aspect: "portrait" },
-  { id: 8, name: "Dark Luxury Tee", garment: "Tee", shot: "Studio", summary: "Placeholder. Black tee, hard light, luxury product shot.", prompt: "Placeholder", img: distressedGraphicTee, aspect: "portrait" },
-  { id: 9, name: "Vintage Hoodie Hanger", garment: "Sweatshirt", shot: "Hanger", summary: "Placeholder. Washed hoodie on a hanger.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
-  { id: 10, name: "Clean Hoodie Flat", garment: "Sweatshirt", shot: "Flat lay", summary: "Placeholder. Neutral hoodie, top-down.", prompt: "Placeholder", img: raspberryHillsTee, aspect: "square" },
-  { id: 11, name: "On-Body Hoodie", garment: "Sweatshirt", shot: "On body", summary: "Placeholder. Boxy hoodie, street editorial.", prompt: "Placeholder", img: lossesToWinsTee, aspect: "portrait" },
-  { id: 12, name: "Dark Studio Hoodie", garment: "Sweatshirt", shot: "Studio", summary: "Placeholder. Black hoodie, studio sweep.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
-  { id: 13, name: "Black Tee Hanger", garment: "Tee", shot: "Hanger", summary: "Placeholder. Black graphic tee on a hanger.", prompt: "Placeholder", img: raspberryWorldwideTee, aspect: "portrait" },
-  { id: 14, name: "Distressed On-Body Tee", garment: "Tee", shot: "On body", summary: "Placeholder. Cropped distressed tee, on body.", prompt: "Placeholder", img: lossesToWinsTee, aspect: "portrait" },
-  { id: 15, name: "Washed Hoodie Flat", garment: "Sweatshirt", shot: "Flat lay", summary: "Placeholder. Faded hoodie, flat lay.", prompt: "Placeholder", img: raspberryWorldwideTee, aspect: "portrait" },
-  { id: 16, name: "Clean Tee Hanger", garment: "Tee", shot: "Hanger", summary: "Placeholder. Crisp white tee on a hanger.", prompt: "Placeholder", img: saintDistressedTee, aspect: "portrait" },
-  { id: 17, name: "Dark On-Body Tee", garment: "Tee", shot: "On body", summary: "Placeholder. Black tee, night street light.", prompt: "Placeholder", img: distressedGraphicTee, aspect: "portrait" },
-  { id: 18, name: "Minimal Hoodie Hanger", garment: "Sweatshirt", shot: "Hanger", summary: "Placeholder. No-print hoodie, hanger.", prompt: "Placeholder", img: oversizedGraphicSweatshirt, aspect: "portrait" },
-];
+async function toJpegDataUrl(src: string, max = 1280) {
+  const blob = await fetch(src).then((res) => res.blob());
+  const bitmap = await createImageBitmap(blob);
+  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not read this image.");
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.82);
+}
+
+const LOOK_IMAGES: Record<number, string> = {
+  1: distressedGraphicTee,
+  2: oversizedGraphicSweatshirt,
+  3: saintDistressedTee,
+  4: raspberryWorldwideTee,
+  5: raspberryHillsTee,
+  6: lossesToWinsTee,
+  7: distressedFlatJeans,
+  8: distressedGraphicTee,
+  9: oversizedGraphicSweatshirt,
+  10: raspberryHillsTee,
+  11: lossesToWinsTee,
+  12: oversizedGraphicSweatshirt,
+  13: raspberryWorldwideTee,
+  14: lossesToWinsTee,
+  15: raspberryWorldwideTee,
+  16: saintDistressedTee,
+  17: distressedGraphicTee,
+  18: oversizedGraphicSweatshirt,
+};
+
+const TEMPLATES = LOOKS.map((look) => ({
+  ...look,
+  img: LOOK_IMAGES[look.id] ?? distressedGraphicTee,
+}));
 
 const LOOKS_PER_PAGE = 6;
 const GARMENT_FILTERS = ["All", "Tee", "Sweatshirt", "Jeans"] as const;
@@ -828,6 +850,7 @@ export default function App() {
   const [selectedPlan, setSelectedPlan] = useState<(typeof PLANS)[number]["id"]>("starter");
   const [previewId, setPreviewId] = useState<number | null>(null);
   const [lookSetIndex, setLookSetIndex] = useState(0);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -936,7 +959,27 @@ export default function App() {
   const outOfCredits = imagesLeft <= 0;
   const canGenerate = mockups.length > 0 && selectedTemplate !== null && !generating && !outOfCredits;
 
-  const handleGenerate = () => {
+  const spendCredit = (useFree: boolean) => {
+    if (useFree) {
+      setFreeUsed((prev) => {
+        const next = Math.min(FREE_IMAGE_LIMIT, prev + 1);
+        try {
+          localStorage.setItem(FREE_USED_KEY, String(next));
+        } catch {
+          /* ignore quota / private mode */
+        }
+        return next;
+      });
+    } else {
+      setPaidCredits((prev) => {
+        const next = Math.max(0, prev - 1);
+        writePaidCredits(next);
+        return next;
+      });
+    }
+  };
+
+  const handleGenerate = async () => {
     if (outOfCredits) {
       setPaywallOpen(true);
       return;
@@ -944,28 +987,38 @@ export default function App() {
     if (!canGenerate || !selectedLook) return;
     setGenerating(true);
     setResult(null);
+    setGenerateError(null);
     const useFree = freeLeft > 0;
-    setTimeout(() => {
-      setResult(selectedLook.img);
-      if (useFree) {
-        setFreeUsed((prev) => {
-          const next = Math.min(FREE_IMAGE_LIMIT, prev + 1);
-          try {
-            localStorage.setItem(FREE_USED_KEY, String(next));
-          } catch {
-            /* ignore quota / private mode */
-          }
-          return next;
-        });
-      } else {
-        setPaidCredits((prev) => {
-          const next = Math.max(0, prev - 1);
-          writePaidCredits(next);
-          return next;
-        });
+    try {
+      const [mockup, lookImage] = await Promise.all([
+        toJpegDataUrl(mockups[0]),
+        toJpegDataUrl(selectedLook.img),
+      ]);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lookId: selectedLook.id,
+          mockup,
+          lookImage,
+          aspectRatio,
+        }),
+      });
+      const data = await res.json().catch(() => ({} as { image?: string; error?: string }));
+      if (!res.ok || typeof data.image !== "string") {
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error
+            : "Generation is available on the live site after you add FAL_KEY in Vercel.",
+        );
       }
+      setResult(data.image);
+      spendCredit(useFree);
+    } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : "Nano could not apply this look.");
+    } finally {
       setGenerating(false);
-    }, 3000);
+    }
   };
 
   const startCheckout = async () => {
@@ -1205,14 +1258,16 @@ export default function App() {
             {generating ? "Applying look…" : "Apply this look"}
           </button>
           {!generating && (
-            <p className="text-[11px] text-[#bbb] text-center mt-2">
-              {outOfCredits
-                ? "Get more images to continue"
-                : mockups.length === 0
-                  ? "Upload a mockup to continue"
-                  : selectedTemplate
-                    ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
-                    : "Pick a look to continue"}
+            <p className={`text-[11px] text-center mt-2 ${generateError ? "text-[#111]" : "text-[#bbb]"}`}>
+              {generateError
+                ? generateError
+                : outOfCredits
+                  ? "Get more images to continue"
+                  : mockups.length === 0
+                    ? "Upload a mockup to continue"
+                    : selectedTemplate
+                      ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
+                      : "Pick a look to continue"}
             </p>
           )}
         </div>
