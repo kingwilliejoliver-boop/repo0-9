@@ -1407,10 +1407,10 @@ export default function App() {
       </div>
 
       {/* ── Output ──────────────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col min-h-[70vh] md:min-h-0 md:overflow-hidden bg-white">
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white max-md:min-h-[min(70vh,calc(100dvh-3.5rem))]">
 
         {result && !generating && (
-          <div className="flex items-center justify-end gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-[#ebebeb]">
+          <div className="flex-shrink-0 flex items-center justify-end gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-[#ebebeb]">
             <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg border border-[#e8e8e8] text-[#555] text-sm hover:border-[#ccc] hover:text-[#111] transition-all cursor-pointer">
               <IconShare /> <span className="hidden sm:inline">Share</span>
             </button>
@@ -1437,20 +1437,18 @@ export default function App() {
         )}
 
         {/* Canvas */}
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-[#fafafa] min-h-[280px]">
+        <div className="flex-1 min-h-0 overflow-hidden bg-[#fafafa]">
+          <div className="h-full w-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
           {generating ? (
-            <div className="w-full max-w-md h-full max-h-[520px] rounded-2xl border border-[#ebebeb] bg-white flex items-center justify-center">
+            <div className="w-full max-w-md h-full max-h-full rounded-2xl border border-[#ebebeb] bg-white flex items-center justify-center">
               <GeneratingState />
             </div>
           ) : result ? (
-            <div className="relative group max-h-full">
-              <img
-                src={imageSrc(result, 900)}
-                alt="Restyled piece"
-                className="rounded-2xl shadow-sm max-h-[min(520px,calc(100dvh-220px))] md:max-h-[calc(100vh-200px)] object-contain border border-[#ebebeb]"
-                style={{ maxWidth: "100%" }}
-              />
-            </div>
+            <img
+              src={imageSrc(result, 900)}
+              alt="Restyled piece"
+              className="rounded-2xl shadow-sm max-h-full max-w-full w-auto h-auto object-contain border border-[#ebebeb]"
+            />
           ) : (
             <div className="flex flex-col items-center justify-center gap-4 text-center">
               <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-[#e8e8e8] flex items-center justify-center text-[#ccc]">
@@ -1462,10 +1460,11 @@ export default function App() {
               </div>
             </div>
           )}
+          </div>
         </div>
 
         {/* History strip */}
-        <div className="border-t border-[#ebebeb] px-4 sm:px-6 lg:px-8 py-4 bg-white pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="flex-shrink-0 relative z-10 border-t border-[#ebebeb] px-4 sm:px-6 lg:px-8 py-4 bg-white pb-[max(1rem,env(safe-area-inset-bottom))]">
           <p className="text-[10px] font-semibold text-[#bbb] tracking-wide mb-3">Recent</p>
           <div className="flex gap-2">
             {HISTORY.map((h) => (
