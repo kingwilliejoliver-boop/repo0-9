@@ -1,11 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import distressedGraphicTee from "./assets/templates/distressed-graphic-tee.jpg";
-import oversizedGraphicSweatshirt from "./assets/templates/oversized-graphic-sweatshirt.jpg";
 import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
-import raspberryWorldwideTee from "./assets/templates/raspberry-worldwide-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
-import lossesToWinsTee from "./assets/templates/losses-to-wins-tee.jpg";
-import distressedFlatJeans from "./assets/templates/distressed-flat-jeans.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
@@ -263,34 +258,18 @@ async function toJpegDataUrl(src: string, max = 1280, aspectRatio?: string) {
 }
 
 const LOOK_IMAGES: Record<number, string> = {
-  1: distressedGraphicTee,
-  2: oversizedGraphicSweatshirt,
   3: saintDistressedTee,
-  4: raspberryWorldwideTee,
   5: raspberryHillsTee,
-  6: lossesToWinsTee,
-  7: distressedFlatJeans,
-  8: distressedGraphicTee,
-  9: oversizedGraphicSweatshirt,
-  10: raspberryHillsTee,
-  11: lossesToWinsTee,
-  12: oversizedGraphicSweatshirt,
-  13: raspberryWorldwideTee,
-  14: lossesToWinsTee,
-  15: raspberryWorldwideTee,
-  16: saintDistressedTee,
-  17: distressedGraphicTee,
-  18: oversizedGraphicSweatshirt,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
   ...look,
   refs: look.refs ?? [],
-  img: look.refs?.[0] || LOOK_IMAGES[look.id] || distressedGraphicTee,
+  img: look.refs?.[0] || LOOK_IMAGES[look.id] || saintDistressedTee,
 }));
 
 const LOOKS_PER_PAGE = 6;
-const GARMENT_FILTERS = ["All", "Tee", "Sweatshirt", "Jeans"] as const;
+const GARMENT_FILTERS = ["All", "Tee"] as const;
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
 const FREE_USED_KEY = "shotfarm-free-used";
@@ -343,9 +322,8 @@ const PLANS = [
 ];
 
 const HISTORY = [
-  { id: 1, img: distressedGraphicTee, prompt: "Distressed graphic tee" },
-  { id: 2, img: oversizedGraphicSweatshirt, prompt: "Oversized graphic sweatshirt" },
   { id: 3, img: saintDistressedTee, prompt: "Saint distressed tee" },
+  { id: 5, img: raspberryHillsTee, prompt: "Raspberry Hills tee" },
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
