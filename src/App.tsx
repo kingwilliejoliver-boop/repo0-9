@@ -783,7 +783,7 @@ function LandingPage({
             Your mockup,<br />shot like the look.
           </h1>
           <p className="mt-3 text-sm text-[#888] leading-relaxed">
-            Upload a garment. Pick a template. We apply it for you.
+            Upload a garment. Pick a template.<br />We apply it for you.
           </p>
           <button
             type="button"
