@@ -1,7 +1,7 @@
-import { buildLockedPrompt, getLook } from "../src/looks";
+import { getLook, withImageRefs } from "../src/looks";
 
 export const config = {
-  api: { bodyParser: { sizeLimit: "4mb" } },
+  api: { bodyParser: { sizeLimit: "8mb" } },
   maxDuration: 60,
 };
 
@@ -27,7 +27,10 @@ function falMessage(data: unknown) {
 }
 
 export default async function handler(
-  req: { method?: string; body?: { lookId?: number; mockup?: string; lookImage?: string; aspectRatio?: string } },
+  req: {
+    method?: string;
+    body?: { lookId?: number; mockup?: string; mockups?: string[]; lookImage?: string; lookImages?: string[]; aspectRatio?: string };
+  },
   res: { status: (n: number) => { json: (b: unknown) => void } },
 ) {
   if (req.method !== "POST") {
@@ -42,16 +45,26 @@ export default async function handler(
   }
 
   const look = getLook(Number(req.body?.lookId));
-  const mockup = asImageDataUrl(req.body?.mockup);
-  if (!look || !mockup) {
+  const mockups = (Array.isArray(req.body?.mockups) ? req.body.mockups : [req.body?.mockup])
+    .map(asImageDataUrl)
+    .filter((src): src is string => Boolean(src));
+  if (!look || mockups.length === 0) {
     res.status(400).json({ error: "Upload a mockup and pick a look." });
     return;
   }
 
-  const lookImage = asImageDataUrl(req.body?.lookImage);
+  const prompt = look.prompt.trim();
+  if (!prompt) {
+    res.status(400).json({ error: "This look has no prompt yet." });
+    return;
+  }
+
+  const lookImages = (Array.isArray(req.body?.lookImages) ? req.body.lookImages : [req.body?.lookImage])
+    .map(asImageDataUrl)
+    .filter((src): src is string => Boolean(src));
   const aspectRatio = ASPECT_RATIOS.has(req.body?.aspectRatio ?? "") ? req.body!.aspectRatio! : "1:1";
   const model = process.env.FAL_MODEL || "fal-ai/nano-banana-2/edit";
-  const imageUrls = lookImage ? [mockup, lookImage] : [mockup];
+  const imageUrls = [...mockups, ...lookImages];
 
   try {
     const fal = await fetch(`https://fal.run/${model}`, {
@@ -61,7 +74,7 @@ export default async function handler(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: buildLockedPrompt(look),
+        prompt: withImageRefs(prompt, mockups.length, lookImages.length),
         image_urls: imageUrls,
         num_images: 1,
         aspect_ratio: aspectRatio,

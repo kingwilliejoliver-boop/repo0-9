@@ -2,6 +2,7 @@ import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
+import fs from 'node:fs/promises'
 
 import siteConfiguration from './.figma/make/site.json'
 
@@ -19,6 +20,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
+      looksEditorPlugin(),
       figmaSiteConfiguration(siteConfiguration),
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
@@ -41,6 +43,125 @@ export default defineConfig(({ mode }) => {
     },
   }
 })
+
+function looksEditorPlugin(): Plugin {
+  const looksPath = path.resolve(process.cwd(), 'src/looks.ts')
+  const refsRoot = path.resolve(process.cwd(), 'public/looks')
+  const start = '/* looks:start */'
+  const end = '/* looks:end */'
+
+  type DraftLook = {
+    id: number
+    name: string
+    garment: string
+    shot: string
+    summary: string
+    prompt: string
+    refs: string[]
+    aspect: string
+  }
+
+  function serializeLooks(looks: DraftLook[]) {
+    const items = looks.map((look) => `  {
+    id: ${Number(look.id)},
+    name: ${JSON.stringify(look.name)},
+    garment: ${JSON.stringify(look.garment)},
+    shot: ${JSON.stringify(look.shot)},
+    summary: ${JSON.stringify(look.summary)},
+    prompt: ${JSON.stringify(look.prompt)},
+    refs: ${JSON.stringify(look.refs)},
+    aspect: ${JSON.stringify(look.aspect)},
+  }`).join(',\n')
+    return `${start}\nexport const LOOKS: Look[] = [\n${items}${items ? ',' : ''}\n];\n${end}`
+  }
+
+  async function persistRefs(looks: DraftLook[]) {
+    await fs.mkdir(refsRoot, { recursive: true })
+    const kept = new Set(looks.map((look) => String(look.id)))
+    const existing = await fs.readdir(refsRoot).catch(() => [] as string[])
+    for (const dir of existing) {
+      if (!kept.has(dir)) await fs.rm(path.join(refsRoot, dir), { recursive: true, force: true })
+    }
+
+    const next: DraftLook[] = []
+    for (const look of looks) {
+      const dir = path.join(refsRoot, String(look.id))
+      const files: Array<{ ext: string; buf: Buffer }> = []
+      for (const ref of look.refs ?? []) {
+        if (typeof ref !== 'string' || !ref) continue
+        if (ref.startsWith('data:image/')) {
+          const match = ref.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/)
+          if (!match) continue
+          files.push({
+            ext: match[1] === 'jpeg' ? 'jpg' : match[1].replace('svg+xml', 'svg'),
+            buf: Buffer.from(match[2], 'base64'),
+          })
+        } else if (ref.startsWith('/looks/')) {
+          const fromDisk = path.join(process.cwd(), 'public', ref.replace(/^\//, ''))
+          try {
+            const buf = await fs.readFile(fromDisk)
+            const ext = path.extname(fromDisk).replace('.', '') || 'jpg'
+            files.push({ ext, buf })
+          } catch {
+            /* missing file */
+          }
+        }
+      }
+      await fs.rm(dir, { recursive: true, force: true })
+      await fs.mkdir(dir, { recursive: true })
+      const refs: string[] = []
+      for (let i = 0; i < files.length; i += 1) {
+        const file = `${i}.${files[i].ext}`
+        await fs.writeFile(path.join(dir, file), files[i].buf)
+        refs.push(`/looks/${look.id}/${file}`)
+      }
+      next.push({ ...look, refs })
+    }
+    return next
+  }
+
+  return {
+    name: 'looks-editor',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if ((req.url || '').split('?')[0] !== '/__looks' || req.method !== 'POST') return next()
+
+        const chunks: Buffer[] = []
+        req.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
+        req.on('end', async () => {
+          try {
+            const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { looks?: unknown }
+            if (!Array.isArray(body.looks)) {
+              res.statusCode = 400
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify({ error: 'Looks are required.' }))
+              return
+            }
+            const saved = await persistRefs(body.looks as DraftLook[])
+            const source = await fs.readFile(looksPath, 'utf8')
+            const from = source.indexOf(start)
+            const to = source.indexOf(end)
+            if (from < 0 || to < 0) {
+              res.statusCode = 500
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify({ error: 'Could not find looks in src/looks.ts.' }))
+              return
+            }
+            const nextSource = `${source.slice(0, from)}${serializeLooks(saved)}${source.slice(to + end.length)}`
+            await fs.writeFile(looksPath, nextSource)
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ ok: true, looks: saved }))
+          } catch (err) {
+            res.statusCode = 500
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Save failed.' }))
+          }
+        })
+      })
+    },
+  }
+}
 
 type FigmaSiteConfiguration = {
   title?: string

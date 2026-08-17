@@ -9,6 +9,7 @@ import distressedFlatJeans from "./assets/templates/distressed-flat-jeans.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
+import LooksEditor from "./LooksEditor";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -167,7 +168,8 @@ const LOOK_IMAGES: Record<number, string> = {
 
 const TEMPLATES = LOOKS.map((look) => ({
   ...look,
-  img: LOOK_IMAGES[look.id] ?? distressedGraphicTee,
+  refs: look.refs ?? [],
+  img: look.refs?.[0] || LOOK_IMAGES[look.id] || distressedGraphicTee,
 }));
 
 const LOOKS_PER_PAGE = 6;
@@ -990,17 +992,16 @@ export default function App() {
     setGenerateError(null);
     const useFree = freeLeft > 0;
     try {
-      const [mockup, lookImage] = await Promise.all([
-        toJpegDataUrl(mockups[0]),
-        toJpegDataUrl(selectedLook.img),
-      ]);
+      const encodedMockups = await Promise.all(mockups.map((src) => toJpegDataUrl(src)));
+      const lookSources = selectedLook.refs.length > 0 ? selectedLook.refs : [selectedLook.img];
+      const lookImages = await Promise.all(lookSources.map((src) => toJpegDataUrl(src)));
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           lookId: selectedLook.id,
-          mockup,
-          lookImage,
+          mockups: encodedMockups,
+          lookImages,
           aspectRatio,
         }),
       });
@@ -1126,7 +1127,7 @@ export default function App() {
         </div>
       </aside>
 
-      <div className={`flex-1 flex flex-col min-h-0 ${page === "library" ? "overflow-hidden" : "md:flex-row overflow-y-auto md:overflow-hidden"}`}>
+      <div className={`flex-1 flex flex-col min-h-0 ${page === "library" || page === "settings" ? "overflow-hidden" : "md:flex-row overflow-y-auto md:overflow-hidden"}`}>
 
       {page === "library" ? (
         <LibraryPage
@@ -1143,6 +1144,14 @@ export default function App() {
           }}
           onStart={() => goTo("generate")}
         />
+      ) : page === "settings" ? (
+        import.meta.env.DEV ? (
+          <LooksEditor thumbs={LOOK_IMAGES} />
+        ) : (
+          <div className="flex-1 flex items-center justify-center p-8">
+            <p className="text-sm text-[#aaa] text-center">Edit templates in the local app.</p>
+          </div>
+        )
       ) : (
       <>
       {/* ── Control Panel ────────────────────────────────────────────────── */}

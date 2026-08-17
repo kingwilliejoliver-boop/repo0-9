@@ -1,18 +1,24 @@
+export const GARMENTS = ["Tee", "Sweatshirt", "Jeans"] as const;
+export const SHOTS = ["Hanger", "Studio", "Flat lay", "On body"] as const;
+export const LOOK_ASPECTS = ["portrait", "square"] as const;
+
 export type Look = {
   id: number;
   name: string;
-  garment: "Tee" | "Sweatshirt" | "Jeans";
-  shot: "Hanger" | "Studio" | "Flat lay" | "On body";
+  garment: (typeof GARMENTS)[number];
+  shot: (typeof SHOTS)[number];
   summary: string;
-  /** Locked Nano prompt. Users never see this. */
+  /** Your locked Fal prompt. Users never see this. */
   prompt: string;
-  aspect: "portrait" | "square";
+  /** Look reference photos. Numbered #2, #3… after the user mockup. */
+  refs: string[];
+  aspect: (typeof LOOK_ASPECTS)[number];
 };
 
 /**
- * Edit `prompt` on each look to control Nano.
- * `buildLockedPrompt` is the wrapper sent with the mockup + look photos.
+ * Edit these in Settings while running locally. Save writes this file.
  */
+/* looks:start */
 export const LOOKS: Look[] = [
   {
     id: 1,
@@ -20,8 +26,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "Hanger",
     summary: "Vintage cream tee, raw hem, punk collage print.",
-    prompt:
-      "Vintage distressed cream graphic t-shirt on a hanger, raw cut hem, punk collage print, live fast die loud, high-contrast black and white photo, grunge fashion editorial, industrial brick backdrop",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -30,8 +36,8 @@ export const LOOKS: Look[] = [
     garment: "Sweatshirt",
     shot: "Studio",
     summary: "Boxy heather gray sweatshirt with a faded chest graphic.",
-    prompt:
-      "Oversized boxy heather gray sweatshirt on a mannequin, raw-cut hem, dropped shoulders, faded UNDERSTAND graffiti chest print, streetwear editorial, retail lighting, dark denim",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -40,8 +46,580 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "Studio",
     summary: "Cropped off-white tee, frayed edges, faded icon print.",
-    prompt:
-      "Oversized cropped off-white t-shirt on black background, raw frayed neckline, moth-eaten holes, faded SAINT MXXXXXX arched serif print, distressed religious icon graphic, luxury vintage streetwear product shot",
+    prompt: `## PRIMARY OBJECTIVE
+
+CREATE A **100% PHOTOREALISTIC, PROFESSIONAL E-COMMERCE PRODUCT MOCKUP** USING EXACTLY TWO REFERENCE IMAGES.
+
+THE FINAL IMAGE MUST SHOW THE **EXACT CUSTOMER T-SHIRT FROM IMAGE #1** — INCLUDING ITS EXACT SHIRT COLOR, GRAPHICS, PRINTS, TEXT, LOGOS, ARTWORK, DESIGN DETAILS, AND VISUAL IDENTITY — BUT THE T-SHIRT MUST BE **PRESENTED, SHAPED, POSITIONED, AND PHOTOGRAPHED IN THE SAME MOCKUP STYLE AS IMAGE #2**.
+
+THE SIMPLE RULE IS:
+
+**IMAGE #1 = THE PRODUCT / DESIGN SOURCE.**
+**IMAGE #2 = THE PRESENTATION / MOCKUP SOURCE.**
+
+IMAGE #2 MUST NEVER OVERRIDE THE CUSTOMER'S ACTUAL PRODUCT DESIGN FROM IMAGE #1.
+
+---
+
+# IMAGE ASSIGNMENTS
+
+## IMAGE #1 — ABSOLUTE PRODUCT DESIGN SOURCE
+
+IMAGE #1 IS THE CUSTOMER'S ACTUAL T-SHIRT MOCKUP AND IS THE **ONLY AUTHORIZED SOURCE** FOR:
+
+* T-SHIRT COLOR
+* GRAPHIC DESIGN
+* LOGOS
+* WORDING
+* TYPOGRAPHY
+* LETTERING
+* NUMBERS
+* SYMBOLS
+* ILLUSTRATIONS
+* PRINT COLORS
+* GRAPHIC COLORS
+* GRAPHIC PLACEMENT
+* GRAPHIC SCALE
+* GRAPHIC PROPORTIONS
+* GRAPHIC ORIENTATION
+* GRAPHIC SPACING
+* FRONT/BACK DESIGN DETAILS
+* BRANDING
+* LABEL GRAPHICS IF VISIBLE
+* EMBLEMS
+* DISTRESSING THAT IS PART OF THE PRINT
+* SPECIAL DESIGN EFFECTS
+* ALL OTHER CUSTOMER-SPECIFIC VISUAL DETAILS
+
+**EVERY CUSTOMER-SPECIFIC DETAIL VISIBLE IN IMAGE #1 MUST BE PRESERVED.**
+
+DO NOT REDESIGN, REINTERPRET, IMPROVE, CLEAN UP, SIMPLIFY, RESTYLE, RECOLOR, REPOSITION, OR RECREATE THE CUSTOMER'S ARTWORK DIFFERENTLY.
+
+THE DESIGN IN IMAGE #1 IS LOCKED.
+
+---
+
+# IMAGE #2 — MOCKUP / PRESENTATION SOURCE ONLY
+
+IMAGE #2 IS STRICTLY A **DISPLAY, GARMENT PRESENTATION, MATERIAL, AND PHOTOGRAPHY REFERENCE**.
+
+USE IMAGE #2 ONLY TO DETERMINE:
+
+* HOW THE T-SHIRT IS DISPLAYED
+* OVERALL T-SHIRT SILHOUETTE
+* GARMENT SHAPE
+* GARMENT POSITION
+* GARMENT ORIENTATION
+* CAMERA ANGLE
+* CAMERA DISTANCE
+* PERSPECTIVE
+* CROPPING
+* T-SHIRT PROPORTIONS
+* SLEEVE POSITION
+* SLEEVE FALL
+* COLLAR SHAPE
+* BODY WIDTH
+* BODY LENGTH
+* NATURAL FABRIC DRAPE
+* NATURAL WRINKLES
+* NATURAL FOLDS
+* FABRIC WEIGHT
+* FABRIC THICKNESS
+* COTTON TEXTURE
+* REALISTIC SEAMS
+* STITCHING BEHAVIOR
+* FABRIC SHADOWS
+* NATURAL HIGHLIGHTS
+* REALISTIC DEPTH
+* PHOTOGRAPHIC LIGHTING
+* PRODUCT PHOTOGRAPHY QUALITY
+* OVERALL MOCKUP PRESENTATION STYLE
+
+THE FINAL T-SHIRT SHOULD LOOK LIKE **IMAGE #1'S T-SHIRT WAS PHYSICALLY MANUFACTURED, THEN PHOTOGRAPHED USING THE SAME MOCKUP FORMAT AND GARMENT PRESENTATION AS IMAGE #2.**
+
+---
+
+# CRITICAL SOURCE SEPARATION
+
+DO NOT MIX THE DESIGN CONTENT OF THE TWO IMAGES.
+
+### TRANSFER FROM IMAGE #1:
+
+**DESIGN + COLOR + BRAND IDENTITY + CUSTOMER-SPECIFIC DETAILS**
+
+### TRANSFER FROM IMAGE #2:
+
+**SHAPE + DISPLAY STYLE + FABRIC REALISM + GARMENT CONSTRUCTION + DRAPE + WRINKLES + CAMERA/PRESENTATION**
+
+THIS SOURCE ASSIGNMENT IS ABSOLUTE.
+
+IF ANY CONFLICT EXISTS BETWEEN THE TWO REFERENCES:
+
+**IMAGE #1 ALWAYS WINS FOR DESIGN, COLOR, PRINT, LOGO, TEXT, AND BRANDING.**
+
+**IMAGE #2 ONLY WINS FOR HOW THE PHYSICAL T-SHIRT IS PRESENTED AND HOW REALISTIC THE FABRIC APPEARS.**
+
+---
+
+# ABSOLUTELY DO NOT TRANSFER THESE DETAILS FROM IMAGE #2
+
+IMAGE #2 MAY CONTAIN A DIFFERENT SHIRT COLOR, GRAPHIC, LOGO, TEXT, ARTWORK, OR BRANDING.
+
+**IGNORE ALL OF THOSE ELEMENTS COMPLETELY.**
+
+DO NOT COPY FROM IMAGE #2:
+
+* ITS SHIRT COLOR
+* ITS GRAPHIC
+* ITS LOGO
+* ITS TEXT
+* ITS BRAND NAME
+* ITS ARTWORK
+* ITS PRINT
+* ITS EMBROIDERY
+* ITS SYMBOLS
+* ITS NUMBERS
+* ITS DESIGN COLORS
+* ITS LABEL DESIGN
+* ITS BRAND-SPECIFIC ELEMENTS
+* ITS DECORATIVE DETAILS
+
+THESE ELEMENTS FROM IMAGE #2 HAVE **ZERO AUTHORITY** OVER THE FINAL DESIGN.
+
+THE FINAL PRODUCT MUST NOT LOOK LIKE IMAGE #2'S BRAND OR DESIGN.
+
+IMAGE #2 IS A **BLANK PHYSICAL MOCKUP TEMPLATE IN CONCEPT ONLY.**
+
+IMAGINE COMPLETELY REMOVING THE ORIGINAL DESIGN AND COLOR FROM IMAGE #2, WHILE RETAINING ITS PHYSICAL GARMENT PRESENTATION, THEN APPLYING THE EXACT CUSTOMER PRODUCT FROM IMAGE #1 TO THAT PHYSICAL MOCKUP.
+
+---
+
+# T-SHIRT COLOR — STRICT LOCK
+
+THE FINAL SHIRT COLOR MUST COME **ONLY FROM IMAGE #1**.
+
+DO NOT:
+
+* USE THE COLOR OF IMAGE #2
+* BLEND IMAGE #1 AND IMAGE #2 COLORS
+* CHANGE THE HUE
+* CHANGE THE SATURATION
+* MAKE THE COLOR WARMER
+* MAKE THE COLOR COOLER
+* MAKE THE COLOR LIGHTER
+* MAKE THE COLOR DARKER
+* TURN THE SHIRT BLACK
+* TURN THE SHIRT WHITE
+* TURN THE SHIRT GRAY
+* CREATE A WASHED VERSION UNLESS IMAGE #1 ALREADY SHOWS IT
+* ADD VINTAGE FADING UNLESS IMAGE #1 ALREADY SHOWS IT
+
+THE FABRIC MAY RECEIVE **NATURAL LIGHTING, SHADOWS, HIGHLIGHTS, AND FOLDS REQUIRED FOR PHOTOREALISM**, BUT ITS ACTUAL BASE COLOR MUST REMAIN FAITHFUL TO IMAGE #1.
+
+**FABRIC STYLE FROM IMAGE #2 DOES NOT MEAN FABRIC COLOR FROM IMAGE #2.**
+
+---
+
+# CUSTOMER GRAPHIC — ZERO ALTERATION POLICY
+
+THE GRAPHIC FROM IMAGE #1 MUST BE REPRODUCED WITH EXTREME FIDELITY.
+
+PRESERVE:
+
+* EXACT CONTENT
+* EXACT SPELLING
+* EXACT LETTERS
+* EXACT NUMBERS
+* EXACT WORD ORDER
+* EXACT LOGO STRUCTURE
+* EXACT SYMBOLS
+* EXACT ARTWORK
+* EXACT COLORS
+* EXACT RELATIVE SIZE
+* EXACT RELATIVE POSITION
+* EXACT PROPORTIONS
+* EXACT ORIENTATION
+* EXACT INTERNAL SPACING
+* EXACT VISUAL HIERARCHY
+* EXACT COMPOSITION
+
+DO NOT:
+
+* INVENT LETTERS
+* MISSPELL WORDS
+* CHANGE TYPOGRAPHY
+* SUBSTITUTE FONTS
+* ADD WORDS
+* REMOVE WORDS
+* CHANGE LOGOS
+* REDRAW LOGOS DIFFERENTLY
+* MODIFY SYMBOLS
+* ADD DETAILS
+* REMOVE DETAILS
+* CHANGE COLORS
+* CHANGE GRAPHIC SCALE WITHOUT PHYSICAL REASON
+* MOVE THE GRAPHIC TO A DIFFERENT PART OF THE SHIRT
+* CENTER SOMETHING THAT IS INTENTIONALLY OFF-CENTER
+* STRETCH THE ARTWORK
+* SQUASH THE ARTWORK
+* MIRROR THE ARTWORK
+* ROTATE THE ARTWORK
+* CROP THE ARTWORK
+* TURN PRINT INTO EMBROIDERY
+* TURN EMBROIDERY INTO PRINT
+* ADD DISTRESSING
+* REMOVE DISTRESSING
+* GENERATE A "SIMILAR" VERSION
+
+**DO NOT CREATE AN INTERPRETATION OF THE DESIGN. REPRODUCE THE DESIGN.**
+
+---
+
+# GRAPHIC APPLICATION TO REALISTIC FABRIC
+
+WHEN PLACING IMAGE #1'S DESIGN ONTO THE REALISTIC T-SHIRT PRESENTATION FROM IMAGE #2:
+
+THE ARTWORK MUST BEHAVE LIKE A **REAL PHYSICAL PRINT ON FABRIC**.
+
+IF THE FABRIC WRINKLES, BENDS, FOLDS, OR CURVES:
+
+* THE PRINT SHOULD NATURALLY FOLLOW THE FABRIC SURFACE.
+* MINOR PHYSICAL WARPING CAUSED BY REAL FABRIC DRAPE IS ACCEPTABLE.
+* THE UNDERLYING ARTWORK ITSELF MUST NOT BE REDESIGNED.
+* DO NOT DISTORT LETTERS BEYOND WHAT REAL FABRIC WOULD CAUSE.
+* DO NOT BREAK LOGOS.
+* DO NOT REARRANGE ELEMENTS.
+* DO NOT CREATE RANDOM GAPS.
+* DO NOT ADD FAKE TEXTURES INSIDE THE GRAPHIC.
+* DO NOT MAKE THE GRAPHIC FLOAT ABOVE THE SHIRT.
+* DO NOT MAKE IT LOOK DIGITALLY PASTED ON.
+
+THE PRINT MUST LOOK **PHYSICALLY APPLIED TO THE GARMENT**, WHILE REMAINING IDENTICAL TO THE CUSTOMER'S DESIGN.
+
+---
+
+# GARMENT STYLE FROM IMAGE #2
+
+RECREATE THE PHYSICAL CHARACTERISTICS OF IMAGE #2'S T-SHIRT MOCKUP AS CLOSELY AS POSSIBLE.
+
+MATCH:
+
+* OVERALL CUT
+* SILHOUETTE
+* WIDTH
+* LENGTH
+* SHOULDER WIDTH
+* SLEEVE LENGTH
+* SLEEVE ANGLE
+* SLEEVE OPENING
+* COLLAR SIZE
+* COLLAR THICKNESS
+* COLLAR SHAPE
+* BODY PROPORTION
+* SIDE SHAPE
+* HEM POSITION
+* NATURAL GARMENT DRAPE
+* FABRIC DENSITY
+* FABRIC WEIGHT
+* WRINKLE PATTERN STYLE
+* CREASE DEPTH
+* NATURAL FABRIC TENSION
+* EDGE BEHAVIOR
+* STITCHING REALISM
+
+THE GOAL IS FOR SOMEONE VIEWING THE FINAL IMAGE TO IMMEDIATELY RECOGNIZE **IMAGE #2'S MOCKUP PRESENTATION STYLE**, WHILE SEEING **ONLY IMAGE #1'S ACTUAL PRODUCT DESIGN.**
+
+---
+
+# FABRIC REALISM
+
+THE FINAL PRODUCT MUST HAVE THE HIGH-QUALITY PHYSICAL FABRIC APPEARANCE OF IMAGE #2.
+
+CREATE REALISTIC:
+
+* COTTON FIBERS
+* SUBTLE FABRIC GRAIN
+* NATURAL KNIT TEXTURE
+* SEAMS
+* COLLAR RIBBING
+* SLEEVE HEMS
+* BOTTOM HEM
+* STITCHING
+* FABRIC THICKNESS
+* FOLD SHADOWS
+* CONTACT SHADOWS
+* MICRO-WRINKLES
+* LARGE NATURAL FOLDS
+* LIGHT ABSORPTION
+* NATURAL HIGHLIGHTS
+* SMALL TEXTURAL VARIATION
+
+DO NOT OVERDO THE TEXTURE.
+
+THE SHIRT SHOULD LOOK LIKE A **REAL, PROFESSIONALLY PHOTOGRAPHED GARMENT**, NOT A 3D MODEL, CGI RENDER, AI IMAGE, VECTOR MOCKUP, OR FLAT DIGITAL TEMPLATE.
+
+---
+
+# WRINKLES AND FOLDS
+
+USE IMAGE #2 AS THE PRIMARY REFERENCE FOR HOW THE FABRIC NATURALLY LAYS.
+
+WRINKLES MUST:
+
+* FOLLOW THE PHYSICS OF THE GARMENT
+* APPEAR NATURAL
+* BE CONSISTENT WITH THE FABRIC WEIGHT
+* OCCUR AROUND REAL TENSION/COMPRESSION POINTS
+* CREATE BELIEVABLE LIGHT AND SHADOW
+* NOT RANDOMLY DESTROY OR OBSCURE THE CUSTOMER'S GRAPHIC
+
+DO NOT CREATE EXCESSIVE WRINKLES SIMPLY TO MAKE THE IMAGE LOOK REALISTIC.
+
+THE PRODUCT SHOULD REMAIN **CLEAN AND COMMERCIAL**, WHILE STILL HAVING NATURAL FABRIC CHARACTER.
+
+---
+
+# PRODUCT CONSTRUCTION REALISM
+
+ENSURE THAT THE T-SHIRT REMAINS PHYSICALLY POSSIBLE.
+
+CHECK:
+
+* TWO CORRECT SLEEVES
+* SYMMETRICAL BASIC CONSTRUCTION WHERE APPROPRIATE
+* REALISTIC ARMHOLES
+* CORRECT NECK OPENING
+* CONTINUOUS COLLAR
+* PROPER SHOULDER SEAMS
+* CORRECT SIDE SEAMS IF VISIBLE
+* REALISTIC SLEEVE HEMS
+* REALISTIC BOTTOM HEM
+* NO DUPLICATE EDGES
+* NO MELTED FABRIC
+* NO FLOATING MATERIAL
+* NO IMPOSSIBLE FOLDS
+* NO EXTRA SLEEVES
+* NO MISSING SECTIONS
+* NO TWISTED GEOMETRY
+* NO RANDOM CUTOUTS
+
+---
+
+# CAMERA AND COMPOSITION
+
+MATCH IMAGE #2'S PRESENTATION AS CLOSELY AS POSSIBLE.
+
+PRESERVE ITS:
+
+* VIEWING ANGLE
+* CAMERA HEIGHT
+* CAMERA DIRECTION
+* DISTANCE
+* PERSPECTIVE
+* SCALE WITHIN FRAME
+* PRODUCT PLACEMENT
+* CROPPING
+* NEGATIVE SPACE
+* ORIENTATION
+* VISUAL BALANCE
+
+DO NOT RANDOMLY CHANGE THE CAMERA ANGLE.
+
+DO NOT CREATE A DIFFERENT MOCKUP CONCEPT.
+
+DO NOT TURN A FLAT-LAY INTO A HANGING SHIRT.
+
+DO NOT TURN A HANGING SHIRT INTO A MODEL-WORN SHIRT.
+
+DO NOT TURN A FRONT VIEW INTO A THREE-QUARTER VIEW.
+
+**FOLLOW WHATEVER DISPLAY FORMAT IMAGE #2 ACTUALLY USES.**
+
+---
+
+# LIGHTING AND SHADOWS
+
+USE IMAGE #2 AS THE LIGHTING REFERENCE.
+
+MATCH ITS:
+
+* LIGHT DIRECTION
+* LIGHT SOFTNESS
+* SHADOW DIRECTION
+* SHADOW INTENSITY
+* CONTRAST
+* HIGHLIGHT BEHAVIOR
+* EXPOSURE
+* NATURAL DEPTH
+
+LIGHTING MUST AFFECT IMAGE #1'S SHIRT COLOR NATURALLY WITHOUT CHANGING THE PRODUCT'S ACTUAL COLOR IDENTITY.
+
+SHADOWS MUST BE PHYSICALLY CONSISTENT WITH THE FOLDS AND SHAPE OF THE GARMENT.
+
+---
+
+# BACKGROUND
+
+UNLESS OTHERWISE SPECIFIED, PRESERVE THE SAME GENERAL BACKGROUND / SURFACE / STUDIO PRESENTATION STYLE SHOWN IN IMAGE #2.
+
+THE BACKGROUND MUST NOT INTRODUCE:
+
+* NEW PROPS
+* RANDOM OBJECTS
+* DECORATIONS
+* PEOPLE
+* HANDS
+* BRANDING
+* WATERMARKS
+* ADDITIONAL TEXT
+
+THE T-SHIRT MUST REMAIN THE CLEAR PRODUCT FOCUS.
+
+---
+
+# ZERO CREATIVE FREEDOM RULE
+
+THIS IS A **CUSTOMER PRODUCT REPRODUCTION TASK**, NOT A CREATIVE DESIGN TASK.
+
+YOU ARE NOT AUTHORIZED TO MAKE THE PRODUCT:
+
+* "BETTER"
+* "MORE STYLISH"
+* "MORE BALANCED"
+* "MORE PROFESSIONAL"
+* "MORE MINIMAL"
+* "MORE LUXURIOUS"
+* "MORE TRENDY"
+* "MORE AESTHETIC"
+
+DO NOT MAKE CREATIVE DECISIONS ABOUT THE CUSTOMER'S PRODUCT.
+
+YOUR JOB IS TO **PRESERVE IMAGE #1 AND PRESENT IT THROUGH IMAGE #2'S MOCKUP SYSTEM.**
+
+WHEN UNCERTAIN ABOUT A CUSTOMER DESIGN DETAIL, PRESERVE IMAGE #1 RATHER THAN INVENTING SOMETHING.
+
+---
+
+# STRICT NEGATIVE CONSTRAINTS
+
+ABSOLUTELY NO:
+
+* DESIGN CHANGES
+* COLOR CHANGES
+* LOGO CHANGES
+* TEXT CHANGES
+* MISSPELLINGS
+* FONT SUBSTITUTIONS
+* EXTRA GRAPHICS
+* MISSING GRAPHICS
+* GRAPHIC REPLACEMENT
+* GRAPHIC REDESIGN
+* COLOR TRANSFER FROM IMAGE #2
+* ARTWORK TRANSFER FROM IMAGE #2
+* BRANDING TRANSFER FROM IMAGE #2
+* HYBRIDIZATION OF BOTH DESIGNS
+* RANDOM DISTRESSING
+* RANDOM WASHING
+* RANDOM FADING
+* EXTRA LABELS
+* EXTRA TAGS
+* EXTRA STITCHING DETAILS NOT REQUIRED BY THE GARMENT
+* NEW ACCESSORIES
+* NEW OBJECTS
+* DUPLICATED GRAPHICS
+* MIRRORED GRAPHICS
+* AI-GENERATED LETTERING
+* FAKE WORDS
+* WARPED LOGOS
+* MELTED FABRIC
+* FLOATING GRAPHICS
+* PLASTIC-LOOKING FABRIC
+* OVERLY SMOOTH CGI SURFACES
+* CARTOON APPEARANCE
+* ILLUSTRATED APPEARANCE
+* 3D-RENDER APPEARANCE
+* UNREALISTIC SHADOWS
+* UNREALISTIC FOLDS
+* ANATOMICAL ELEMENTS IF NO MODEL EXISTS IN #2
+* WATERMARKS
+* CAPTIONS
+* EXTRA TEXT OUTSIDE THE CUSTOMER'S ACTUAL DESIGN
+
+---
+
+# PRIORITY ORDER
+
+IF ANY INSTRUCTION OR REFERENCE DETAIL CONFLICTS, FOLLOW THIS PRIORITY ORDER:
+
+### PRIORITY 1 — IMAGE #1 CUSTOMER PRODUCT IDENTITY
+
+DESIGN, ARTWORK, GRAPHICS, LOGOS, TEXT, COLORS, BRANDING, AND CUSTOMER-SPECIFIC DETAILS MUST NEVER CHANGE.
+
+### PRIORITY 2 — IMAGE #2 MOCKUP STRUCTURE
+
+MATCH ITS T-SHIRT SHAPE, DISPLAY, ORIENTATION, CAMERA, DRAPE, MATERIAL REALISM, WRINKLES, AND CONSTRUCTION.
+
+### PRIORITY 3 — PHOTOREALISM
+
+MAKE THE COMBINED RESULT LOOK LIKE AN ACTUAL PHYSICAL T-SHIRT THAT WAS PROFESSIONALLY PHOTOGRAPHED.
+
+IF PHOTOREALISM WOULD REQUIRE ALTERING THE CUSTOMER'S DESIGN, **PRESERVE THE CUSTOMER'S DESIGN INSTEAD.**
+
+---
+
+# INTERNAL VALIDATION BEFORE FINAL OUTPUT
+
+BEFORE PRODUCING THE FINAL IMAGE, INTERNALLY VERIFY ALL OF THE FOLLOWING:
+
+1. IS THE SHIRT COLOR FROM IMAGE #1 AND NOT IMAGE #2?
+2. IS 100% OF THE CUSTOMER ARTWORK FROM IMAGE #1?
+3. DID ANY GRAPHIC, LOGO, TEXT, OR BRANDING FROM IMAGE #2 ACCIDENTALLY TRANSFER? IF YES, REMOVE IT.
+4. IS ALL CUSTOMER TEXT SPELLED EXACTLY AS SHOWN IN IMAGE #1?
+5. ARE ALL LOGOS AND SYMBOLS STRUCTURALLY IDENTICAL TO IMAGE #1?
+6. ARE GRAPHIC COLORS PRESERVED?
+7. IS GRAPHIC PLACEMENT PRESERVED RELATIVE TO THE GARMENT?
+8. IS GRAPHIC SCALE PRESERVED?
+9. DOES THE PHYSICAL T-SHIRT PRESENTATION MATCH IMAGE #2?
+10. DOES THE FABRIC TEXTURE AND WEIGHT RESEMBLE IMAGE #2?
+11. DO THE WRINKLES AND FOLDS LOOK PHYSICALLY REAL?
+12. DOES THE CAMERA ANGLE MATCH IMAGE #2?
+13. DOES THE PRODUCT OCCUPY THE FRAME SIMILARLY TO IMAGE #2?
+14. ARE THE COLLAR, SLEEVES, HEMS, AND SEAMS PHYSICALLY CORRECT?
+15. ARE THERE ANY AI ARTIFACTS?
+16. ARE THERE ANY EXTRA LETTERS OR FAKE TEXT?
+17. ARE THERE ANY DUPLICATED OR DEFORMED GRAPHICS?
+18. DOES THE PRINT NATURALLY FOLLOW THE FABRIC WITHOUT CHANGING THE ORIGINAL ARTWORK?
+19. DOES THE IMAGE LOOK LIKE A REAL PHOTOGRAPH RATHER THAN A DIGITAL MOCKUP?
+20. WOULD THE CUSTOMER RECOGNIZE THEIR IMAGE #1 PRODUCT AS **UNCHANGED**?
+
+IF ANY ANSWER IS INCORRECT, **CORRECT IT BEFORE GENERATING THE FINAL RESULT.**
+
+---
+
+# FINAL OUTPUT REQUIREMENT
+
+THE FINAL RESULT MUST LOOK AS THOUGH:
+
+**THE EXACT CUSTOMER T-SHIRT FROM IMAGE #1 WAS PHYSICALLY PRODUCED USING THE REALISTIC GARMENT MATERIAL, SILHOUETTE, DRAPE, WRINKLES, CONSTRUCTION, PHOTOGRAPHY, AND DISPLAY PRESENTATION SHOWN IN IMAGE #2.**
+
+IMAGE #1'S **DESIGN + COLOR + BRANDING + PRODUCT DETAILS MUST REMAIN UNCHANGED.**
+
+IMAGE #2'S **DESIGN + COLOR + GRAPHICS + BRANDING MUST NOT APPEAR ANYWHERE IN THE FINAL RESULT.**
+
+USE IMAGE #2 **ONLY AS THE PHYSICAL MOCKUP AND PRESENTATION REFERENCE.**
+
+THE FINAL IMAGE MUST BE:
+
+**PHOTOREALISTIC.
+COMMERCIAL QUALITY.
+CUSTOMER-READY.
+TEXTURALLY REALISTIC.
+PHYSICALLY BELIEVABLE.
+100% FAITHFUL TO IMAGE #1'S PRODUCT DESIGN.
+100% BASED ON IMAGE #2'S MOCKUP PRESENTATION STYLE.
+ZERO UNAUTHORIZED DESIGN CHANGES.
+ZERO AI ARTIFACTS.**`,
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -50,8 +628,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "Flat lay",
     summary: "Washed charcoal tee with a weathered oval graphic.",
-    prompt:
-      "Faded charcoal oversized t-shirt flat lay on white, raw frayed hem and neckline, distressed holes, weathered orange-red RASPBERRY WORLDWIDE oval print, wired earbuds graphic overlay, Los Angeles streetwear product shot",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -60,8 +638,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "Flat lay",
     summary: "Oversized off-white tee, frayed collar, cracked vintage print.",
-    prompt:
-      "Oversized boxy off-white t-shirt flat lay on white, frayed ribbed collar, pinholes and raw uneven hem, cracked vintage Raspberry Hills collegiate print, blue RASPBERRY! bar, black star column, distressed streetwear product shot",
+    prompt: "",
+    refs: [],
     aspect: "square",
   },
   {
@@ -70,8 +648,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "On body",
     summary: "Boxy white tee with three vertical collage panels.",
-    prompt:
-      "On-body streetwear photo, boxy white graphic t-shirt, slightly cropped raw hem, three vertical skate-deck panels in pink black and seafoam, LOSSES 2 WINS branding, dice chains crosses collage print, camo trousers, urban editorial lighting",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -80,8 +658,8 @@ export const LOOKS: Look[] = [
     garment: "Jeans",
     shot: "Flat lay",
     summary: "Vintage-wash straight jeans, heavy rips, raw hem.",
-    prompt:
-      "Straight-leg vintage wash blue denim jeans flat lay on gray concrete, heavy thigh and knee rips with frayed white threads, faded honeycombing, raw frayed hem, bright blue repair stitch at the knee, streetwear product shot",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -90,7 +668,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "Studio",
     summary: "Placeholder. Black tee, hard light, luxury product shot.",
-    prompt: "Black graphic t-shirt, hard studio light, luxury product shot on a dark sweep, sharp shadows, high-end streetwear catalog",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -99,7 +678,8 @@ export const LOOKS: Look[] = [
     garment: "Sweatshirt",
     shot: "Hanger",
     summary: "Placeholder. Washed hoodie on a hanger.",
-    prompt: "Washed vintage hoodie on a hanger, faded fleece, worn rib cuffs, editorial hanger shot, industrial backdrop",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -108,7 +688,8 @@ export const LOOKS: Look[] = [
     garment: "Sweatshirt",
     shot: "Flat lay",
     summary: "Placeholder. Neutral hoodie, top-down.",
-    prompt: "Neutral hoodie flat lay, top-down on a clean white surface, even retail lighting, centered, e-commerce product photo",
+    prompt: "",
+    refs: [],
     aspect: "square",
   },
   {
@@ -117,7 +698,8 @@ export const LOOKS: Look[] = [
     garment: "Sweatshirt",
     shot: "On body",
     summary: "Placeholder. Boxy hoodie, street editorial.",
-    prompt: "On-body street editorial, boxy hoodie, cropped at the hips, urban daylight, fashion lookbook crop",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -126,7 +708,8 @@ export const LOOKS: Look[] = [
     garment: "Sweatshirt",
     shot: "Studio",
     summary: "Placeholder. Black hoodie, studio sweep.",
-    prompt: "Black hoodie on a dark studio sweep, low-key lighting, luxury streetwear product shot",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -135,7 +718,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "Hanger",
     summary: "Placeholder. Black graphic tee on a hanger.",
-    prompt: "Black graphic t-shirt on a hanger, clean hanger hardware, simple wall, streetwear product photo",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -144,7 +728,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "On body",
     summary: "Placeholder. Cropped distressed tee, on body.",
-    prompt: "On-body cropped distressed t-shirt, raw hem, urban editorial lighting, streetwear lookbook",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -153,7 +738,8 @@ export const LOOKS: Look[] = [
     garment: "Sweatshirt",
     shot: "Flat lay",
     summary: "Placeholder. Faded hoodie, flat lay.",
-    prompt: "Faded washed hoodie flat lay on a light surface, soft wrinkles, vintage fleece texture, product photo",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -162,7 +748,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "Hanger",
     summary: "Placeholder. Crisp white tee on a hanger.",
-    prompt: "Crisp white t-shirt on a hanger, clean studio wall, bright even light, simple product photo",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -171,7 +758,8 @@ export const LOOKS: Look[] = [
     garment: "Tee",
     shot: "On body",
     summary: "Placeholder. Black tee, night street light.",
-    prompt: "On-body black t-shirt, night street light, moody editorial, city backdrop, fashion lookbook",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
   {
@@ -180,25 +768,25 @@ export const LOOKS: Look[] = [
     garment: "Sweatshirt",
     shot: "Hanger",
     summary: "Placeholder. No-print hoodie, hanger.",
-    prompt: "Plain no-print hoodie on a hanger, minimal backdrop, quiet product photo, natural fabric texture",
+    prompt: "",
+    refs: [],
     aspect: "portrait",
   },
 ];
+/* looks:end */
 
 export function getLook(id: number) {
   return LOOKS.find((look) => look.id === id) ?? null;
 }
 
-export function buildLockedPrompt(look: Look) {
-  return [
-    "Restyle the garment in the first image to match this locked look.",
-    "First image: the user's mockup. Keep the exact graphic, logo, print, colors, and garment identity from this mockup. Do not replace the artwork or invent a new brand.",
-    "Second image: the target look. Match its photography — shot type, camera angle, crop, lighting, background, fabric wash, distressing, and editorial mood.",
-    `Look: ${look.name}`,
-    `Garment: ${look.garment}`,
-    `Shot: ${look.shot}`,
-    "Locked look direction:",
-    look.prompt,
-    "Output one photorealistic product photograph. No captions, no side-by-side comparison, no extra garments.",
-  ].join("\n");
+/** Append numbered image refs. #1… are mockups; following #s are this look's reference photos. */
+export function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number) {
+  const refs: string[] = [];
+  for (let i = 0; i < mockupCount; i += 1) {
+    refs.push(`#${i + 1} user's mockup${mockupCount > 1 ? ` ${i + 1}` : ""}`);
+  }
+  for (let i = 0; i < lookRefCount; i += 1) {
+    refs.push(`#${mockupCount + i + 1} look reference${lookRefCount > 1 ? ` ${i + 1}` : ""}`);
+  }
+  return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
