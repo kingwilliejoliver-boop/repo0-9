@@ -746,20 +746,45 @@ function FaqSection() {
   );
 }
 
-function LandingPage({ onStart, onLooks }: { onStart: () => void; onLooks: () => void }) {
+function LandingPage({
+  onStart,
+  onLooks,
+  signedIn,
+  showSignIn,
+  onSignIn,
+}: {
+  onStart: () => void;
+  onLooks: () => void;
+  signedIn: boolean;
+  showSignIn: boolean;
+  onSignIn: () => void;
+}) {
+  const startLabel = signedIn ? "Generate" : "Get started";
+
   return (
     <div className="flex-1 min-h-0 overflow-y-auto bg-white">
       <div className="min-h-full flex flex-col">
       <header className="flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0">
         <BrandLockup />
-        <button
-          type="button"
-          onClick={onStart}
-          className="px-4 py-2 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
-          style={{ letterSpacing: "0.04em" }}
-        >
-          Get started
-        </button>
+        <div className="flex items-center gap-4">
+          {showSignIn ? (
+            <button
+              type="button"
+              onClick={onSignIn}
+              className="text-sm text-[#888] hover:text-[#111] cursor-pointer"
+            >
+              Sign in
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onStart}
+            className="px-4 py-2 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
+            style={{ letterSpacing: "0.04em" }}
+          >
+            {startLabel}
+          </button>
+        </div>
       </header>
 
       <section className="flex flex-col items-center px-6 pt-12 pb-10 gap-10">
@@ -819,9 +844,9 @@ function LandingPage({ onStart, onLooks }: { onStart: () => void; onLooks: () =>
             className="px-5 py-2.5 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
             style={{ letterSpacing: "0.04em" }}
           >
-            Get started
+            {startLabel}
           </button>
-          <p className="text-[12px] text-[#bbb] mt-3">3 free images to start</p>
+          {signedIn ? null : <p className="text-[12px] text-[#bbb] mt-3">3 free images to start</p>}
         </div>
       </section>
 
@@ -1357,7 +1382,13 @@ function AppShell({ session }: { session: Session }) {
   return (
     <div className="flex flex-col lg:flex-row h-dvh overflow-hidden bg-white font-sans">
       {page === "home" ? (
-        <LandingPage onStart={() => goTo("generate")} onLooks={() => goTo("library")} />
+        <LandingPage
+          onStart={() => goTo("generate")}
+          onLooks={() => goTo("library")}
+          signedIn={session.signedIn}
+          showSignIn={needsSignIn}
+          onSignIn={() => session.openSignIn()}
+        />
       ) : (
         <>
       {/* ── Mobile top bar ─────────────────────────────────────────────── */}
