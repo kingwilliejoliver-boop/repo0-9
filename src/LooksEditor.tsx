@@ -189,22 +189,18 @@ export default function LooksEditor({ thumbs }: { thumbs: Record<number, string>
             <div>
               <span className="text-[11px] text-[#888]">Prompt</span>
               <p className="text-[11px] text-[#bbb] mt-0.5 mb-2">
-                #1 is the shopper’s design and shirt color only. Images you add here are the template you edit — fabric, mockup style, and shot.
+                Images you add here are sent first — #1 is the template being edited. The shopper’s upload is last: color and print only.
               </p>
               <div className="flex flex-wrap gap-2 mb-3">
-                <div className="w-[5.5rem] h-[5.5rem] rounded-lg border border-dashed border-[#ddd] bg-[#fafafa] flex flex-col items-center justify-center text-center px-1">
-                  <span className="text-[10px] font-medium text-[#111]">#1</span>
-                  <span className="text-[9px] text-[#bbb] leading-tight mt-0.5">User mockup</span>
-                </div>
                 {selected.refs.map((src, i) => (
                   <div key={`${src.slice(0, 24)}-${i}`} className="relative w-[5.5rem] h-[5.5rem] rounded-lg overflow-hidden border border-[#e8e8e8] bg-[#f4f4f4]">
-                    <img src={src} alt={`#${i + 2}`} className="w-full h-full object-cover" />
-                    <span className="absolute top-1 left-1 px-1 py-px rounded bg-black/60 text-white text-[9px] font-medium">#{i + 2}</span>
+                    <img src={src} alt={`#${i + 1}`} className="w-full h-full object-cover" />
+                    <span className="absolute top-1 left-1 px-1 py-px rounded bg-black/60 text-white text-[9px] font-medium">#{i + 1}</span>
                     <button
                       type="button"
                       onClick={() => removeRef(i)}
                       className="absolute top-1 right-1 w-4 h-4 rounded-full bg-white/90 text-[#111] text-[10px] leading-none cursor-pointer"
-                      aria-label={`Remove #${i + 2}`}
+                      aria-label={`Remove #${i + 1}`}
                     >
                       ×
                     </button>
@@ -217,6 +213,10 @@ export default function LooksEditor({ thumbs }: { thumbs: Record<number, string>
                 >
                   Add image
                 </button>
+                <div className="w-[5.5rem] h-[5.5rem] rounded-lg border border-dashed border-[#ddd] bg-[#fafafa] flex flex-col items-center justify-center text-center px-1">
+                  <span className="text-[10px] font-medium text-[#111]">Last</span>
+                  <span className="text-[9px] text-[#bbb] leading-tight mt-0.5">Shopper color + print</span>
+                </div>
               </div>
               <input
                 ref={fileRef}

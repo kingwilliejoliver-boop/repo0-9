@@ -1110,9 +1110,9 @@ export default function App() {
     setGenerateError(null);
     const useFree = freeLeft > 0;
     try {
-      const encodedMockups = await Promise.all(mockups.map((src) => toJpegDataUrl(src, 1280, aspectRatio)));
+      const encodedMockups = await Promise.all(mockups.map((src) => toJpegDataUrl(src, 1280)));
       const lookSources = selectedLook.refs.length > 0 ? selectedLook.refs : [selectedLook.img];
-      const lookImages = await Promise.all(lookSources.map((src) => toJpegDataUrl(src, 1280, aspectRatio)));
+      const lookImages = await Promise.all(lookSources.map((src) => toJpegDataUrl(src, 1280)));
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

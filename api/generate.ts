@@ -7,8 +7,6 @@ export const config = {
   maxDuration: 60,
 };
 
-const ASPECT_RATIOS = new Set(["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "4:5", "5:4", "21:9"]);
-
 function falKey() {
   return (process.env.FAL_KEY || process.env.FAL_API_KEY || "").trim();
 }
@@ -30,21 +28,21 @@ function readLookPrompt(id: number) {
 
 function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number) {
   const refs: string[] = [];
-  for (let i = 0; i < mockupCount; i += 1) {
-    refs.push(`#${i + 1} design swatch only — take shirt color and printed artwork from this image. Do not output this photo. Do not use its fabric, mockup, background, or shot.`);
-  }
   for (let i = 0; i < lookRefCount; i += 1) {
-    refs.push(`#${mockupCount + i + 1} locked template — this is the photograph you edit. Keep this fabric, mockup style, and shot type.`);
+    refs.push(`#${i + 1} locked template — edit this photograph. Keep this fabric, mockup style, and shot type.`);
+  }
+  for (let i = 0; i < mockupCount; i += 1) {
+    refs.push(`#${lookRefCount + i + 1} design swatch only — shirt color and printed artwork. Do not output this photo.`);
   }
   return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
 
-function withFitInstruction(prompt: string, aspectRatio: string) {
-  return `${prompt}\n\nOutput size is ${aspectRatio}. Fit the entire #2 template mockup inside this frame. Keep every part of the #2 garment visible. Do not crop or zoom in. Add matching background from #2 if needed. Do not fit or output image #1.`;
-}
+const LOCKED_PREFIX = `The first attached image is the locked product template. Edit that photograph and return it.
+The last attached image is the customer's design swatch. Use it only for garment color and printed artwork.
+Do not output the last image. Do not put the last image on a new background.`;
 
 const SYSTEM_PROMPT =
-  "Edit the second image (the locked template). Return that same mockup photograph. Use the first image only as a design swatch for garment color and printed artwork. Never output the first image. Never put the first image on a new background. Keep the template's fabric, mockup style, shot type, camera, and background. Fit the entire template garment in frame. Do not crop or zoom in.";
+  "Edit the first attached image (the locked template) and return that same photograph. Use the last attached image only as a design swatch for garment color and printed artwork. Never output the last image. Never put the last image on a new background. Keep the template's fabric, mockup style, shot type, camera, and background.";
 
 function asImageDataUrl(value: unknown) {
   if (typeof value !== "string") return null;
@@ -104,9 +102,8 @@ export default async function handler(
   const lookImages = (Array.isArray(req.body?.lookImages) ? req.body.lookImages : [req.body?.lookImage])
     .map(asImageDataUrl)
     .filter((src): src is string => Boolean(src));
-  const aspectRatio = ASPECT_RATIOS.has(req.body?.aspectRatio ?? "") ? req.body!.aspectRatio! : "1:1";
   const model = process.env.FAL_MODEL || "fal-ai/nano-banana-2/edit";
-  const imageUrls = [...mockups, ...lookImages];
+  const imageUrls = lookImages.length > 0 ? [...lookImages, ...mockups] : mockups;
 
   try {
     const fal = await fetch(`https://fal.run/${model}`, {
@@ -116,13 +113,14 @@ export default async function handler(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: withFitInstruction(withImageRefs(prompt, mockups.length, lookImages.length), aspectRatio),
+        prompt: `${LOCKED_PREFIX}\n\n${withImageRefs(prompt, mockups.length, lookImages.length)}`,
         system_prompt: SYSTEM_PROMPT,
         image_urls: imageUrls,
         num_images: 1,
-        aspect_ratio: aspectRatio,
+        aspect_ratio: "auto",
         output_format: "jpeg",
         resolution: "1K",
+        thinking_level: "high",
         limit_generations: true,
       }),
     });
