@@ -120,6 +120,21 @@ function looksEditorPlugin(): Plugin {
     return next
   }
 
+  async function persistPrompts(looks: DraftLook[]) {
+    const dir = path.resolve(process.cwd(), 'api/prompts')
+    await fs.mkdir(dir, { recursive: true })
+    const kept = new Set(looks.filter((look) => look.prompt.trim()).map((look) => `${look.id}.txt`))
+    const existing = await fs.readdir(dir).catch(() => [] as string[])
+    for (const file of existing) {
+      if (file.endsWith('.txt') && !kept.has(file)) await fs.rm(path.join(dir, file), { force: true })
+    }
+    for (const look of looks) {
+      const prompt = look.prompt.trim()
+      if (!prompt) continue
+      await fs.writeFile(path.join(dir, `${look.id}.txt`), prompt)
+    }
+  }
+
   return {
     name: 'looks-editor',
     apply: 'serve',
@@ -139,6 +154,7 @@ function looksEditorPlugin(): Plugin {
               return
             }
             const saved = await persistRefs(body.looks as DraftLook[])
+            await persistPrompts(saved)
             const source = await fs.readFile(looksPath, 'utf8')
             const from = source.indexOf(start)
             const to = source.indexOf(end)

@@ -1,4 +1,6 @@
-import { getLook, withImageRefs } from "../src/looks";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const config = {
   api: { bodyParser: { sizeLimit: "8mb" } },
@@ -6,6 +8,36 @@ export const config = {
 };
 
 const ASPECT_RATIOS = new Set(["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "4:5", "5:4", "21:9"]);
+
+function falKey() {
+  return (process.env.FAL_KEY || process.env.FAL_API_KEY || "").trim();
+}
+
+function promptDir() {
+  try {
+    return join(dirname(fileURLToPath(import.meta.url)), "prompts");
+  } catch {
+    return join(process.cwd(), "api/prompts");
+  }
+}
+
+function readLookPrompt(id: number) {
+  if (!Number.isFinite(id) || id <= 0) return "";
+  const file = join(promptDir(), `${id}.txt`);
+  if (!existsSync(file)) return "";
+  return readFileSync(file, "utf8").trim();
+}
+
+function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number) {
+  const refs: string[] = [];
+  for (let i = 0; i < mockupCount; i += 1) {
+    refs.push(`#${i + 1} user's mockup${mockupCount > 1 ? ` ${i + 1}` : ""}`);
+  }
+  for (let i = 0; i < lookRefCount; i += 1) {
+    refs.push(`#${mockupCount + i + 1} look reference${lookRefCount > 1 ? ` ${i + 1}` : ""}`);
+  }
+  return `${prompt.trim()}\n\n${refs.join("\n")}`;
+}
 
 function asImageDataUrl(value: unknown) {
   if (typeof value !== "string") return null;
@@ -33,27 +65,30 @@ export default async function handler(
   },
   res: { status: (n: number) => { json: (b: unknown) => void } },
 ) {
+  if (req.method === "GET") {
+    res.status(200).json({ ok: true, fal: Boolean(falKey()) });
+    return;
+  }
+
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;
   }
 
-  const key = process.env.FAL_KEY;
+  const key = falKey();
   if (!key) {
-    res.status(500).json({ error: "Fal is not configured. Add FAL_KEY in Vercel." });
+    res.status(500).json({ error: "Fal is not configured. Add FAL_KEY on Vercel for Production, then Redeploy." });
     return;
   }
 
-  const look = getLook(Number(req.body?.lookId));
+  const prompt = readLookPrompt(Number(req.body?.lookId));
   const mockups = (Array.isArray(req.body?.mockups) ? req.body.mockups : [req.body?.mockup])
     .map(asImageDataUrl)
     .filter((src): src is string => Boolean(src));
-  if (!look || mockups.length === 0) {
+  if (mockups.length === 0) {
     res.status(400).json({ error: "Upload a mockup and pick a look." });
     return;
   }
-
-  const prompt = look.prompt.trim();
   if (!prompt) {
     res.status(400).json({ error: "This look has no prompt yet." });
     return;

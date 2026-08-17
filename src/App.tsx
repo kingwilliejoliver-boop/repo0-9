@@ -1010,7 +1010,9 @@ export default function App() {
         throw new Error(
           typeof data.error === "string"
             ? data.error
-            : "Generation is available on the live site after you add FAL_KEY in Vercel.",
+            : res.status === 404
+              ? "Generation only runs on the live Vercel site."
+              : "Could not apply this look. Try again.",
         );
       }
       setResult(data.image);
