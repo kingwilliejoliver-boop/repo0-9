@@ -278,33 +278,23 @@ function LibraryCard({
 
 function TemplateCard({ tpl, selected, onClick }: { tpl: typeof TEMPLATES[0]; selected: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className={`group relative w-full aspect-square rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
-        selected ? "ring-2 ring-[#111] ring-offset-2 ring-offset-white" : "hover:opacity-90"
-      }`}
-    >
-      <img
-        src={imageSrc(tpl.img, 400)}
-        alt={tpl.name}
-        className="w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-2.5 text-left">
-        <p className="text-white text-[11px] font-medium leading-tight">{tpl.name}</p>
-        <p className="text-white/70 text-[10px] mt-0.5">{tpl.shot} · {tpl.garment}</p>
+    <button type="button" onClick={onClick} className="w-full text-left cursor-pointer group">
+      <div
+        className={`relative aspect-square rounded-lg overflow-hidden bg-[#f4f4f4] ${
+          selected ? "ring-2 ring-[#111]" : "ring-1 ring-[#ebebeb] group-hover:ring-[#ccc]"
+        }`}
+      >
+        <img src={imageSrc(tpl.img, 400)} alt={tpl.name} className="w-full h-full object-cover" />
       </div>
-      {selected && (
-        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#111] flex items-center justify-center">
-          <svg width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" strokeWidth="2" stroke="white" fill="none" strokeLinecap="round" /></svg>
-        </div>
-      )}
+      <p className={`mt-1.5 text-[11px] leading-tight truncate ${selected ? "text-[#111] font-medium" : "text-[#888]"}`}>
+        {tpl.name}
+      </p>
     </button>
   );
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-semibold text-[#aaa] uppercase tracking-widest mb-2.5">{children}</p>;
+  return <p className="text-[10px] font-semibold text-[#aaa] tracking-wide">{children}</p>;
 }
 
 function MockupDropzone({ images, onAdd, onRemove }: { images: string[]; onAdd: (s: string) => void; onRemove: (i: number) => void }) {
@@ -322,7 +312,9 @@ function MockupDropzone({ images, onAdd, onRemove }: { images: string[]; onAdd: 
 
   return (
     <div>
-      <Label>Your mockup</Label>
+      <div className="mb-2">
+        <Label>Your mockup</Label>
+      </div>
       {images.length === 0 ? (
         <button
           type="button"
@@ -373,7 +365,7 @@ function GeneratingState() {
         <div className="absolute inset-4 rounded-full border-b-[#555] border-t-transparent border-r-transparent border-l-transparent border-2 animate-[spin_2s_linear_infinite_reverse]" />
       </div>
       <div className="text-center">
-        <p  className="text-[#111] text-xl font-700 tracking-wide uppercase">Applying look</p>
+        <p className="text-[#111] text-xl font-700 tracking-tight">Applying look</p>
         <p className="text-[#999] text-sm mt-1">Restyling your mockup to match this template…</p>
       </div>
       <div className="flex gap-1.5">
@@ -423,7 +415,7 @@ function Paywall({
         <div className="px-6 pt-6 pb-5 border-b border-[#ebebeb]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p  className="text-[#111] text-2xl font-700 tracking-wide uppercase">Keep creating</p>
+              <p className="text-[#111] text-2xl font-700 tracking-tight">Keep creating</p>
               <p className="text-[#888] text-sm mt-1.5 leading-relaxed">You've used your 3 free images. Get more to keep applying looks to your mockups.</p>
             </div>
             <button
@@ -481,7 +473,7 @@ function Paywall({
             className="w-full py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
           >
-            {busy ? "REDIRECTING…" : `CONTINUE WITH ${plan.name.toUpperCase()}`}
+            {busy ? "Redirecting…" : `Continue with ${plan.name}`}
           </button>
           <p className={`text-[11px] text-center mt-2.5 ${error ? "text-[#111]" : "text-[#bbb]"}`}>
             {error
@@ -548,8 +540,8 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
           </svg>
         </div>
       </div>
-      <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide uppercase">Your mockup</span>
-      <span className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide uppercase">Look applied</span>
+      <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide">Your mockup</span>
+      <span className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide">Look applied</span>
     </div>
   );
 }
@@ -720,7 +712,7 @@ function LibraryPage({
       <header className="flex-shrink-0 px-5 sm:px-8 pt-6 pb-5 border-b border-[#ebebeb]">
         <div className="flex items-start sm:items-end justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-2xl font-700 text-[#111] tracking-wide uppercase">Looks</h1>
+            <h1 className="text-2xl font-700 text-[#111] tracking-tight">Templates</h1>
             <p className="text-[#aaa] text-sm mt-0.5">The set we apply to your mockup.</p>
           </div>
           <button
@@ -873,7 +865,7 @@ export default function App() {
 
   useEffect(() => {
     setLookSetIndex(0);
-  }, [lookQuery, garmentFilter]);
+  }, [garmentFilter]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -918,23 +910,23 @@ export default function App() {
     };
   }, []);
 
-  const filteredTemplates = TEMPLATES.filter((t) => {
-    const matchesGarment = garmentFilter === "All" || t.garment === garmentFilter;
+  const generateTemplates = TEMPLATES.filter((t) => garmentFilter === "All" || t.garment === garmentFilter);
+  const filteredTemplates = generateTemplates.filter((t) => {
     const q = lookQuery.trim().toLowerCase();
-    const matchesQuery =
+    return (
       q.length === 0 ||
       t.name.toLowerCase().includes(q) ||
       t.summary.toLowerCase().includes(q) ||
       t.shot.toLowerCase().includes(q) ||
-      t.garment.toLowerCase().includes(q);
-    return matchesGarment && matchesQuery;
+      t.garment.toLowerCase().includes(q)
+    );
   });
 
-  const lookPageCount = Math.max(1, Math.ceil(filteredTemplates.length / LOOKS_PER_PAGE));
+  const lookPageCount = Math.max(1, Math.ceil(generateTemplates.length / LOOKS_PER_PAGE));
   const lookSafeIndex = Math.min(lookSetIndex, lookPageCount - 1);
   const lookPages: (typeof TEMPLATES)[] = [];
-  for (let i = 0; i < filteredTemplates.length; i += LOOKS_PER_PAGE) {
-    lookPages.push(filteredTemplates.slice(i, i + LOOKS_PER_PAGE));
+  for (let i = 0; i < generateTemplates.length; i += LOOKS_PER_PAGE) {
+    lookPages.push(generateTemplates.slice(i, i + LOOKS_PER_PAGE));
   }
 
   const selectedLook = TEMPLATES.find((t) => t.id === selectedTemplate) ?? null;
@@ -1074,7 +1066,7 @@ export default function App() {
                 className="mt-2.5 w-full py-2 rounded-lg bg-[#111] text-white text-[11px] font-semibold tracking-wide cursor-pointer hover:opacity-90"
                 style={{ letterSpacing: "0.04em" }}
               >
-                GET MORE
+                Get more
               </button>
             )}
           </div>
@@ -1112,79 +1104,77 @@ export default function App() {
           />
 
           <div>
-            <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center justify-between mb-3">
               <Label>Choose a look</Label>
-              <span className="text-[10px] text-[#bbb] -mt-2.5">{filteredTemplates.length} of {TEMPLATES.length}</span>
+              {lookPageCount > 1 && (
+                <div className="flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    aria-label="Previous looks"
+                    disabled={lookSafeIndex === 0}
+                    onClick={() => setLookSetIndex((n) => Math.max(0, n - 1))}
+                    className="w-6 h-6 flex items-center justify-center text-[#bbb] hover:text-[#111] cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                  >
+                    <IconChevron dir="left" />
+                  </button>
+                  <span className="text-[10px] text-[#ccc] tabular-nums w-7 text-center">
+                    {lookSafeIndex + 1}/{lookPageCount}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Next looks"
+                    disabled={lookSafeIndex >= lookPageCount - 1}
+                    onClick={() => setLookSetIndex((n) => Math.min(lookPageCount - 1, n + 1))}
+                    className="w-6 h-6 flex items-center justify-center text-[#bbb] hover:text-[#111] cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                  >
+                    <IconChevron dir="right" />
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="relative mb-2.5">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bbb] pointer-events-none">
-                <IconSearch />
-              </span>
-              <input
-                type="search"
-                value={lookQuery}
-                onChange={(e) => setLookQuery(e.target.value)}
-                placeholder="Search looks"
-                className="w-full rounded-lg bg-white border border-[#e8e8e8] pl-9 pr-3 py-2 text-sm text-[#111] placeholder:text-[#ccc] focus:border-[#999] focus:outline-none"
-              />
-            </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-0.5 px-0.5 mb-3">
+            <div className="flex gap-3 mb-3 overflow-x-auto">
               {GARMENT_FILTERS.map((garment) => (
-                <Pill key={garment} label={garment} active={garmentFilter === garment} onClick={() => setGarmentFilter(garment)} />
+                <button
+                  key={garment}
+                  type="button"
+                  onClick={() => setGarmentFilter(garment)}
+                  className={`text-[11px] flex-shrink-0 cursor-pointer ${
+                    garmentFilter === garment ? "text-[#111]" : "text-[#bbb] hover:text-[#666]"
+                  }`}
+                >
+                  {garment}
+                </button>
               ))}
             </div>
-            {filteredTemplates.length === 0 ? (
-              <p className="text-sm text-[#aaa] py-8 text-center">No looks match that. Try another garment or search.</p>
+            {generateTemplates.length === 0 ? (
+              <p className="text-sm text-[#aaa] py-8 text-center">No looks for that garment.</p>
             ) : (
-              <>
-                <div className="overflow-hidden">
-                  <div
-                    className="flex transition-transform duration-300 ease-out"
-                    style={{ transform: `translateX(-${lookSafeIndex * 100}%)` }}
-                  >
-                    {lookPages.map((pageLooks, i) => (
-                      <div key={i} className="w-full min-w-full flex-shrink-0 grid grid-cols-2 gap-2">
-                        {pageLooks.map((tpl) => (
-                          <TemplateCard
-                            key={tpl.id}
-                            tpl={tpl}
-                            selected={selectedTemplate === tpl.id}
-                            onClick={() => setPreviewId(tpl.id)}
-                          />
-                        ))}
-                      </div>
-                    ))}
-                  </div>
+              <div className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-300 ease-out"
+                  style={{ transform: `translateX(-${lookSafeIndex * 100}%)` }}
+                >
+                  {lookPages.map((pageLooks, i) => (
+                    <div key={i} className="w-full min-w-full flex-shrink-0 grid grid-cols-2 gap-x-2.5 gap-y-3">
+                      {pageLooks.map((tpl) => (
+                        <TemplateCard
+                          key={tpl.id}
+                          tpl={tpl}
+                          selected={selectedTemplate === tpl.id}
+                          onClick={() => setPreviewId(tpl.id)}
+                        />
+                      ))}
+                    </div>
+                  ))}
                 </div>
-                {lookPageCount > 1 && (
-                  <div className="flex items-center justify-center gap-3 mt-3">
-                    <button
-                      type="button"
-                      aria-label="Previous looks"
-                      disabled={lookSafeIndex === 0}
-                      onClick={() => setLookSetIndex((n) => Math.max(0, n - 1))}
-                      className="w-8 h-8 rounded-full border border-[#e8e8e8] bg-white flex items-center justify-center text-[#111] hover:border-[#111] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <IconChevron dir="left" />
-                    </button>
-                    <span className="text-[11px] text-[#888] tabular-nums">{lookSafeIndex + 1} / {lookPageCount}</span>
-                    <button
-                      type="button"
-                      aria-label="Next looks"
-                      disabled={lookSafeIndex >= lookPageCount - 1}
-                      onClick={() => setLookSetIndex((n) => Math.min(lookPageCount - 1, n + 1))}
-                      className="w-8 h-8 rounded-full border border-[#e8e8e8] bg-white flex items-center justify-center text-[#111] hover:border-[#111] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <IconChevron dir="right" />
-                    </button>
-                  </div>
-                )}
-              </>
+              </div>
             )}
           </div>
 
           <div>
-            <Label>Output size</Label>
+            <div className="mb-2">
+              <Label>Output size</Label>
+            </div>
             <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5">
               {ASPECT_RATIOS.map((r) => (
                 <button
@@ -1212,7 +1202,7 @@ export default function App() {
             style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
           >
             <IconGenerate />
-            {generating ? "APPLYING LOOK…" : "APPLY THIS LOOK"}
+            {generating ? "Applying look…" : "Apply this look"}
           </button>
           {!generating && (
             <p className="text-[11px] text-[#bbb] text-center mt-2">
@@ -1263,7 +1253,7 @@ export default function App() {
                 <IconSpark />
               </div>
               <div>
-                <p  className="text-[#bbb] text-lg font-600 uppercase tracking-wide">No piece yet</p>
+                <p className="text-[#bbb] text-lg font-600 tracking-tight">No piece yet</p>
                 <p className="text-[#ccc] text-sm mt-1">Upload a mockup and pick a look</p>
               </div>
             </div>
@@ -1272,7 +1262,7 @@ export default function App() {
 
         {/* History strip */}
         <div className="border-t border-[#ebebeb] px-4 sm:px-6 lg:px-8 py-4 bg-white pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <p className="text-[10px] font-semibold text-[#bbb] uppercase tracking-widest mb-3">Recent</p>
+          <p className="text-[10px] font-semibold text-[#bbb] tracking-wide mb-3">Recent</p>
           <div className="flex gap-2">
             {HISTORY.map((h) => (
               <button
