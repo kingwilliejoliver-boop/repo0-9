@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { SignInButton, UserButton, useAuth, useClerk } from "@clerk/react";
+import { SignIn, UserButton, useAuth } from "@clerk/react";
 import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
@@ -940,8 +940,8 @@ export default function App() {
 
 function AppWithClerk() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
-  const { openSignIn } = useClerk();
   const [account, setAccount] = useState<AccountSnap | null>(null);
+  const [signInOpen, setSignInOpen] = useState(false);
 
   const refreshAccount = useCallback(async () => {
     if (!isSignedIn) {
@@ -957,18 +957,48 @@ function AppWithClerk() {
     void refreshAccount();
   }, [refreshAccount]);
 
+  useEffect(() => {
+    if (isSignedIn) setSignInOpen(false);
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    document.body.style.overflow = signInOpen && !isSignedIn ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isSignedIn, signInOpen]);
+
   const session: Session = {
     configured: true,
     ready: isLoaded,
     signedIn: Boolean(isSignedIn),
     getToken,
-    openSignIn: () => openSignIn({ appearance: clerkAppearance }),
+    openSignIn: () => setSignInOpen(true),
     account,
     applyAccount: setAccount,
     refreshAccount,
   };
 
-  return <AppShell session={session} />;
+  return (
+    <>
+      <AppShell session={session} />
+      {signInOpen && !isSignedIn && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-5 bg-black/50">
+          <div className="relative max-h-[min(92dvh,40rem)] overflow-y-auto">
+            <button
+              type="button"
+              aria-label="Close sign in"
+              onClick={() => setSignInOpen(false)}
+              className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-white border border-[#e8e8e8] text-[#888] hover:text-[#111] cursor-pointer"
+            >
+              ×
+            </button>
+            <SignIn appearance={clerkAppearance} routing="hash" />
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 function AppShell({ session }: { session: Session }) {
@@ -1291,14 +1321,13 @@ function AppShell({ session }: { session: Session }) {
                   <span className="text-[11px] text-[#888] truncate">Your account</span>
                 </div>
               ) : (
-                <SignInButton mode="modal" appearance={clerkAppearance}>
-                  <button
-                    type="button"
-                    className="w-full py-2 rounded-lg border border-[#e8e8e8] text-[11px] font-semibold text-[#111] hover:border-[#ccc] cursor-pointer"
-                  >
-                    Sign in
-                  </button>
-                </SignInButton>
+                <button
+                  type="button"
+                  onClick={() => session.openSignIn()}
+                  className="w-full py-2 rounded-lg border border-[#e8e8e8] text-[11px] font-semibold text-[#111] hover:border-[#ccc] cursor-pointer"
+                >
+                  Sign in
+                </button>
               )}
             </div>
           )}
