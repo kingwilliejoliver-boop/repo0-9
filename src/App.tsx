@@ -661,8 +661,18 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
           </svg>
         </div>
       </div>
-      <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide">Your mockup</span>
-      <span className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide">Look applied</span>
+      <span
+        className="absolute top-3 left-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide pointer-events-none"
+        style={{ opacity: Math.min(1, Math.max(0, pos / 50)) }}
+      >
+        Your mockup
+      </span>
+      <span
+        className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide pointer-events-none"
+        style={{ opacity: Math.min(1, Math.max(0, (100 - pos) / 50)) }}
+      >
+        Look applied
+      </span>
     </div>
   );
 }
