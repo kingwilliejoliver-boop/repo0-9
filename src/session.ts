@@ -14,6 +14,22 @@ export type Session = {
   refreshAccount: () => Promise<AccountSnap | null>;
 };
 
+export const clerkLocalization = {
+  signIn: {
+    start: {
+      title: "Sign in to ShotFarm",
+      titleCombined: "Sign in to ShotFarm",
+    },
+  },
+  signUp: {
+    start: {
+      title: "Create your ShotFarm account",
+      titleCombined: "Create your ShotFarm account",
+      subtitle: "Welcome. Fill in the details to get started.",
+    },
+  },
+};
+
 export const clerkAppearance = {
   variables: {
     colorPrimary: "#111111",

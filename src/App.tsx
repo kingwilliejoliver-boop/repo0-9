@@ -6,7 +6,7 @@ import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png"
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
-import { clerkAppearance, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
+import { clerkAppearance, clerkLocalization, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -993,7 +993,7 @@ function AppWithClerk() {
             >
               ×
             </button>
-            <SignIn appearance={clerkAppearance} routing="hash" />
+            <SignIn appearance={clerkAppearance} localization={clerkLocalization} routing="hash" />
           </div>
         </div>
       )}
