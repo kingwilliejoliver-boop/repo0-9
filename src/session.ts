@@ -20,6 +20,10 @@ export const clerkAppearance = {
     colorText: "#111111",
     borderRadius: "0.75rem",
   },
+  elements: {
+    modalBackdrop: "flex items-center justify-center p-5",
+    modalContent: "mx-auto my-0",
+  },
 };
 
 export const localSession: Session = {

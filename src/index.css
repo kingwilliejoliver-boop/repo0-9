@@ -24,6 +24,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.cl-modalBackdrop {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1.25rem !important;
+}
+
+.cl-modalContent {
+  margin: 0 auto !important;
+}
+
 input[type='range'] {
   accent-color: #111111;
 }
