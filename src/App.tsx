@@ -129,6 +129,45 @@ function imageSrc(img: string, size = 400) {
   return `https://images.unsplash.com/${img}?w=${size}&h=${size}&fit=crop&auto=format`;
 }
 
+async function downloadImage(src: string, filename: string) {
+  const save = (href: string) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  if (src.startsWith("data:") || src.startsWith("blob:")) {
+    save(src);
+    return;
+  }
+
+  const toObjectUrl = async (res: Response) => {
+    const blob = await res.blob();
+    if (!blob.type.startsWith("image/")) throw new Error("Could not download that image.");
+    const objectUrl = URL.createObjectURL(blob);
+    save(objectUrl);
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  };
+
+  try {
+    const direct = await fetch(src);
+    if (direct.ok) {
+      await toObjectUrl(direct);
+      return;
+    }
+  } catch {
+    /* CORS — fall through to proxy */
+  }
+
+  const proxied = await fetch(`/api/download?url=${encodeURIComponent(src)}`);
+  if (!proxied.ok) throw new Error("Could not download that image.");
+  await toObjectUrl(proxied);
+}
+
 async function toJpegDataUrl(src: string, max = 1280) {
   const blob = await fetch(src).then((res) => res.blob());
   const bitmap = await createImageBitmap(blob);
@@ -845,6 +884,7 @@ export default function App() {
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [freeUsed, setFreeUsed] = useState(seedTestAccountCredits);
   const [paidCredits, setPaidCredits] = useState(readPaidCredits);
@@ -1292,8 +1332,24 @@ export default function App() {
             <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg border border-[#e8e8e8] text-[#555] text-sm hover:border-[#ccc] hover:text-[#111] transition-all cursor-pointer">
               <IconShare /> <span className="hidden sm:inline">Share</span>
             </button>
-            <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg bg-[#111] text-white text-sm hover:opacity-90 transition-all cursor-pointer">
-              <IconDownload /> <span className="hidden sm:inline">Download</span>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!result || downloading) return;
+                setDownloading(true);
+                try {
+                  const name = (selectedLook?.name || "piece").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                  await downloadImage(imageSrc(result, 1600), `shotfarm-${name}.jpg`);
+                } catch {
+                  setGenerateError("Could not download that image.");
+                } finally {
+                  setDownloading(false);
+                }
+              }}
+              disabled={downloading}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg bg-[#111] text-white text-sm hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <IconDownload /> <span className="hidden sm:inline">{downloading ? "Downloading…" : "Download"}</span>
             </button>
           </div>
         )}
