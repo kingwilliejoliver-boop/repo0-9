@@ -1,5 +1,3 @@
-import { createClerkClient, verifyToken } from "@clerk/backend";
-
 export type AuthedUser = {
   userId: string;
   email: string | null;
@@ -34,6 +32,7 @@ export async function requireUser(req: { headers?: Record<string, unknown> }): P
   ].filter((value): value is string => Boolean(value));
 
   try {
+    const { createClerkClient, verifyToken } = await import("@clerk/backend");
     const payload = await verifyToken(token, { secretKey, authorizedParties }).catch(() =>
       verifyToken(token, { secretKey }),
     );

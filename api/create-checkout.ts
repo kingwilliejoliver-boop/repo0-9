@@ -18,7 +18,18 @@ export default async function handler(
     res.status(500).json({ error: "Stripe is not configured" });
     return;
   }
-  const userId = "guest";
+  let userId = "guest";
+  let email: string | undefined;
+  try {
+    const { requireUser } = await import("../lib/auth");
+    const user = await requireUser(req);
+    if (user) {
+      userId = user.userId;
+      email = user.email ?? undefined;
+    }
+  } catch {
+    /* sign-in is optional */
+  }
 
   const plan = req.body?.plan === "pro" ? "pro" : "starter";
   const originHeader = req.headers.origin;
@@ -31,6 +42,7 @@ export default async function handler(
   try {
     const session = await stripe.checkout.sessions.create({
       mode: plan === "pro" ? "subscription" : "payment",
+      customer_email: email,
       client_reference_id: userId,
       metadata: { plan, user_id: userId },
       subscription_data:

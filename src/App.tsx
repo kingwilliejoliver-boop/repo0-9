@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { SignIn, UserButton, useAuth } from "@clerk/react";
 import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
@@ -13,7 +14,7 @@ import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
 import StarsGalaxy from "./StarsGalaxy";
-import { localSession, type Session } from "./session";
+import { clerkAppearance, clerkLocalization, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -1104,7 +1105,71 @@ function LibraryPage({
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  if (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) return <AppWithClerk />;
   return <AppShell session={localSession} />;
+}
+
+function AppWithClerk() {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const [account, setAccount] = useState<AccountSnap | null>(null);
+  const [signInOpen, setSignInOpen] = useState(false);
+
+  const refreshAccount = useCallback(async () => {
+    if (!isSignedIn) {
+      setAccount(null);
+      return null;
+    }
+    const next = await fetchAccount(getToken);
+    setAccount(next);
+    return next;
+  }, [getToken, isSignedIn]);
+
+  useEffect(() => {
+    void refreshAccount();
+  }, [refreshAccount]);
+
+  useEffect(() => {
+    if (isSignedIn) setSignInOpen(false);
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    document.body.style.overflow = signInOpen && !isSignedIn ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isSignedIn, signInOpen]);
+
+  const session: Session = {
+    configured: true,
+    ready: isLoaded,
+    signedIn: Boolean(isSignedIn),
+    getToken,
+    openSignIn: () => setSignInOpen(true),
+    account,
+    applyAccount: setAccount,
+    refreshAccount,
+  };
+
+  return (
+    <>
+      <AppShell session={session} />
+      {signInOpen && !isSignedIn && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 overflow-hidden">
+          <div className="relative w-full max-w-[400px] max-h-[min(92dvh,40rem)] overflow-x-hidden overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <button
+              type="button"
+              aria-label="Close sign in"
+              onClick={() => setSignInOpen(false)}
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-[#f4f4f4] text-[#888] hover:text-[#111] hover:bg-[#ebebeb] cursor-pointer"
+            >
+              ×
+            </button>
+            <SignIn appearance={clerkAppearance} localization={clerkLocalization} routing="hash" />
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 function AppShell({ session }: { session: Session }) {
@@ -1126,9 +1191,9 @@ function AppShell({ session }: { session: Session }) {
   const [lookSetIndex, setLookSetIndex] = useState(0);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
-  const freeUsed = session.configured ? session.account?.freeUsed ?? 0 : localFreeUsed;
-  const paidCredits = session.configured ? session.account?.paidCredits ?? 0 : localPaidCredits;
-  const needsSignIn = session.configured && session.ready && !session.signedIn;
+  const freeUsed = session.signedIn && session.account ? session.account.freeUsed : localFreeUsed;
+  const paidCredits = session.signedIn && session.account ? session.account.paidCredits : localPaidCredits;
+  const canSignIn = session.configured && session.ready && !session.signedIn;
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -1138,7 +1203,7 @@ function AppShell({ session }: { session: Session }) {
     } catch {
       /* ignore quota / private mode */
     }
-    if (next === "generate" && !needsSignIn && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
+    if (next === "generate" && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
     if (next === "home") setPaywallOpen(false);
   };
 
@@ -1265,10 +1330,6 @@ function AppShell({ session }: { session: Session }) {
   };
 
   const handleGenerate = async () => {
-    if (needsSignIn) {
-      session.openSignIn();
-      return;
-    }
     if (outOfCredits) {
       setPaywallOpen(true);
       return;
@@ -1320,9 +1381,9 @@ function AppShell({ session }: { session: Session }) {
       } catch {
         setResult(data.image);
       }
-      if (typeof data.freeUsed === "number" && typeof data.paidCredits === "number") {
+      if (session.signedIn && typeof data.freeUsed === "number" && typeof data.paidCredits === "number") {
         session.applyAccount({ freeUsed: data.freeUsed, paidCredits: data.paidCredits });
-      } else if (!session.configured) {
+      } else {
         spendLocalCredit(useFree);
       }
     } catch (err) {
@@ -1333,11 +1394,7 @@ function AppShell({ session }: { session: Session }) {
   };
 
   const startCheckout = async () => {
-    if (needsSignIn) {
-      session.openSignIn();
-      return;
-    }
-    const token = session.configured ? await session.getToken() : null;
+    const token = session.configured && session.signedIn ? await session.getToken() : null;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch("/api/create-checkout", {
@@ -1362,7 +1419,7 @@ function AppShell({ session }: { session: Session }) {
           onStart={() => goTo("generate")}
           onLooks={() => goTo("library")}
           signedIn={session.signedIn}
-          showSignIn={needsSignIn}
+          showSignIn={canSignIn}
           onSignIn={() => session.openSignIn()}
         />
       ) : (
@@ -1423,24 +1480,40 @@ function AppShell({ session }: { session: Session }) {
 
         <div className="p-3 border-t border-[#ebebeb] flex flex-col gap-0.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:pb-3">
           <NavItem icon={<IconSettings />} label="Settings" active={page === "settings"} onClick={() => goTo("settings")} />
+          {session.configured && (
+            <div className="mt-2 px-1">
+              {session.signedIn ? (
+                <div className="flex items-center gap-2 px-2 py-1.5">
+                  <UserButton appearance={clerkAppearance} />
+                  <span className="text-[11px] text-[#888] truncate">Your account</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => session.openSignIn()}
+                  className="w-full py-2 rounded-lg border border-[#e8e8e8] text-[11px] font-semibold text-[#111] hover:border-[#ccc] cursor-pointer"
+                >
+                  Sign in
+                </button>
+              )}
+            </div>
+          )}
           <div className="mt-3 px-3 py-3 rounded-xl bg-[#f7f7f7]">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] text-[#888]">{needsSignIn ? "Images" : paidCredits > 0 ? "Images" : "Free images"}</span>
-              <span className="text-[11px] font-semibold text-[#111]">{needsSignIn ? "—" : `${imagesLeft} left`}</span>
+              <span className="text-[11px] text-[#888]">{paidCredits > 0 ? "Images" : "Free images"}</span>
+              <span className="text-[11px] font-semibold text-[#111]">{`${imagesLeft} left`}</span>
             </div>
             <div className="h-1 rounded-full bg-[#e8e8e8] overflow-hidden">
-              <div className="h-full rounded-full bg-[#111]" style={{ width: needsSignIn ? "0%" : `${Math.min(100, (imagesLeft / Math.max(imagesLeft, FREE_IMAGE_LIMIT)) * 100)}%` }} />
+              <div className="h-full rounded-full bg-[#111]" style={{ width: `${Math.min(100, (imagesLeft / Math.max(imagesLeft, FREE_IMAGE_LIMIT)) * 100)}%` }} />
             </div>
             <p className="text-[10px] text-[#bbb] mt-1.5">
-              {needsSignIn
-                ? "Sign in to keep your images"
-                : paidCredits > 0
-                  ? `${paidCredits} paid · ${freeLeft} free`
-                  : outOfCredits
-                    ? "You've used your 3 free images"
-                    : `${freeUsed} / ${FREE_IMAGE_LIMIT} used · that's all for free`}
+              {paidCredits > 0
+                ? `${paidCredits} paid · ${freeLeft} free`
+                : outOfCredits
+                  ? "You've used your 3 free images"
+                  : `${freeUsed} / ${FREE_IMAGE_LIMIT} used · that's all for free`}
             </p>
-            {!needsSignIn && outOfCredits && (
+            {outOfCredits && (
               <button
                 type="button"
                 onClick={() => setPaywallOpen(true)}
@@ -1591,15 +1664,13 @@ function AppShell({ session }: { session: Session }) {
             style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
           >
             <IconGenerate />
-            {generating ? "Applying look…" : needsSignIn ? "Sign in to apply" : "Apply this look"}
+            {generating ? "Applying look…" : "Apply this look"}
           </button>
           {!generating && (
             <p className={`text-[11px] text-center mt-2 ${generateError ? "text-[#111]" : "text-[#bbb]"}`}>
               {generateError
                 ? generateError
-                : needsSignIn
-                  ? "Your images stay on this account"
-                  : outOfCredits
+                : outOfCredits
                     ? "Get more images to continue"
                     : mockups.length === 0
                       ? "Upload a mockup to continue"
