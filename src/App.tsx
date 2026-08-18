@@ -13,6 +13,7 @@ import washedZipHoodie from "./assets/templates/washed-zip-hoodie.jpg";
 import prizemanCap from "./assets/templates/prizeman-cap.jpg";
 import dhsCap from "./assets/templates/dhs-cap.jpg";
 import tinosCap from "./assets/templates/tinos-cap.jpg";
+import stinkyDogCap from "./assets/templates/stinky-dog-cap.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
@@ -283,6 +284,7 @@ const LOOK_IMAGES: Record<number, string> = {
   13: prizemanCap,
   14: dhsCap,
   15: tinosCap,
+  16: stinkyDogCap,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
@@ -357,6 +359,7 @@ const HISTORY = [
   { id: 13, img: prizemanCap, prompt: "Prizeman cap" },
   { id: 14, img: dhsCap, prompt: "DHS cap" },
   { id: 15, img: tinosCap, prompt: "Tino's cap" },
+  { id: 16, img: stinkyDogCap, prompt: "Stinky Dog cap" },
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────

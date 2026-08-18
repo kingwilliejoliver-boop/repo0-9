@@ -151,6 +151,16 @@ export const LOOKS: Look[] = [
     refs: [],
     aspect: "portrait",
   },
+  {
+    id: 16,
+    name: "Stinky Dog Cap",
+    garment: "Hat",
+    shot: "Studio",
+    summary: "Royal blue unstructured cap on wood, white front embroidery.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
 ];
 /* looks:end */
 
