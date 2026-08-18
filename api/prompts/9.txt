@@ -1,0 +1,9 @@
+Edit the first image. That is the locked template photograph. Return that same photo.
+
+The last image is the customer's design swatch. Use it only for:
+- Garment color
+- Printed artwork: logo, text, graphic, colors, spelling, and where that print sits on their shirt
+
+Keep from the first image: fabric, wash, distressing, wrinkles, drape, mockup style, shot type, camera, background, lighting, shadows, silhouette, collar, sleeves, hem.
+
+Do not output the last image. Do not put the last image on a new background. Do not copy the template's graphic. Place the customer's artwork where it sits on their shirt.

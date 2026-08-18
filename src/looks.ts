@@ -81,6 +81,36 @@ export const LOOKS: Look[] = [
     refs: [],
     aspect: "portrait",
   },
+  {
+    id: 9,
+    name: "Shim Tee",
+    garment: "Tee",
+    shot: "Studio",
+    summary: "Oversized faded black tee, frayed collar, grainy collage print.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
+  {
+    id: 10,
+    name: "Alice Galerie Tee",
+    garment: "Tee",
+    shot: "Studio",
+    summary: "Distressed black tee, torn hem, triptych print.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
+  {
+    id: 11,
+    name: "Trinity Tee",
+    garment: "Tee",
+    shot: "Flat lay",
+    summary: "Oversized washed red tee, pinhole distress, stone floor.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
 ];
 /* looks:end */
 
