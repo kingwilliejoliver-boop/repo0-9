@@ -512,6 +512,83 @@ function MockupDropzone({ images, onAdd, onRemove }: { images: string[]; onAdd: 
   );
 }
 
+const HAT_SLOTS = [
+  { key: "front" as const, label: "Front", hint: "Required" },
+  { key: "side" as const, label: "Side", hint: "Side logo" },
+  { key: "back" as const, label: "Back", hint: "Rear / closure" },
+];
+
+type HatShots = { front?: string; side?: string; back?: string };
+
+function HatMockupDropzone({
+  shots,
+  onSet,
+  onClear,
+}: {
+  shots: HatShots;
+  onSet: (key: keyof HatShots, src: string) => void;
+  onClear: (key: keyof HatShots) => void;
+}) {
+  const refs = {
+    front: useRef<HTMLInputElement>(null),
+    side: useRef<HTMLInputElement>(null),
+    back: useRef<HTMLInputElement>(null),
+  };
+
+  return (
+    <div>
+      <div className="mb-2">
+        <Label>Your hat</Label>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {HAT_SLOTS.map((slot) => {
+          const src = shots[slot.key];
+          return (
+            <div key={slot.key}>
+              <button
+                type="button"
+                onClick={() => refs[slot.key].current?.click()}
+                className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-dashed border-[#ddd] bg-white flex flex-col items-center justify-center gap-1 hover:border-[#999] transition-colors cursor-pointer"
+              >
+                {src ? (
+                  <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <span className="text-[#bbb]"><IconUpload /></span>
+                    <span className="text-[10px] font-semibold text-[#333]">{slot.label}</span>
+                    <span className="text-[9px] text-[#aaa]">{slot.hint}</span>
+                  </>
+                )}
+              </button>
+              {src && (
+                <button
+                  type="button"
+                  onClick={() => onClear(slot.key)}
+                  className="mt-1 w-full text-[10px] text-[#888] hover:text-[#111] cursor-pointer"
+                >
+                  Remove
+                </button>
+              )}
+              <input
+                ref={refs[slot.key]}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onSet(slot.key, URL.createObjectURL(file));
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[11px] text-[#aaa] mt-2">Front is required. Side and back tell the model where each logo sits.</p>
+    </div>
+  );
+}
+
 function GeneratingState() {
   return (
     <div className="flex flex-col items-center justify-center gap-6 h-full">
@@ -1191,6 +1268,7 @@ function AppShell({ session }: { session: Session }) {
   const [lookQuery, setLookQuery] = useState("");
   const [garmentFilter, setGarmentFilter] = useState<(typeof GARMENT_FILTERS)[number]>("All");
   const [mockups, setMockups] = useState<string[]>([]);
+  const [hatShots, setHatShots] = useState<HatShots>({});
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -1317,10 +1395,13 @@ function AppShell({ session }: { session: Session }) {
 
   const selectedLook = TEMPLATES.find((t) => t.id === selectedTemplate) ?? null;
   const previewLook = TEMPLATES.find((t) => t.id === previewId) ?? null;
+  const hatLook = selectedLook?.garment === "Hat";
+  const showHatUpload = hatLook || (!selectedLook && garmentFilter === "Hat");
   const freeLeft = Math.max(0, FREE_IMAGE_LIMIT - freeUsed);
   const imagesLeft = freeLeft + paidCredits;
   const outOfCredits = PAYWALL_ENABLED && imagesLeft <= 0;
-  const canGenerate = mockups.length > 0 && selectedTemplate !== null && !generating && !outOfCredits;
+  const hasMockup = hatLook ? Boolean(hatShots.front) : mockups.length > 0;
+  const canGenerate = hasMockup && selectedTemplate !== null && !generating && !outOfCredits;
 
   const spendLocalCredit = (useFree: boolean) => {
     if (useFree) {
@@ -1353,7 +1434,9 @@ function AppShell({ session }: { session: Session }) {
     setGenerateError(null);
     const useFree = freeLeft > 0;
     try {
-      const encodedMockups = await Promise.all(mockups.map((src) => toJpegDataUrl(src, 1280)));
+      const hatAngles = (["front", "side", "back"] as const).filter((key) => hatShots[key]);
+      const mockupSources = hatLook ? hatAngles.map((key) => hatShots[key] as string) : mockups;
+      const encodedMockups = await Promise.all(mockupSources.map((src) => toJpegDataUrl(src, 1280)));
       const lookSources = selectedLook.refs.length > 0 ? selectedLook.refs : [selectedLook.img];
       const lookImages = await Promise.all(lookSources.map((src) => toJpegDataUrl(src, 1280)));
       const token = session.configured ? await session.getToken() : null;
@@ -1364,7 +1447,9 @@ function AppShell({ session }: { session: Session }) {
         headers,
         body: JSON.stringify({
           lookId: selectedLook.id,
+          garment: selectedLook.garment,
           mockups: encodedMockups,
+          mockupAngles: hatLook ? hatAngles : undefined,
           lookImages,
           aspectRatio,
         }),
@@ -1574,11 +1659,23 @@ function AppShell({ session }: { session: Session }) {
 
         <div className="flex-1 px-5 py-5 flex flex-col gap-6">
 
+          {showHatUpload ? (
+            <HatMockupDropzone
+              shots={hatShots}
+              onSet={(key, src) => setHatShots((prev) => ({ ...prev, [key]: src }))}
+              onClear={(key) => setHatShots((prev) => {
+                const next = { ...prev };
+                delete next[key];
+                return next;
+              })}
+            />
+          ) : (
           <MockupDropzone
             images={mockups}
             onAdd={(src) => setMockups((p) => [...p, src])}
             onRemove={(i) => setMockups((p) => p.filter((_, j) => j !== i))}
           />
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -1687,13 +1784,17 @@ function AppShell({ session }: { session: Session }) {
                 ? generateError
                 : outOfCredits
                     ? "Get more images to continue"
-                    : mockups.length === 0
-                      ? "Upload a mockup to continue"
-                      : selectedTemplate
-                        ? PAYWALL_ENABLED
+                    : !hasMockup
+                    ? hatLook || showHatUpload
+                      ? "Upload the front of your hat"
+                      : "Upload a mockup to continue"
+                    : selectedTemplate
+                      ? hatLook && (!hatShots.side || !hatShots.back)
+                        ? "Add side and back for exact logo placement"
+                        : PAYWALL_ENABLED
                           ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
                           : "Ready to apply"
-                        : "Pick a look to continue"}
+                      : "Pick a look to continue"}
             </p>
           )}
         </div>

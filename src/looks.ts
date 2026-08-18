@@ -29,6 +29,24 @@ Keep from the first image: fabric, wash, distressing, wrinkles, drape, mockup st
 Do not output the last image. Do not put the last image on a new background. Do not copy the template's graphic. Place the customer's artwork where it sits on their shirt.
 `;
 
+export const HAT_TRANSFER_PROMPT = `Edit the first image. That is the locked hat photograph. Return that same photo.
+
+The other images are the customer's real hat, shot from different angles. They are the source of truth for:
+- Crown and brim colors
+- Every logo, embroidery, patch, and text: spelling, colors, scale
+- Which panel each mark sits on: front, left/right side, back, brim
+
+Strip the template's original branding completely. Do not keep, restyle, or restamp those logos. Do not put the customer's art in the template's logo box just because a logo was there.
+
+Place marks only where they appear on the customer's hat, at the same relative size and position on that panel. If a panel has no mark in their photos, leave it blank (hat color only). Do not invent a front lockup because the template has one.
+
+If they included a side photo, use it for side marks. If they included a back photo, use it for rear marks and the closure. If an angle is missing, do not guess extra logos on the hidden side.
+
+Keep from the first image: fabric, wash, distressing, wrinkles, brim shape, construction, mockup style, shot type, camera, background, lighting, shadows.
+
+Do not output the customer's photos. Do not put those photos on a new background.
+`;
+
 /* looks:start */
 export const LOOKS: Look[] = [
   {
@@ -127,7 +145,7 @@ export const LOOKS: Look[] = [
     garment: "Hat",
     shot: "Flat lay",
     summary: "White and blue dad hat on a red car hood.",
-    prompt: TEMPLATE_TRANSFER_PROMPT,
+    prompt: HAT_TRANSFER_PROMPT,
     refs: [],
     aspect: "portrait",
   },
@@ -137,7 +155,7 @@ export const LOOKS: Look[] = [
     garment: "Hat",
     shot: "Studio",
     summary: "Distressed yellow and orange cap, frayed brim, concrete.",
-    prompt: TEMPLATE_TRANSFER_PROMPT,
+    prompt: HAT_TRANSFER_PROMPT,
     refs: [],
     aspect: "portrait",
   },
@@ -147,7 +165,7 @@ export const LOOKS: Look[] = [
     garment: "Hat",
     shot: "Flat lay",
     summary: "Red cap on a blue car trunk, daylight.",
-    prompt: TEMPLATE_TRANSFER_PROMPT,
+    prompt: HAT_TRANSFER_PROMPT,
     refs: [],
     aspect: "portrait",
   },
@@ -157,7 +175,7 @@ export const LOOKS: Look[] = [
     garment: "Hat",
     shot: "Studio",
     summary: "Royal blue unstructured cap on wood, white front embroidery.",
-    prompt: TEMPLATE_TRANSFER_PROMPT,
+    prompt: HAT_TRANSFER_PROMPT,
     refs: [],
     aspect: "portrait",
   },

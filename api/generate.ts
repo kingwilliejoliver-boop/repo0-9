@@ -26,13 +26,33 @@ function readLookPrompt(id: number) {
   return readFileSync(file, "utf8").trim();
 }
 
-function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number) {
+function asAngle(value: unknown) {
+  return value === "front" || value === "side" || value === "back" || value === "brim" ? value : null;
+}
+
+function hatAngles(mockupCount: number, requested: unknown) {
+  const listed = Array.isArray(requested) ? requested.map(asAngle).filter((a): a is string => Boolean(a)) : [];
+  if (listed.length === mockupCount) return listed;
+  if (mockupCount <= 1) return ["front"];
+  if (mockupCount === 2) return ["front", "side"];
+  return ["front", "side", "back"].slice(0, mockupCount);
+}
+
+function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number, hat: boolean, angles: string[]) {
   const refs: string[] = [];
   for (let i = 0; i < lookRefCount; i += 1) {
-    refs.push(`#${i + 1} locked template — edit this photograph. Keep this fabric, mockup style, and shot type.`);
+    refs.push(
+      hat
+        ? `#${i + 1} locked hat template — edit this photograph. Keep this fabric, construction, and shot.`
+        : `#${i + 1} locked template — edit this photograph. Keep this fabric, mockup style, and shot type.`,
+    );
   }
   for (let i = 0; i < mockupCount; i += 1) {
-    refs.push(`#${lookRefCount + i + 1} design swatch only — shirt color and printed artwork. Do not output this photo.`);
+    refs.push(
+      hat
+        ? `#${lookRefCount + i + 1} customer's hat ${angles[i] || "detail"} — color and marks on this side only. Do not copy the template logo box. Do not output this photo.`
+        : `#${lookRefCount + i + 1} design swatch only — shirt color and printed artwork. Do not output this photo.`,
+    );
   }
   return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
@@ -41,8 +61,16 @@ const LOCKED_PREFIX = `The first attached image is the locked product template. 
 The last attached image is the customer's design swatch. Use it only for garment color and printed artwork.
 Do not output the last image. Do not put the last image on a new background.`;
 
+const HAT_LOCKED_PREFIX = `The first attached image is the locked hat photograph. Edit that photo and return it.
+The other attached images are the customer's hat from different angles. Use them for hat color and for which panel each logo sits on.
+Erase the template's original branding. Do not restamp the customer's art into the template's logo box.
+Do not output the customer's photos. Do not put those photos on a new background.`;
+
 const SYSTEM_PROMPT =
   "Edit the first attached image (the locked template) and return that same photograph. Use the last attached image only as a design swatch for garment color and printed artwork. Never output the last image. Never put the last image on a new background. Keep the template's fabric, mockup style, shot type, camera, and background.";
+
+const HAT_SYSTEM_PROMPT =
+  "Edit the first attached image (the locked hat template) and return that same photograph. The other images are the customer's hat from front, side, and/or back. Use them for color and for exact logo placement by panel. Strip the template logos. Do not force a front lockup. Leave blank any panel with no mark in the customer's photos. Never output the customer's photos.";
 
 function asImageDataUrl(value: unknown) {
   if (typeof value !== "string") return null;
@@ -67,7 +95,7 @@ export default async function handler(
   req: {
     method?: string;
     headers?: Record<string, unknown>;
-    body?: { lookId?: number; mockup?: string; mockups?: string[]; lookImage?: string; lookImages?: string[]; aspectRatio?: string };
+    body?: { lookId?: number; mockup?: string; mockups?: string[]; lookImage?: string; lookImages?: string[]; aspectRatio?: string; garment?: string; mockupAngles?: string[] };
   },
   res: { status: (n: number) => { json: (b: unknown) => void } },
 ) {
@@ -103,6 +131,10 @@ export default async function handler(
   const lookImages = (Array.isArray(req.body?.lookImages) ? req.body.lookImages : [req.body?.lookImage])
     .map(asImageDataUrl)
     .filter((src): src is string => Boolean(src));
+  const hat = req.body?.garment === "Hat" || prompt.includes("locked hat photograph");
+  const angles = hatAngles(mockups.length, req.body?.mockupAngles);
+  const lockedPrefix = hat ? HAT_LOCKED_PREFIX : LOCKED_PREFIX;
+  const systemPrompt = hat ? HAT_SYSTEM_PROMPT : SYSTEM_PROMPT;
   const model = process.env.FAL_MODEL || "fal-ai/nano-banana-2/edit";
   const imageUrls = lookImages.length > 0 ? [...lookImages, ...mockups] : mockups;
 
@@ -114,8 +146,8 @@ export default async function handler(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: `${LOCKED_PREFIX}\n\n${withImageRefs(prompt, mockups.length, lookImages.length)}`,
-        system_prompt: SYSTEM_PROMPT,
+        prompt: `${lockedPrefix}\n\n${withImageRefs(prompt, mockups.length, lookImages.length, hat, angles)}`,
+        system_prompt: systemPrompt,
         image_urls: imageUrls,
         num_images: 1,
         aspect_ratio: "auto",
