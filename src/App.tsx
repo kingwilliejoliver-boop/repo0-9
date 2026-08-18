@@ -1043,7 +1043,7 @@ function LandingPage({
   const startLabel = signedIn ? "Generate" : "Get started";
 
   return (
-    <div className="w-full min-w-0 flex-1 min-h-0 overflow-y-auto">
+    <div className="w-full min-w-0 flex-1 min-h-0 overflow-y-auto overscroll-contain">
       <div className="min-h-full flex flex-col">
       <div className="hero-mesh-wrap">
       <StarsGalaxy className="hero-smoke" edgeFade="bottom" />
@@ -1292,7 +1292,7 @@ function LibraryPage({
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
         {templates.length === 0 ? (
           <p className="text-sm text-[#aaa] py-16 text-center px-5">No looks match that. Try another garment or search.</p>
         ) : (
@@ -1792,7 +1792,7 @@ function AppShell({ session }: { session: Session }) {
         </div>
       </aside>
 
-      <div className={`flex-1 flex flex-col min-h-0 ${page === "library" || page === "settings" ? "overflow-hidden" : "md:flex-row overflow-y-auto md:overflow-hidden"}`}>
+      <div className={`flex-1 flex flex-col min-h-0 ${page === "library" || page === "settings" ? "overflow-hidden" : "md:flex-row overflow-y-auto overscroll-contain md:overflow-hidden"}`}>
 
       {page === "library" ? (
         <LibraryPage
@@ -1820,9 +1820,9 @@ function AppShell({ session }: { session: Session }) {
       ) : (
       <>
       {/* ── Control Panel ────────────────────────────────────────────────── */}
-      <div className="w-full md:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-[#ebebeb] md:overflow-y-auto md:h-full bg-[#fafafa]">
+      <div className="w-full md:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col min-h-0 md:h-full border-b md:border-b-0 md:border-r border-[#ebebeb] bg-[#fafafa]">
 
-        <div className="flex-1 px-5 py-5 flex flex-col gap-6">
+        <div className="px-5 py-5 flex flex-col gap-6 md:flex-1 md:min-h-0 md:overflow-y-auto md:overscroll-contain">
 
           {showHatUpload ? (
             <HatMockupDropzone
@@ -1871,7 +1871,7 @@ function AppShell({ session }: { session: Session }) {
                 </div>
               )}
             </div>
-            <div className="flex gap-3 mb-3 overflow-x-auto">
+            <div className="flex flex-wrap gap-3 mb-3">
               {GARMENT_FILTERS.map((garment) => (
                 <button
                   key={garment}
@@ -1914,7 +1914,7 @@ function AppShell({ session }: { session: Session }) {
             <div className="mb-2">
               <Label>Output size</Label>
             </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5">
+            <div className="flex gap-1.5">
               {ASPECT_RATIOS.map((r) => (
                 <button
                   key={r}
@@ -1933,7 +1933,7 @@ function AppShell({ session }: { session: Session }) {
         </div>
 
         {/* Generate */}
-        <div className="p-4 sm:p-5 border-t border-[#ebebeb] bg-white sticky bottom-0 md:static z-10">
+        <div className="p-4 sm:p-5 border-t border-[#ebebeb] bg-white sticky bottom-0 md:static flex-shrink-0 z-10">
           <button
             onClick={handleGenerate}
             disabled={generating || (!outOfCredits && !canGenerate)}
