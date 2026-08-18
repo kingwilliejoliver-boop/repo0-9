@@ -71,8 +71,8 @@ export default function LooksEditor({ thumbs }: { thumbs: Record<number, string>
     <div className="flex-1 min-h-0 flex flex-col md:flex-row bg-white">
       <aside className="w-full md:w-[260px] flex-shrink-0 border-b md:border-b-0 md:border-r border-[#ebebeb] overflow-y-auto">
         <div className="px-4 pt-5 pb-3">
-          <h1 className="text-lg font-700 text-[#111] tracking-tight">Templates</h1>
-          <p className="text-[12px] text-[#aaa] mt-0.5">Edit locally. Users never see prompts.</p>
+          <h1 className="type-headline text-lg">Templates</h1>
+          <p className="type-subtext text-[12px] mt-1">Edit locally. Users never see prompts.</p>
         </div>
         <div className="px-2 pb-4 flex flex-col gap-0.5">
           {drafts.map((look) => (

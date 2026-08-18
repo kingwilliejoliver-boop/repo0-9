@@ -6,6 +6,7 @@ import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png"
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
+import StarsGalaxy from "./StarsGalaxy";
 import { clerkAppearance, clerkLocalization, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -114,7 +115,7 @@ function BrandLockup() {
   return (
     <div className="flex items-center gap-2.5 min-w-0">
       <img src={shotfarmLogo} alt="" width={32} height={32} className="w-8 h-8 rounded-[8px] flex-shrink-0" />
-      <p className="text-[#111] font-700 text-lg leading-none tracking-wide">ShotFarm</p>
+      <p className="type-headline text-lg">ShotFarm</p>
     </div>
   );
 }
@@ -390,8 +391,8 @@ function LibraryCard({
         )}
       </div>
       <div className="pt-2.5 px-0.5">
-        <p className="text-[13px] font-medium text-[#111] leading-tight">{tpl.name}</p>
-        <p className="text-[11px] text-[#888] mt-0.5">{tpl.shot} · {tpl.garment}</p>
+        <p className="type-headline text-[13px]">{tpl.name}</p>
+        <p className="type-subtext text-[11px] mt-0.5">{tpl.shot} · {tpl.garment}</p>
       </div>
     </article>
   );
@@ -486,8 +487,8 @@ function GeneratingState() {
         <div className="absolute inset-4 rounded-full border-b-[#555] border-t-transparent border-r-transparent border-l-transparent border-2 animate-[spin_2s_linear_infinite_reverse]" />
       </div>
       <div className="text-center">
-        <p className="text-[#111] text-xl font-700 tracking-tight">Applying look</p>
-        <p className="text-[#999] text-sm mt-1">Restyling your mockup to match this template…</p>
+        <p className="type-headline text-xl">Applying look</p>
+        <p className="type-subtext text-[15px] sm:text-base mt-2">Restyling your mockup to match this template…</p>
       </div>
       <div className="flex gap-1.5">
         {[0, 1, 2, 3].map((i) => (
@@ -536,8 +537,8 @@ function Paywall({
         <div className="px-6 pt-6 pb-5 border-b border-[#ebebeb]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[#111] text-2xl font-700 tracking-tight">Keep creating</p>
-              <p className="text-[#888] text-sm mt-1.5 leading-relaxed">You've used your 3 free images. Get more to keep applying looks to your mockups.</p>
+              <p className="type-headline text-2xl">Keep creating</p>
+              <p className="type-subtext text-[15px] sm:text-base mt-2">You've used your 3 free images. Get more to keep applying looks to your mockups.</p>
             </div>
             <button
               type="button"
@@ -567,16 +568,16 @@ function Paywall({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[#111]">{p.name}</span>
+                      <span className="type-headline text-sm">{p.name}</span>
                       {p.recommended && (
                         <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-[#111] text-white">Best value</span>
                       )}
                     </div>
-                    <p className="text-xs text-[#888] mt-0.5">
+                    <p className="type-subtext text-[13px] mt-0.5">
                       {p.interval === "once" ? `${p.images} images · ${p.blurb}` : `${p.images} images / month · ${p.blurb}`}
                     </p>
                   </div>
-                  <p className="text-[#111] text-xl font-700 tracking-wide">
+                  <p className="type-headline text-xl">
                     ${p.price}
                     {p.interval === "month" && <span className="text-xs font-medium text-[#aaa] tracking-normal">/mo</span>}
                   </p>
@@ -722,7 +723,7 @@ function FaqSection() {
   return (
     <section className="px-6 py-16">
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-[22px] sm:text-[24px] font-semibold text-[#111] tracking-tight text-center mb-8">FAQ</h2>
+        <h2 className="type-headline text-[32px] sm:text-[40px] text-center mb-8">FAQ</h2>
         <div className="rounded-[26px] bg-[#f4f4f4] p-1 flex flex-col gap-0.5">
           {FAQS.map((item, i) => {
             const isOpen = open === i;
@@ -734,7 +735,7 @@ function FaqSection() {
                 className="w-full text-left rounded-3xl bg-white border border-[#ebebeb] px-6 py-6 cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex-1 text-[15px] font-medium text-[#111] leading-snug">{item.q}</span>
+                  <span className="type-headline flex-1 text-[16px] sm:text-[18px]">{item.q}</span>
                   <span className="relative w-7 h-7 rounded-full bg-[#f4f4f4] flex-shrink-0" aria-hidden>
                     <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-[#111]" />
                     <span
@@ -746,7 +747,7 @@ function FaqSection() {
                 </div>
                 <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                   <div className="overflow-hidden">
-                    <p className="pt-4 text-sm text-[#555] leading-relaxed">{item.a}</p>
+                    <p className="type-subtext pt-4 text-[15px] sm:text-base">{item.a}</p>
                   </div>
                 </div>
               </button>
@@ -774,33 +775,35 @@ function LandingPage({
   const startLabel = signedIn ? "Generate" : "Get started";
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto bg-white">
+    <div className="w-full min-w-0 flex-1 min-h-0 overflow-y-auto">
       <div className="min-h-full flex flex-col">
-      <header className="flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0">
+      <div className="hero-mesh-wrap">
+      <StarsGalaxy className="hero-smoke" />
+      <header className="relative z-10 flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0">
         <BrandLockup />
         {showSignIn ? (
           <button
             type="button"
             onClick={onSignIn}
-            className="text-sm text-[#888] hover:text-[#111] cursor-pointer"
+            className="text-sm text-white/80 hover:text-white cursor-pointer"
           >
             Sign in
           </button>
         ) : null}
       </header>
 
-      <section className="flex flex-col items-center px-6 pt-12 pb-10 gap-10">
+      <section className="relative z-10 flex flex-col items-center px-6 pt-12 pb-24 gap-10">
         <div className="text-center max-w-sm">
-          <h1 className="text-[28px] sm:text-[32px] font-semibold text-[#111] tracking-tight leading-[1.15]">
+          <h1 className="type-headline text-[36px] sm:text-[48px] text-white" style={{ color: "#ffffff" }}>
             Upload a mockup.<br />Get the shot.
           </h1>
-          <p className="mt-3 text-sm text-[#888] leading-tight">
+          <p className="type-subtext mt-4 text-[16px] sm:text-[18px] text-white" style={{ color: "#ffffff" }}>
             Skip the photoshoot.<br />We apply a locked look to your mockup.
           </p>
           <button
             type="button"
             onClick={onStart}
-            className="mt-3 px-5 py-2.5 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
+            className="mt-3 px-5 py-2.5 rounded-lg bg-white text-[#111] text-sm font-semibold hover:opacity-90 cursor-pointer"
             style={{ letterSpacing: "0.04em" }}
           >
             {startLabel}
@@ -814,11 +817,12 @@ function LandingPage({
           />
         </div>
       </section>
+      </div>
 
-      <section className="px-6 py-16">
+      <section className="px-6 py-16 bg-white">
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <h2 className="text-[28px] sm:text-[32px] font-semibold text-[#111] tracking-tight leading-[1.15]">How it works</h2>
-          <p className="mt-3 text-sm text-[#888] leading-relaxed">
+          <h2 className="type-headline text-[36px] sm:text-[48px]">How it works</h2>
+          <p className="type-subtext mt-4 text-[16px] sm:text-[18px]">
             Upload a garment. Pick a template.<br />We apply it for you.
           </p>
         </div>
@@ -845,9 +849,9 @@ function LandingPage({
               )}
               <div className="flex items-baseline justify-center gap-2">
                 <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em]">{step.n}</p>
-                <h2 className="text-[18px] sm:text-[20px] font-semibold text-[#111] tracking-tight">{step.title}</h2>
+                <h2 className="type-headline text-[18px] sm:text-[20px]">{step.title}</h2>
               </div>
-              <p className="mt-0 text-sm text-[#888] leading-snug">{step.body}</p>
+              <p className="type-subtext mt-1 text-[14px] sm:text-[15px]">{step.body}</p>
             </div>
           ))}
         </div>
@@ -899,7 +903,7 @@ function LookPreview({
       <div className="relative w-full sm:max-w-[480px] max-h-[92dvh] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-[#ebebeb] flex-shrink-0">
           <div className="min-w-0">
-            <p className="text-[#111] text-base font-semibold truncate">{look.name}</p>
+            <p className="type-headline text-base truncate">{look.name}</p>
             <p className="text-[#888] text-xs mt-0.5">{look.shot} · {look.garment}</p>
           </div>
           <button
@@ -921,7 +925,7 @@ function LookPreview({
           />
         </div>
         <div className="px-5 py-4 border-t border-[#ebebeb] flex-shrink-0">
-          <p className="text-sm text-[#666] leading-relaxed mb-4">{look.summary}</p>
+          <p className="type-subtext text-[15px] sm:text-base mb-4">{look.summary}</p>
           <button
             type="button"
             onClick={onUse}
@@ -975,8 +979,8 @@ function LibraryPage({
       <header className="flex-shrink-0 px-5 sm:px-8 pt-6 pb-5 border-b border-[#ebebeb]">
         <div className="flex items-start sm:items-end justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-2xl font-700 text-[#111] tracking-tight">Templates</h1>
-            <p className="text-[#aaa] text-sm mt-0.5">The set we apply to your mockup.</p>
+            <h1 className="type-headline text-2xl sm:text-[28px]">Templates</h1>
+            <p className="type-subtext text-[15px] sm:text-base mt-2">The set we apply to your mockup.</p>
           </div>
           <button
             type="button"
@@ -1060,7 +1064,7 @@ function LibraryPage({
       </div>
 
       <div className="flex-shrink-0 border-t border-[#ebebeb] bg-white/95 backdrop-blur-sm px-5 sm:px-8 py-3 flex items-center justify-between gap-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <p className="text-[13px] text-[#888] leading-snug min-w-0">Upload a mockup to apply one of these looks.</p>
+        <p className="type-subtext text-[15px] min-w-0">Upload a mockup to apply one of these looks.</p>
         <button
           type="button"
           onClick={onStart}
@@ -1394,7 +1398,7 @@ function AppShell({ session }: { session: Session }) {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-dvh overflow-hidden bg-white font-sans">
+    <div className={`flex flex-col h-dvh overflow-hidden font-sans ${page === "home" ? "bg-black" : "lg:flex-row bg-white"}`}>
       {page === "home" ? (
         <LandingPage
           onStart={() => goTo("generate")}
@@ -1716,8 +1720,8 @@ function AppShell({ session }: { session: Session }) {
                 <IconSpark />
               </div>
               <div>
-                <p className="text-[#bbb] text-lg font-600 tracking-tight">No piece yet</p>
-                <p className="text-[#ccc] text-sm mt-1">Upload a mockup and pick a look</p>
+                <p className="type-headline text-lg">No piece yet</p>
+                <p className="type-subtext text-[15px] mt-2">Upload a mockup and pick a look</p>
               </div>
             </div>
           )}

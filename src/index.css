@@ -1,7 +1,8 @@
 @import 'tailwindcss';
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
 @theme {
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -20,8 +21,26 @@ body,
 body {
   background-color: #ffffff;
   font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: -0.02em;
   color: #111111;
   -webkit-font-smoothing: antialiased;
+}
+
+.type-headline {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  color: #111111;
+}
+
+.type-subtext {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.45;
+  color: #111111;
 }
 
 .cl-modalBackdrop {
@@ -59,4 +78,45 @@ input[type='range'] {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #c8c8c8;
+}
+
+.hero-mesh-wrap {
+  position: relative;
+  width: 100%;
+  min-width: 100%;
+  margin: 0;
+  left: 0;
+  background: #000000;
+  overflow: hidden;
+}
+
+.hero-mesh-wrap .hero-smoke {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100%;
+  min-height: 100%;
+  pointer-events: none;
+  display: block;
+}
+
+.hero-mesh-wrap header .type-headline {
+  color: #ffffff;
+}
+
+.hero-mesh-wrap::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14rem;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
 }
