@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { clerkConfigured, requireUser } from "../lib/auth";
+import { requireUser } from "../lib/auth";
 import { PACK_IMAGES, PRO_IMAGES } from "../lib/billing";
 
 const PACK = { name: "ShotFarm Pack", amount: 900, images: PACK_IMAGES };
@@ -19,16 +19,8 @@ export default async function handler(
     res.status(500).json({ error: "Stripe is not configured" });
     return;
   }
-  if (!clerkConfigured()) {
-    res.status(500).json({ error: "Sign in is not configured. Add Clerk keys on Vercel." });
-    return;
-  }
-
   const user = await requireUser(req);
-  if (!user) {
-    res.status(401).json({ error: "Sign in to buy images." });
-    return;
-  }
+  const userId = user?.userId || "guest";
 
   const plan = req.body?.plan === "pro" ? "pro" : "starter";
   const originHeader = req.headers.origin;
@@ -41,12 +33,12 @@ export default async function handler(
   try {
     const session = await stripe.checkout.sessions.create({
       mode: plan === "pro" ? "subscription" : "payment",
-      customer_email: user.email || undefined,
-      client_reference_id: user.userId,
-      metadata: { plan, user_id: user.userId },
+      customer_email: user?.email || undefined,
+      client_reference_id: userId,
+      metadata: { plan, user_id: userId },
       subscription_data:
         plan === "pro"
-          ? { metadata: { plan, user_id: user.userId } }
+          ? { metadata: { plan, user_id: userId } }
           : undefined,
       line_items:
         plan === "pro"

@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { SignIn, UserButton, useAuth } from "@clerk/react";
 import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
@@ -7,7 +6,7 @@ import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
 import StarsGalaxy from "./StarsGalaxy";
-import { clerkAppearance, clerkLocalization, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
+import { localSession, type Session } from "./session";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -1080,71 +1079,7 @@ function LibraryPage({
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  if (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) return <AppWithClerk />;
   return <AppShell session={localSession} />;
-}
-
-function AppWithClerk() {
-  const { isLoaded, isSignedIn, getToken } = useAuth();
-  const [account, setAccount] = useState<AccountSnap | null>(null);
-  const [signInOpen, setSignInOpen] = useState(false);
-
-  const refreshAccount = useCallback(async () => {
-    if (!isSignedIn) {
-      setAccount(null);
-      return null;
-    }
-    const next = await fetchAccount(getToken);
-    setAccount(next);
-    return next;
-  }, [getToken, isSignedIn]);
-
-  useEffect(() => {
-    void refreshAccount();
-  }, [refreshAccount]);
-
-  useEffect(() => {
-    if (isSignedIn) setSignInOpen(false);
-  }, [isSignedIn]);
-
-  useEffect(() => {
-    document.body.style.overflow = signInOpen && !isSignedIn ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isSignedIn, signInOpen]);
-
-  const session: Session = {
-    configured: true,
-    ready: isLoaded,
-    signedIn: Boolean(isSignedIn),
-    getToken,
-    openSignIn: () => setSignInOpen(true),
-    account,
-    applyAccount: setAccount,
-    refreshAccount,
-  };
-
-  return (
-    <>
-      <AppShell session={session} />
-      {signInOpen && !isSignedIn && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 overflow-hidden">
-          <div className="relative w-full max-w-[400px] max-h-[min(92dvh,40rem)] overflow-x-hidden overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <button
-              type="button"
-              aria-label="Close sign in"
-              onClick={() => setSignInOpen(false)}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-[#f4f4f4] text-[#888] hover:text-[#111] hover:bg-[#ebebeb] cursor-pointer"
-            >
-              ×
-            </button>
-            <SignIn appearance={clerkAppearance} localization={clerkLocalization} routing="hash" />
-          </div>
-        </div>
-      )}
-    </>
-  );
 }
 
 function AppShell({ session }: { session: Session }) {
@@ -1337,8 +1272,7 @@ function AppShell({ session }: { session: Session }) {
       });
       const data = await res.json().catch(() => ({} as { image?: string; error?: string; code?: string; freeUsed?: number; paidCredits?: number }));
       if (res.status === 401) {
-        session.openSignIn();
-        throw new Error("Sign in to apply a look.");
+        throw new Error("Could not apply this look. Try again.");
       }
       if (res.status === 402 || data.code === "out_of_credits") {
         setPaywallOpen(true);
@@ -1388,8 +1322,7 @@ function AppShell({ session }: { session: Session }) {
     });
     const data = await res.json().catch(() => ({} as { url?: string; error?: string }));
     if (res.status === 401) {
-      session.openSignIn();
-      throw new Error("Sign in to buy images.");
+      throw new Error("Checkout could not start.");
     }
     if (!res.ok || !data.url) {
       throw new Error(typeof data.error === "string" ? data.error : "Checkout could not start.");
@@ -1465,24 +1398,6 @@ function AppShell({ session }: { session: Session }) {
 
         <div className="p-3 border-t border-[#ebebeb] flex flex-col gap-0.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:pb-3">
           <NavItem icon={<IconSettings />} label="Settings" active={page === "settings"} onClick={() => goTo("settings")} />
-          {session.configured && (
-            <div className="mt-2 px-1">
-              {session.signedIn ? (
-                <div className="flex items-center gap-2 px-2 py-1.5">
-                  <UserButton appearance={clerkAppearance} />
-                  <span className="text-[11px] text-[#888] truncate">Your account</span>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => session.openSignIn()}
-                  className="w-full py-2 rounded-lg border border-[#e8e8e8] text-[11px] font-semibold text-[#111] hover:border-[#ccc] cursor-pointer"
-                >
-                  Sign in
-                </button>
-              )}
-            </div>
-          )}
           <div className="mt-3 px-3 py-3 rounded-xl bg-[#f7f7f7]">
             <div className="flex justify-between items-center mb-2">
               <span className="text-[11px] text-[#888]">{needsSignIn ? "Images" : paidCredits > 0 ? "Images" : "Free images"}</span>
