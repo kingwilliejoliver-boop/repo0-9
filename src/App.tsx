@@ -297,6 +297,7 @@ const LOOKS_PER_PAGE = 6;
 const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Hat"] as const;
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
+const PAYWALL_ENABLED = false;
 const FREE_USED_KEY = "shotfarm-free-used";
 const PAID_CREDITS_KEY = "shotfarm-paid-credits";
 const PAGE_KEY = "shotfarm-page";
@@ -1215,7 +1216,7 @@ function AppShell({ session }: { session: Session }) {
     } catch {
       /* ignore quota / private mode */
     }
-    if (next === "generate" && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
+    if (PAYWALL_ENABLED && next === "generate" && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
     if (next === "home") setPaywallOpen(false);
   };
 
@@ -1318,7 +1319,7 @@ function AppShell({ session }: { session: Session }) {
   const previewLook = TEMPLATES.find((t) => t.id === previewId) ?? null;
   const freeLeft = Math.max(0, FREE_IMAGE_LIMIT - freeUsed);
   const imagesLeft = freeLeft + paidCredits;
-  const outOfCredits = imagesLeft <= 0;
+  const outOfCredits = PAYWALL_ENABLED && imagesLeft <= 0;
   const canGenerate = mockups.length > 0 && selectedTemplate !== null && !generating && !outOfCredits;
 
   const spendLocalCredit = (useFree: boolean) => {
@@ -1342,7 +1343,7 @@ function AppShell({ session }: { session: Session }) {
   };
 
   const handleGenerate = async () => {
-    if (outOfCredits) {
+    if (PAYWALL_ENABLED && outOfCredits) {
       setPaywallOpen(true);
       return;
     }
@@ -1372,7 +1373,7 @@ function AppShell({ session }: { session: Session }) {
       if (res.status === 401) {
         throw new Error("Could not apply this look. Try again.");
       }
-      if (res.status === 402 || data.code === "out_of_credits") {
+      if (PAYWALL_ENABLED && (res.status === 402 || data.code === "out_of_credits")) {
         setPaywallOpen(true);
         if (typeof data.freeUsed === "number" && typeof data.paidCredits === "number") {
           session.applyAccount({ freeUsed: data.freeUsed, paidCredits: data.paidCredits });
@@ -1393,9 +1394,9 @@ function AppShell({ session }: { session: Session }) {
       } catch {
         setResult(data.image);
       }
-      if (session.signedIn && typeof data.freeUsed === "number" && typeof data.paidCredits === "number") {
+      if (PAYWALL_ENABLED && session.signedIn && typeof data.freeUsed === "number" && typeof data.paidCredits === "number") {
         session.applyAccount({ freeUsed: data.freeUsed, paidCredits: data.paidCredits });
-      } else {
+      } else if (PAYWALL_ENABLED) {
         spendLocalCredit(useFree);
       }
     } catch (err) {
@@ -1510,6 +1511,7 @@ function AppShell({ session }: { session: Session }) {
               )}
             </div>
           )}
+          {PAYWALL_ENABLED && (
           <div className="mt-3 px-3 py-3 rounded-xl bg-[#f7f7f7]">
             <div className="flex justify-between items-center mb-2">
               <span className="text-[11px] text-[#888]">{paidCredits > 0 ? "Images" : "Free images"}</span>
@@ -1536,6 +1538,7 @@ function AppShell({ session }: { session: Session }) {
               </button>
             )}
           </div>
+          )}
         </div>
       </aside>
 
@@ -1687,7 +1690,9 @@ function AppShell({ session }: { session: Session }) {
                     : mockups.length === 0
                       ? "Upload a mockup to continue"
                       : selectedTemplate
-                        ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
+                        ? PAYWALL_ENABLED
+                          ? `${imagesLeft} ${imagesLeft === 1 ? "image" : "images"} left`
+                          : "Ready to apply"
                         : "Pick a look to continue"}
             </p>
           )}
@@ -1790,7 +1795,7 @@ function AppShell({ session }: { session: Session }) {
           }}
         />
       )}
-      {paywallOpen && page !== "home" && (
+      {PAYWALL_ENABLED && paywallOpen && page !== "home" && (
         <Paywall
           selectedPlan={selectedPlan}
           onSelectPlan={setSelectedPlan}
