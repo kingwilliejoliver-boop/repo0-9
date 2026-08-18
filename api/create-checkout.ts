@@ -1,13 +1,14 @@
 import Stripe from "stripe";
-import { PACK_IMAGES, PRO_IMAGES } from "../lib/billing";
-
-const PACK = { name: "ShotFarm Pack", amount: 900, images: PACK_IMAGES };
-const PRO = { name: "ShotFarm Pro", amount: 4900, images: PRO_IMAGES };
 
 export default async function handler(
   req: { method?: string; body?: { plan?: string }; headers: Record<string, unknown> },
   res: { status: (n: number) => { json: (b: unknown) => void } },
 ) {
+  if (req.method === "GET") {
+    res.status(200).json({ ok: true });
+    return;
+  }
+
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;
@@ -25,17 +26,15 @@ export default async function handler(
   const origin =
     (typeof originHeader === "string" && originHeader) ||
     (typeof hostHeader === "string" && hostHeader ? `https://${hostHeader}` : "http://localhost:8443");
-  const stripe = new Stripe(secret);
 
   try {
+    const stripe = new Stripe(secret);
     const session = await stripe.checkout.sessions.create({
       mode: plan === "pro" ? "subscription" : "payment",
       client_reference_id: "guest",
       metadata: { plan, user_id: "guest" },
       subscription_data:
-        plan === "pro"
-          ? { metadata: { plan, user_id: "guest" } }
-          : undefined,
+        plan === "pro" ? { metadata: { plan, user_id: "guest" } } : undefined,
       line_items:
         plan === "pro"
           ? [
@@ -43,9 +42,9 @@ export default async function handler(
                 quantity: 1,
                 price_data: {
                   currency: "usd",
-                  unit_amount: PRO.amount,
+                  unit_amount: 4900,
                   recurring: { interval: "month" },
-                  product_data: { name: PRO.name, description: `${PRO.images} images per month` },
+                  product_data: { name: "ShotFarm Pro", description: "150 images per month" },
                 },
               },
             ]
@@ -54,14 +53,19 @@ export default async function handler(
                 quantity: 1,
                 price_data: {
                   currency: "usd",
-                  unit_amount: PACK.amount,
-                  product_data: { name: PACK.name, description: `${PACK.images} images` },
+                  unit_amount: 900,
+                  product_data: { name: "ShotFarm Pack", description: "20 images" },
                 },
               },
             ],
       success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: origin,
     });
+
+    if (!session.url) {
+      res.status(500).json({ error: "Stripe did not return a checkout URL." });
+      return;
+    }
 
     res.status(200).json({ url: session.url });
   } catch (err) {
