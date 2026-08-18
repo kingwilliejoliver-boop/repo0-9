@@ -15,6 +15,7 @@ import dhsCap from "./assets/templates/dhs-cap.jpg";
 import tinosCap from "./assets/templates/tinos-cap.jpg";
 import stinkyDogCap from "./assets/templates/stinky-dog-cap.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
+import howItWorksMockup from "./assets/how-it-works-mockup.jpg";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
 import StarsGalaxy from "./StarsGalaxy";
@@ -481,7 +482,7 @@ function MockupDropzone({ images, onAdd, onRemove }: { images: string[]; onAdd: 
         >
           <span className="text-[#bbb]"><IconUpload /></span>
           <span className="text-sm font-medium text-[#333]">Upload a photo of your garment</span>
-          <span className="text-xs text-[#aaa]">Front, flat lay, or on a hanger.</span>
+          <span className="text-xs text-[#aaa]">A mockup with your design on it. Not a logo file.</span>
         </button>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -939,7 +940,7 @@ function LandingPage({
         </div>
         <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
           {[
-            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: null as string | null, imgLabel: "Mockup example" },
+            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: howItWorksMockup as string | null, imgLabel: "Mockup example" },
             { n: "02", title: "Pick a look", body: "Choose from our set templates.", img: null as string | null, imgLabel: "Look example" },
             { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: null as string | null, imgLabel: "Result example" },
           ].map((step) => (
@@ -948,7 +949,7 @@ function LandingPage({
                 <img
                   src={step.img}
                   alt={step.imgLabel}
-                  className="w-full aspect-square object-cover rounded-xl mb-3 bg-[#f4f4f4]"
+                  className="w-full aspect-square object-contain p-4 rounded-xl mb-3 bg-[#f4f4f4]"
                 />
               ) : (
                 <div

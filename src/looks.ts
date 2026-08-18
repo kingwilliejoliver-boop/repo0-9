@@ -20,13 +20,16 @@ export type Look = {
  */
 export const TEMPLATE_TRANSFER_PROMPT = `Edit the first image. That is the locked template photograph. Return that same photo.
 
-The last image is the customer's design swatch. Use it only for:
-- Garment color
-- Printed artwork: logo, text, graphic, colors, spelling, and where that print sits on their shirt
+The last image is the customer's garment mockup — their finished piece, not a logo file. It is the source of truth for the exact design:
+- Garment colors
+- Every print, graphic, embroidery, and tag: spelling, colors, scale, and where each mark sits
+- Neck, sleeve, and hem details that belong to their design
 
-Keep from the first image: fabric, wash, distressing, wrinkles, drape, mockup style, shot type, camera, background, lighting, shadows, silhouette, collar, sleeves, hem.
+Keep from the first image only the mock style: fabric, wash, distressing, wrinkles, drape, shot type, camera, background, lighting, shadows, and silhouette.
 
-Do not output the last image. Do not put the last image on a new background. Do not copy the template's graphic. Place the customer's artwork where it sits on their shirt.
+Do not copy the template's graphic or logo layout. Do not restamp their art into the template's print box. Rebuild their exact mockup design in this template's photographic style.
+
+Do not output the last image. Do not put the last image on a new background.
 `;
 
 export const HAT_TRANSFER_PROMPT = `Edit the first image. That is the locked hat photograph. Return that same photo.
