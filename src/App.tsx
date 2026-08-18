@@ -609,9 +609,17 @@ function Paywall({
   );
 }
 
-function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSrc: string }) {
+function BeforeAfterSlider({
+  beforeSrc,
+  afterSrc,
+  afterLabel,
+}: {
+  beforeSrc: string;
+  afterSrc: string;
+  afterLabel: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState(50);
+  const [pos, setPos] = useState(25);
   const dragging = useRef(false);
 
   const updateFromX = useCallback((clientX: number) => {
@@ -621,6 +629,10 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
     const next = ((clientX - rect.left) / rect.width) * 100;
     setPos(Math.min(100, Math.max(0, next)));
   }, []);
+
+  useEffect(() => {
+    setPos(25);
+  }, [afterSrc]);
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -650,7 +662,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
         updateFromX(e.clientX);
       }}
     >
-      <img src={afterSrc} alt="Look applied" className="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable={false} />
+      <img src={afterSrc} alt={afterLabel} className="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable={false} />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img src={beforeSrc} alt="Your mockup" className="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable={false} />
       </div>
@@ -671,7 +683,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
         className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/55 text-white text-[10px] font-semibold tracking-wide pointer-events-none"
         style={{ opacity: Math.min(1, Math.max(0, (100 - pos) / 50)) }}
       >
-        Look applied
+        {afterLabel}
       </span>
     </div>
   );
@@ -760,6 +772,12 @@ function LandingPage({
   onSignIn: () => void;
 }) {
   const startLabel = signedIn ? "Generate" : "Get started";
+  const heroLooks = [
+    { id: 5, label: "Raspberry Hills", after: raspberryHillsTee },
+    { id: 3, label: "Saint Distressed", after: saintDistressedTee },
+  ];
+  const [heroLookId, setHeroLookId] = useState(5);
+  const heroLook = heroLooks.find((look) => look.id === heroLookId) ?? heroLooks[0];
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto bg-white">
@@ -780,10 +798,10 @@ function LandingPage({
       <section className="flex flex-col items-center px-6 pt-12 pb-10 gap-10">
         <div className="text-center max-w-sm">
           <h1 className="text-[28px] sm:text-[32px] font-semibold text-[#111] tracking-tight leading-[1.15]">
-            Your mockup,<br />shot like the look.
+            Upload a mockup.<br />Get the shot.
           </h1>
-          <p className="mt-3 text-sm text-[#888] leading-relaxed">
-            Upload a garment. Pick a template.<br />We apply it for you.
+          <p className="mt-3 text-sm text-[#888] leading-tight">
+            Skip the photoshoot.<br />We apply a locked look to your mockup.
           </p>
           <button
             type="button"
@@ -795,7 +813,28 @@ function LandingPage({
           </button>
         </div>
         <div className="w-full max-w-[420px]">
-          <BeforeAfterSlider beforeSrc={raspberryHillsMockup} afterSrc={raspberryHillsTee} />
+          <BeforeAfterSlider
+            beforeSrc={raspberryHillsMockup}
+            afterSrc={heroLook.after}
+            afterLabel={heroLook.label}
+          />
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {heroLooks.map((look) => {
+              const active = look.id === heroLookId;
+              return (
+                <button
+                  key={look.id}
+                  type="button"
+                  onClick={() => setHeroLookId(look.id)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold cursor-pointer ${
+                    active ? "bg-[#111] text-white" : "bg-[#f4f4f4] text-[#888] hover:text-[#111]"
+                  }`}
+                >
+                  {look.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -813,25 +852,25 @@ function LandingPage({
             { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: null as string | null, imgLabel: "Result example" },
           ].map((step) => (
             <div key={step.n} className="text-center">
-              <div className="flex items-baseline justify-center gap-2">
-                <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em]">{step.n}</p>
-                <h2 className="text-[18px] sm:text-[20px] font-semibold text-[#111] tracking-tight">{step.title}</h2>
-              </div>
-              <p className="mt-0 mb-3 text-sm text-[#888] leading-snug">{step.body}</p>
               {step.img ? (
                 <img
                   src={step.img}
                   alt={step.imgLabel}
-                  className="w-full aspect-square object-cover rounded-xl bg-[#f4f4f4]"
+                  className="w-full aspect-square object-cover rounded-xl mb-3 bg-[#f4f4f4]"
                 />
               ) : (
                 <div
-                  className="w-full aspect-square rounded-xl bg-[#f4f4f4] border border-dashed border-[#ddd] flex items-center justify-center"
+                  className="w-full aspect-square rounded-xl mb-3 bg-[#f4f4f4] border border-dashed border-[#ddd] flex items-center justify-center"
                   aria-hidden
                 >
                   <span className="text-[11px] text-[#bbb] tracking-[0.08em]">{step.imgLabel}</span>
                 </div>
               )}
+              <div className="flex items-baseline justify-center gap-2">
+                <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em]">{step.n}</p>
+                <h2 className="text-[18px] sm:text-[20px] font-semibold text-[#111] tracking-tight">{step.title}</h2>
+              </div>
+              <p className="mt-0 text-sm text-[#888] leading-snug">{step.body}</p>
             </div>
           ))}
         </div>
