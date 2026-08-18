@@ -51,6 +51,16 @@ export const LOOKS: Look[] = [
     refs: [],
     aspect: "square",
   },
+  {
+    id: 6,
+    name: "Archives Tee",
+    garment: "Tee",
+    shot: "Flat lay",
+    summary: "Boxy cream tee, thick collar, archival collage print.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
 ];
 /* looks:end */
 

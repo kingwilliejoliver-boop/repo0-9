@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
+import archivesTee from "./assets/templates/archives-tee.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
@@ -262,6 +263,7 @@ async function toJpegDataUrl(src: string, max = 1280, aspectRatio?: string) {
 const LOOK_IMAGES: Record<number, string> = {
   3: saintDistressedTee,
   5: raspberryHillsTee,
+  6: archivesTee,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
@@ -326,6 +328,7 @@ const PLANS = [
 const HISTORY = [
   { id: 3, img: saintDistressedTee, prompt: "Saint distressed tee" },
   { id: 5, img: raspberryHillsTee, prompt: "Raspberry Hills tee" },
+  { id: 6, img: archivesTee, prompt: "Archives tee" },
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
