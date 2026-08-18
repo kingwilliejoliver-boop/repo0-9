@@ -1,8 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { requireUser } from "../lib/auth";
-import { databaseConfigured, refundCredit, spendCredit } from "../lib/db";
 
 export const config = {
   api: { bodyParser: { sizeLimit: "8mb" } },
@@ -83,22 +81,8 @@ export default async function handler(
     return;
   }
 
-  const user = await requireUser(req);
-  const trackCredits = Boolean(user && databaseConfigured());
-  const reserved = trackCredits && user
-    ? await spendCredit(user.userId)
-    : { ok: true as const, usedFree: false, account: { freeUsed: 0, paidCredits: 0 } };
-  if (!reserved.ok) {
-    res.status(402).json({ error: "No images left.", code: "out_of_credits" });
-    return;
-  }
-  const refundIfNeeded = async () => {
-    if (trackCredits && user) await refundCredit(user.userId, reserved.usedFree);
-  };
-
   const key = falKey();
   if (!key) {
-    await refundIfNeeded();
     res.status(500).json({ error: "Fal is not configured. Add FAL_KEY on Vercel for Production, then Redeploy." });
     return;
   }
@@ -108,12 +92,10 @@ export default async function handler(
     .map(asImageDataUrl)
     .filter((src): src is string => Boolean(src));
   if (mockups.length === 0) {
-    await refundIfNeeded();
     res.status(400).json({ error: "Upload a mockup and pick a look." });
     return;
   }
   if (!prompt) {
-    await refundIfNeeded();
     res.status(400).json({ error: "This look has no prompt yet." });
     return;
   }
@@ -152,23 +134,18 @@ export default async function handler(
     };
 
     if (!fal.ok) {
-      await refundIfNeeded();
       res.status(502).json({ error: falMessage(data) });
       return;
     }
 
     const image = data.images?.[0]?.url;
     if (!image) {
-      await refundIfNeeded();
       res.status(502).json({ error: "Fal did not return an image. Try another mockup." });
       return;
     }
 
-    res.status(200).json(trackCredits
-      ? { image, freeUsed: reserved.account.freeUsed, paidCredits: reserved.account.paidCredits }
-      : { image });
+    res.status(200).json({ image });
   } catch {
-    await refundIfNeeded();
     res.status(500).json({ error: "Fal could not apply this look." });
   }
 }

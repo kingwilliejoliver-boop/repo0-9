@@ -1,5 +1,4 @@
 import Stripe from "stripe";
-import { requireUser } from "../lib/auth";
 import { PACK_IMAGES, PRO_IMAGES } from "../lib/billing";
 
 const PACK = { name: "ShotFarm Pack", amount: 900, images: PACK_IMAGES };
@@ -19,8 +18,7 @@ export default async function handler(
     res.status(500).json({ error: "Stripe is not configured" });
     return;
   }
-  const user = await requireUser(req);
-  const userId = user?.userId || "guest";
+  const userId = "guest";
 
   const plan = req.body?.plan === "pro" ? "pro" : "starter";
   const originHeader = req.headers.origin;
@@ -33,7 +31,6 @@ export default async function handler(
   try {
     const session = await stripe.checkout.sessions.create({
       mode: plan === "pro" ? "subscription" : "payment",
-      customer_email: user?.email || undefined,
       client_reference_id: userId,
       metadata: { plan, user_id: userId },
       subscription_data:
