@@ -61,6 +61,16 @@ export const LOOKS: Look[] = [
     refs: [],
     aspect: "portrait",
   },
+  {
+    id: 7,
+    name: "Pretty Toxic Tee",
+    garment: "Tee",
+    shot: "Flat lay",
+    summary: "White crew tee, sharp-to-blur print, concrete floor.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
 ];
 /* looks:end */
 
