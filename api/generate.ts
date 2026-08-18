@@ -51,16 +51,15 @@ function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number
     refs.push(
       hat
         ? `#${lookRefCount + i + 1} customer's hat ${angles[i] || "detail"} — color and marks on this side only. Do not copy the template logo box. Do not output this photo.`
-        : `#${lookRefCount + i + 1} customer's garment mockup — keep this exact design (colors, prints, placement). Apply the template's mock style. Do not output this photo.`,
+        : `#${lookRefCount + i + 1} design swatch only — shirt color and printed artwork. Do not output this photo.`,
     );
   }
   return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
 
 const LOCKED_PREFIX = `The first attached image is the locked product template. Edit that photograph and return it.
-The last attached image is the customer's garment mockup. Keep their exact design — colors, prints, spelling, scale, and placement.
-Apply only the template's mock style: fabric, wash, distressing, lighting, camera, and background.
-Do not copy the template's graphic. Do not output the last image. Do not put the last image on a new background.`;
+The last attached image is the customer's design swatch. Use it only for garment color and printed artwork.
+Do not output the last image. Do not put the last image on a new background.`;
 
 const HAT_LOCKED_PREFIX = `The first attached image is the locked hat photograph. Edit that photo and return it.
 The other attached images are the customer's hat from different angles. Use them for hat color and for which panel each logo sits on.
@@ -68,7 +67,7 @@ Erase the template's original branding. Do not restamp the customer's art into t
 Do not output the customer's photos. Do not put those photos on a new background.`;
 
 const SYSTEM_PROMPT =
-  "Edit the first attached image (the locked template) and return that same photograph. The last image is the customer's garment mockup. Keep their exact design. Apply only the template's mock style (fabric, wash, shot, lighting, background). Do not stamp their art into the template logo. Never output the last image. Never put the last image on a new background.";
+  "Edit the first attached image (the locked template) and return that same photograph. Use the last attached image only as a design swatch for garment color and printed artwork. Never output the last image. Never put the last image on a new background. Keep the template's fabric, mockup style, shot type, camera, and background.";
 
 const HAT_SYSTEM_PROMPT =
   "Edit the first attached image (the locked hat template) and return that same photograph. The other images are the customer's hat from front, side, and/or back. Use them for color and for exact logo placement by panel. Strip the template logos. Do not force a front lockup. Leave blank any panel with no mark in the customer's photos. Never output the customer's photos.";
