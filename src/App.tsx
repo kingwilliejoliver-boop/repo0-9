@@ -16,6 +16,7 @@ import tinosCap from "./assets/templates/tinos-cap.jpg";
 import stinkyDogCap from "./assets/templates/stinky-dog-cap.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import howItWorksMockup from "./assets/how-it-works-mockup.jpg";
+import howItWorksResult from "./assets/how-it-works-result.jpg";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
 import StarsGalaxy from "./StarsGalaxy";
@@ -298,7 +299,7 @@ const LOOKS_PER_PAGE = 6;
 const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Hat"] as const;
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
-const PAYWALL_ENABLED = false;
+const PAYWALL_ENABLED = true;
 const FREE_USED_KEY = "shotfarm-free-used";
 const PAID_CREDITS_KEY = "shotfarm-paid-credits";
 const PAGE_KEY = "shotfarm-page";
@@ -871,6 +872,161 @@ function FaqSection() {
   );
 }
 
+function UploadMockupDemo() {
+  return (
+    <div
+      className="w-full aspect-square rounded-xl mb-3 bg-[#fafafa] border border-[#ebebeb] overflow-hidden text-left p-3 flex flex-col"
+      aria-hidden
+    >
+      <p className="text-[10px] font-semibold text-[#aaa] tracking-wide mb-2">Your mockup</p>
+      <div className="flex-1 min-h-0 flex gap-2">
+        <div className="flex-1 min-w-0 rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center p-2">
+          <img src={howItWorksMockup} alt="" className="max-w-full max-h-full object-contain" />
+        </div>
+        <div className="w-12 flex-shrink-0 rounded-lg border-2 border-dashed border-[#ddd] flex flex-col items-center justify-center gap-0.5 text-[#bbb]">
+          <IconUpload />
+          <span className="text-[8px] font-semibold tracking-wide">ADD</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PickLookDemo() {
+  const looks = [3, 5, 8, 11]
+    .map((id) => TEMPLATES.find((t) => t.id === id))
+    .filter((t): t is (typeof TEMPLATES)[number] => Boolean(t));
+  const trinity = looks[3];
+  const [picked, setPicked] = useState(3);
+  const [clicking, setClicking] = useState(false);
+  const [preview, setPreview] = useState(true);
+
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    let cancelled = false;
+    const wait = (ms: number) => new Promise<void>((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+    (async () => {
+      while (!cancelled) {
+        setPreview(false);
+        for (let i = 0; i < 3; i += 1) {
+          setPicked(i);
+          await wait(700);
+          if (cancelled) return;
+        }
+        setPicked(3);
+        await wait(550);
+        if (cancelled) return;
+        setClicking(true);
+        await wait(200);
+        setClicking(false);
+        await wait(120);
+        if (cancelled) return;
+        setPreview(true);
+        await wait(2600);
+        if (cancelled) return;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <div
+      className="w-full aspect-square rounded-xl mb-3 bg-[#fafafa] border border-[#ebebeb] overflow-hidden text-left relative"
+      aria-hidden
+    >
+      <div className="absolute inset-0 flex items-center justify-center p-3">
+        <div className="w-full origin-center scale-[0.8]">
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-[8px] font-semibold text-[#aaa] tracking-wide">Choose a look</p>
+            <div className="flex items-center gap-0.5 text-[#ccc] scale-[0.6] origin-right">
+              <IconChevron dir="left" />
+              <span className="text-[7px] tabular-nums w-5 text-center">1/3</span>
+              <IconChevron dir="right" />
+            </div>
+          </div>
+          <div className="flex gap-1.5 mb-2">
+            {["All", "Tee", "Hoodie", "Hat"].map((garment) => (
+              <span key={garment} className={`text-[8px] ${garment === "All" ? "text-[#111]" : "text-[#bbb]"}`}>
+                {garment}
+              </span>
+            ))}
+          </div>
+          <div className="relative">
+            <div className="grid grid-cols-2 gap-1.5">
+              {looks.map((tpl, i) => (
+                <div key={tpl.id}>
+                  <div
+                    className={`relative aspect-square rounded-md overflow-hidden bg-[#f4f4f4] transition-shadow duration-200 ${
+                      picked === i ? "ring-2 ring-[#111]" : "ring-1 ring-[#ebebeb]"
+                    }`}
+                  >
+                    <img src={tpl.img} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <p className={`mt-0.5 text-[7px] leading-tight truncate ${picked === i ? "text-[#111] font-medium" : "text-[#888]"}`}>
+                    {tpl.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+            {!preview && (
+              <div
+                className="absolute z-10 pointer-events-none transition-all duration-500 ease-out"
+                style={{
+                  left: picked % 2 === 0 ? "28%" : "76%",
+                  top: picked < 2 ? "22%" : "68%",
+                  transform: `translate(-50%, -20%) scale(${clicking ? 0.82 : 1})`,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" className="drop-shadow-md">
+                  <path
+                    fill="#111"
+                    stroke="#fff"
+                    strokeWidth="1.2"
+                    d="M5.5 3.2v17.6c0 .5.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.45 0 .67-.54.35-.85L6.35 2.85A.5.5 0 0 0 5.5 3.2Z"
+                  />
+                </svg>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {preview && trinity && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-2">
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative h-full w-full bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 border-b border-[#ebebeb] flex-shrink-0">
+              <div className="min-w-0">
+                <p className="text-[9px] font-semibold text-[#111] truncate">{trinity.name}</p>
+                <p className="text-[7px] text-[#888]">{trinity.shot} · {trinity.garment}</p>
+              </div>
+              <span className="w-4 h-4 flex items-center justify-center text-[#888] flex-shrink-0">
+                <IconClose />
+              </span>
+            </div>
+            <div className="flex-1 min-h-0 bg-[#f7f7f7] flex items-center justify-center p-2">
+              <img src={trinity.img} alt="" className="max-h-full max-w-full object-contain rounded" />
+            </div>
+            <div className="px-2.5 py-2 border-t border-[#ebebeb] flex-shrink-0">
+              <p className="text-[7px] text-[#888] leading-snug mb-1.5 line-clamp-2">{trinity.summary}</p>
+              <div
+                className="w-full py-1.5 rounded-md text-center text-[8px] font-semibold text-white"
+                style={{ backgroundColor: "#111", letterSpacing: "0.04em" }}
+              >
+                Use this look
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LandingPage({
   onStart,
   onLooks,
@@ -940,16 +1096,24 @@ function LandingPage({
         </div>
         <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
           {[
-            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: howItWorksMockup as string | null, imgLabel: "Mockup example" },
-            { n: "02", title: "Pick a look", body: "Choose from our set templates.", img: null as string | null, imgLabel: "Look example" },
-            { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: null as string | null, imgLabel: "Result example" },
+            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: howItWorksMockup as string | null, imgLabel: "Mockup example", fit: "contain", frame: "square" },
+            { n: "02", title: "Pick a look", body: "Choose from our set templates.", img: trinityTee as string | null, imgLabel: "Trinity Tee", fit: "cover", frame: "square" },
+            { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: howItWorksResult as string | null, imgLabel: "Result example", fit: "cover", frame: "portrait" },
           ].map((step) => (
             <div key={step.n} className="text-center">
-              {step.img ? (
+              {step.n === "01" ? (
+                <UploadMockupDemo />
+              ) : step.n === "02" ? (
+                <PickLookDemo />
+              ) : step.img ? (
                 <img
                   src={step.img}
                   alt={step.imgLabel}
-                  className="w-full aspect-square object-contain p-4 rounded-xl mb-3 bg-[#f4f4f4]"
+                  className={`w-full rounded-xl mb-3 bg-[#f4f4f4] ${
+                    step.frame === "portrait" ? "aspect-[3/4]" : "aspect-square"
+                  } ${
+                    step.fit === "cover" ? "object-cover" : "object-contain p-4"
+                  }`}
                 />
               ) : (
                 <div
