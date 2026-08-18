@@ -772,12 +772,6 @@ function LandingPage({
   onSignIn: () => void;
 }) {
   const startLabel = signedIn ? "Generate" : "Get started";
-  const heroLooks = [
-    { id: 5, label: "Raspberry Hills", after: raspberryHillsTee },
-    { id: 3, label: "Saint Distressed", after: saintDistressedTee },
-  ];
-  const [heroLookId, setHeroLookId] = useState(5);
-  const heroLook = heroLooks.find((look) => look.id === heroLookId) ?? heroLooks[0];
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto bg-white">
@@ -806,7 +800,7 @@ function LandingPage({
           <button
             type="button"
             onClick={onStart}
-            className="mt-5 px-5 py-2.5 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
+            className="mt-3 px-5 py-2.5 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
             style={{ letterSpacing: "0.04em" }}
           >
             {startLabel}
@@ -815,26 +809,9 @@ function LandingPage({
         <div className="w-full max-w-[420px]">
           <BeforeAfterSlider
             beforeSrc={raspberryHillsMockup}
-            afterSrc={heroLook.after}
-            afterLabel={heroLook.label}
+            afterSrc={raspberryHillsTee}
+            afterLabel="Raspberry Hills"
           />
-          <div className="mt-4 flex items-center justify-center gap-2">
-            {heroLooks.map((look) => {
-              const active = look.id === heroLookId;
-              return (
-                <button
-                  key={look.id}
-                  type="button"
-                  onClick={() => setHeroLookId(look.id)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold cursor-pointer ${
-                    active ? "bg-[#111] text-white" : "bg-[#f4f4f4] text-[#888] hover:text-[#111]"
-                  }`}
-                >
-                  {look.label}
-                </button>
-              );
-            })}
-          </div>
         </div>
       </section>
 
