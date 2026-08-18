@@ -8,6 +8,7 @@ import palywoodTee from "./assets/templates/palywood-tee.jpg";
 import shimTee from "./assets/templates/shim-tee.jpg";
 import aliceGalerieTee from "./assets/templates/alice-galerie-tee.jpg";
 import trinityTee from "./assets/templates/trinity-tee.jpg";
+import washedZipHoodie from "./assets/templates/washed-zip-hoodie.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
@@ -274,6 +275,7 @@ const LOOK_IMAGES: Record<number, string> = {
   9: shimTee,
   10: aliceGalerieTee,
   11: trinityTee,
+  12: washedZipHoodie,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
@@ -283,7 +285,7 @@ const TEMPLATES = LOOKS.map((look) => ({
 }));
 
 const LOOKS_PER_PAGE = 6;
-const GARMENT_FILTERS = ["All", "Tee"] as const;
+const GARMENT_FILTERS = ["All", "Tee", "Hoodie"] as const;
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
 const FREE_USED_KEY = "shotfarm-free-used";
@@ -344,6 +346,7 @@ const HISTORY = [
   { id: 9, img: shimTee, prompt: "Shim tee" },
   { id: 10, img: aliceGalerieTee, prompt: "Alice Galerie tee" },
   { id: 11, img: trinityTee, prompt: "Trinity tee" },
+  { id: 12, img: washedZipHoodie, prompt: "Washed zip hoodie" },
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
