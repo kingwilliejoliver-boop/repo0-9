@@ -10,6 +10,9 @@ import shimTee from "./assets/templates/shim-tee.jpg";
 import aliceGalerieTee from "./assets/templates/alice-galerie-tee.jpg";
 import trinityTee from "./assets/templates/trinity-tee.jpg";
 import washedZipHoodie from "./assets/templates/washed-zip-hoodie.jpg";
+import prizemanCap from "./assets/templates/prizeman-cap.jpg";
+import dhsCap from "./assets/templates/dhs-cap.jpg";
+import tinosCap from "./assets/templates/tinos-cap.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
@@ -277,6 +280,9 @@ const LOOK_IMAGES: Record<number, string> = {
   10: aliceGalerieTee,
   11: trinityTee,
   12: washedZipHoodie,
+  13: prizemanCap,
+  14: dhsCap,
+  15: tinosCap,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
@@ -286,7 +292,7 @@ const TEMPLATES = LOOKS.map((look) => ({
 }));
 
 const LOOKS_PER_PAGE = 6;
-const GARMENT_FILTERS = ["All", "Tee", "Hoodie"] as const;
+const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Hat"] as const;
 const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
 const FREE_IMAGE_LIMIT = 3;
 const FREE_USED_KEY = "shotfarm-free-used";
@@ -348,6 +354,9 @@ const HISTORY = [
   { id: 10, img: aliceGalerieTee, prompt: "Alice Galerie tee" },
   { id: 11, img: trinityTee, prompt: "Trinity tee" },
   { id: 12, img: washedZipHoodie, prompt: "Washed zip hoodie" },
+  { id: 13, img: prizemanCap, prompt: "Prizeman cap" },
+  { id: 14, img: dhsCap, prompt: "DHS cap" },
+  { id: 15, img: tinosCap, prompt: "Tino's cap" },
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────

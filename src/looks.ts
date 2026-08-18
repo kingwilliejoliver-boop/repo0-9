@@ -1,4 +1,4 @@
-export const GARMENTS = ["Tee", "Hoodie", "Sweatshirt", "Jeans"] as const;
+export const GARMENTS = ["Tee", "Hoodie", "Hat", "Sweatshirt", "Jeans"] as const;
 export const SHOTS = ["Hanger", "Studio", "Flat lay", "On body"] as const;
 export const LOOK_ASPECTS = ["portrait", "square"] as const;
 
@@ -117,6 +117,36 @@ export const LOOKS: Look[] = [
     garment: "Hoodie",
     shot: "Studio",
     summary: "Oversized faded indigo zip hoodie, holes, bleach spots.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
+  {
+    id: 13,
+    name: "Prizeman Cap",
+    garment: "Hat",
+    shot: "Flat lay",
+    summary: "White and blue dad hat on a red car hood.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
+  {
+    id: 14,
+    name: "DHS Cap",
+    garment: "Hat",
+    shot: "Studio",
+    summary: "Distressed yellow and orange cap, frayed brim, concrete.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
+  {
+    id: 15,
+    name: "Tino's Cap",
+    garment: "Hat",
+    shot: "Flat lay",
+    summary: "Red cap on a blue car trunk, daylight.",
     prompt: TEMPLATE_TRANSFER_PROMPT,
     refs: [],
     aspect: "portrait",
