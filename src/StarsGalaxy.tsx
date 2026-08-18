@@ -15,6 +15,7 @@ export default function StarsGalaxy({
   followCursor = false,
   background = "#000000",
   starColor = "#ffffff",
+  edgeFade = "none",
   className,
 }: {
   stars?: number;
@@ -29,6 +30,7 @@ export default function StarsGalaxy({
   followCursor?: boolean;
   background?: string;
   starColor?: string;
+  edgeFade?: "none" | "top" | "bottom";
   className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -105,6 +107,30 @@ export default function StarsGalaxy({
         ctx.fill();
       }
       ctx.globalAlpha = 1;
+      if (edgeFade === "bottom" || edgeFade === "top") {
+        const fadeH = Math.min(340, h * 0.48);
+        const fade = ctx.createLinearGradient(
+          0,
+          edgeFade === "bottom" ? h - fadeH : 0,
+          0,
+          edgeFade === "bottom" ? h : fadeH,
+        );
+        if (edgeFade === "bottom") {
+          fade.addColorStop(0, "rgba(0,0,0,1)");
+          fade.addColorStop(0.35, "rgba(0,0,0,0.85)");
+          fade.addColorStop(0.7, "rgba(0,0,0,0.28)");
+          fade.addColorStop(1, "rgba(0,0,0,0)");
+        } else {
+          fade.addColorStop(0, "rgba(0,0,0,0)");
+          fade.addColorStop(0.3, "rgba(0,0,0,0.28)");
+          fade.addColorStop(0.65, "rgba(0,0,0,0.85)");
+          fade.addColorStop(1, "rgba(0,0,0,1)");
+        }
+        ctx.globalCompositeOperation = "destination-in";
+        ctx.fillStyle = fade;
+        ctx.fillRect(0, 0, w, h);
+        ctx.globalCompositeOperation = "source-over";
+      }
       raf = requestAnimationFrame(animate);
     };
     animate();
@@ -114,7 +140,7 @@ export default function StarsGalaxy({
       observer.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
     };
-  }, [stars, speed, spread, focal, twinkle, trail, size, fadeInRange, reverseFly, followCursor, background, starColor]);
+  }, [stars, speed, spread, focal, twinkle, trail, size, fadeInRange, reverseFly, followCursor, background, starColor, edgeFade]);
 
   return (
     <canvas
@@ -128,7 +154,7 @@ export default function StarsGalaxy({
         width: "100%",
         height: "100%",
         display: "block",
-        background,
+        background: edgeFade === "none" ? background : "transparent",
       }}
     />
   );

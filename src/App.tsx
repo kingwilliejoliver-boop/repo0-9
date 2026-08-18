@@ -723,10 +723,10 @@ function FaqSection() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section className="px-6 py-16">
+    <section className="px-6 pt-20 pb-10">
       <div className="max-w-2xl mx-auto">
-        <h2 className="type-headline text-[32px] sm:text-[40px] text-center mb-8">FAQ</h2>
-        <div className="rounded-[26px] bg-[#f4f4f4] p-1 flex flex-col gap-0.5">
+        <h2 className="type-headline text-[32px] sm:text-[40px] text-center mb-8" style={{ color: "#ffffff" }}>FAQ</h2>
+        <div className="flex flex-col gap-2.5">
           {FAQS.map((item, i) => {
             const isOpen = open === i;
             return (
@@ -734,14 +734,14 @@ function FaqSection() {
                 key={item.q}
                 type="button"
                 onClick={() => setOpen(isOpen ? null : i)}
-                className="w-full text-left rounded-3xl bg-white border border-[#ebebeb] px-6 py-6 cursor-pointer"
+                className="faq-glass w-full text-left rounded-3xl px-6 py-6 cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <span className="type-headline flex-1 text-[16px] sm:text-[18px]">{item.q}</span>
-                  <span className="relative w-7 h-7 rounded-full bg-[#f4f4f4] flex-shrink-0" aria-hidden>
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-[#111]" />
+                  <span className="type-headline flex-1 text-[16px] sm:text-[18px]" style={{ color: "#ffffff" }}>{item.q}</span>
+                  <span className="relative w-7 h-7 rounded-full bg-white/15 flex-shrink-0" aria-hidden>
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-white" />
                     <span
-                      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-[#111] transition-transform duration-200 ${
+                      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-white transition-transform duration-200 ${
                         isOpen ? "rotate-90 scale-y-0" : ""
                       }`}
                     />
@@ -749,7 +749,7 @@ function FaqSection() {
                 </div>
                 <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                   <div className="overflow-hidden">
-                    <p className="type-subtext pt-4 text-[15px] sm:text-base">{item.a}</p>
+                    <p className="type-subtext pt-4 text-[15px] sm:text-base" style={{ color: "rgba(255,255,255,0.78)" }}>{item.a}</p>
                   </div>
                 </div>
               </button>
@@ -780,7 +780,7 @@ function LandingPage({
     <div className="w-full min-w-0 flex-1 min-h-0 overflow-y-auto">
       <div className="min-h-full flex flex-col">
       <div className="hero-mesh-wrap">
-      <StarsGalaxy className="hero-smoke" />
+      <StarsGalaxy className="hero-smoke" edgeFade="bottom" />
       <header className="relative z-10 flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0">
         <BrandLockup />
         {showSignIn ? (
@@ -870,16 +870,20 @@ function LandingPage({
         </div>
       </section>
 
-      <FaqSection />
-
-      <footer className="mt-auto px-6 pt-16 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-[12px] text-[#bbb]">© 2026 ShotFarm</p>
-        <nav className="flex items-center gap-5 text-[12px] text-[#888]">
-          <button type="button" onClick={onLooks} className="hover:text-[#111] cursor-pointer">Looks</button>
-          <button type="button" className="hover:text-[#111] cursor-pointer">Privacy</button>
-          <button type="button" className="hover:text-[#111] cursor-pointer">Terms</button>
-        </nav>
-      </footer>
+      <div className="footer-stars-wrap">
+        <StarsGalaxy className="hero-smoke" edgeFade="top" />
+        <div className="relative z-10">
+          <FaqSection />
+          <footer className="px-6 pt-10 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-[12px] text-white/45">© 2026 ShotFarm</p>
+            <nav className="flex items-center gap-5 text-[12px] text-white/55">
+              <button type="button" onClick={onLooks} className="hover:text-white cursor-pointer">Looks</button>
+              <button type="button" className="hover:text-white cursor-pointer">Privacy</button>
+              <button type="button" className="hover:text-white cursor-pointer">Terms</button>
+            </nav>
+          </footer>
+        </div>
+      </div>
       </div>
     </div>
   );

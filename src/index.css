@@ -86,7 +86,7 @@ input[type='range'] {
   min-width: 100%;
   margin: 0;
   left: 0;
-  background: #000000;
+  background: #ffffff;
   overflow: hidden;
 }
 
@@ -109,14 +109,44 @@ input[type='range'] {
   color: #ffffff;
 }
 
-.hero-mesh-wrap::after {
-  content: "";
+.footer-stars-wrap {
+  position: relative;
+  width: 100%;
+  min-width: 100%;
+  margin: 0;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.footer-stars-wrap .hero-smoke {
   position: absolute;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 14rem;
-  z-index: 1;
+  z-index: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100%;
+  min-height: 100%;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
+  display: block;
+}
+
+.footer-stars-wrap .type-headline,
+.footer-stars-wrap .type-subtext {
+  color: #ffffff;
+}
+
+.faq-glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.faq-glass:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
 }
