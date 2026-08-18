@@ -1071,8 +1071,8 @@ function LandingPage({
           <button
             type="button"
             onClick={onStart}
-            className="mt-3 px-5 py-2.5 rounded-lg bg-white text-[#111] text-sm font-semibold hover:opacity-90 cursor-pointer"
-            style={{ letterSpacing: "0.04em" }}
+            className="mt-3 inline-flex items-center justify-center min-h-[52px] px-10 rounded-full border border-white/15 text-white text-[15px] font-light tracking-[0.02em] cursor-pointer hover:border-white/30 hover:bg-white/5 transition-colors"
+            style={{ backgroundColor: "rgb(0, 2, 11)" }}
           >
             {startLabel}
           </button>
@@ -1106,15 +1106,17 @@ function LandingPage({
               ) : step.n === "02" ? (
                 <PickLookDemo />
               ) : step.img ? (
-                <img
-                  src={step.img}
-                  alt={step.imgLabel}
-                  className={`w-full rounded-xl mb-3 bg-[#f4f4f4] ${
+                <div
+                  className={`w-full rounded-xl mb-3 overflow-hidden ${
                     step.frame === "portrait" ? "aspect-[3/4]" : "aspect-square"
-                  } ${
-                    step.fit === "cover" ? "object-cover" : "object-contain p-4"
                   }`}
-                />
+                >
+                  <img
+                    src={step.img}
+                    alt={step.imgLabel}
+                    className={`w-full h-full ${step.fit === "cover" ? "object-cover" : "object-contain p-4 bg-[#f4f4f4]"}`}
+                  />
+                </div>
               ) : (
                 <div
                   className="w-full aspect-square rounded-xl mb-3 bg-[#f4f4f4] border border-dashed border-[#ddd] flex items-center justify-center"
