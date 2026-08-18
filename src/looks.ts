@@ -71,6 +71,16 @@ export const LOOKS: Look[] = [
     refs: [],
     aspect: "portrait",
   },
+  {
+    id: 8,
+    name: "Palywood Tee",
+    garment: "Tee",
+    shot: "Studio",
+    summary: "Distressed grey tee, collage print, feathered white studio.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
 ];
 /* looks:end */
 

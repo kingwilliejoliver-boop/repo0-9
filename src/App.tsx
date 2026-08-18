@@ -4,6 +4,7 @@ import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
 import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
 import archivesTee from "./assets/templates/archives-tee.jpg";
 import prettyToxicTee from "./assets/templates/pretty-toxic-tee.jpg";
+import palywoodTee from "./assets/templates/palywood-tee.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
 import { LOOKS } from "./looks";
 import LooksEditor from "./LooksEditor";
@@ -266,6 +267,7 @@ const LOOK_IMAGES: Record<number, string> = {
   5: raspberryHillsTee,
   6: archivesTee,
   7: prettyToxicTee,
+  8: palywoodTee,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
@@ -332,6 +334,7 @@ const HISTORY = [
   { id: 5, img: raspberryHillsTee, prompt: "Raspberry Hills tee" },
   { id: 6, img: archivesTee, prompt: "Archives tee" },
   { id: 7, img: prettyToxicTee, prompt: "Pretty Toxic tee" },
+  { id: 8, img: palywoodTee, prompt: "Palywood tee" },
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
