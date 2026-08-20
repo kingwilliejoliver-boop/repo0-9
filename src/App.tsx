@@ -290,7 +290,13 @@ const TEMPLATES = LOOKS.map((look) => ({
 
 const LOOKS_PER_PAGE = 6;
 const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Hat"] as const;
-const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4"];
+const ASPECT_RATIOS = [
+  { id: "1:1", label: "Feed", hint: "Square", w: 16, h: 16, radius: "rounded-[4px]" },
+  { id: "3:4", label: "Post", hint: "Portrait", w: 13, h: 17, radius: "rounded-[4px]" },
+  { id: "9:16", label: "Story", hint: "Full screen", w: 10, h: 18, radius: "rounded-[5px]" },
+  { id: "4:3", label: "Photo", hint: "Classic", w: 18, h: 14, radius: "rounded-[4px]" },
+  { id: "16:9", label: "Wide", hint: "Landscape", w: 20, h: 11, radius: "rounded-[3px]" },
+] as const;
 const FREE_IMAGE_LIMIT = 3;
 const PAYWALL_ENABLED = true;
 const FREE_USED_KEY = "shotfarm-free-used";
@@ -1910,19 +1916,31 @@ function AppShell({ session }: { session: Session }) {
               <Label>Output size</Label>
             </div>
             <div className="flex gap-1.5">
-              {ASPECT_RATIOS.map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setAspectRatio(r)}
-                  className={`flex-1 min-w-[3.25rem] py-2 lg:py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer border ${
-                    aspectRatio === r
-                      ? "bg-[#111] text-white border-[#111]"
-                      : "bg-white text-[#888] border-[#e8e8e8] hover:border-[#ccc] hover:text-[#333]"
-                  }`}
-                >
-                  {r}
-                </button>
-              ))}
+              {ASPECT_RATIOS.map((r) => {
+                const on = aspectRatio === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setAspectRatio(r.id)}
+                    className={`flex-1 min-w-0 py-2 px-1 rounded-xl text-center transition-all duration-150 cursor-pointer border ${
+                      on
+                        ? "bg-[#111] text-white border-[#111]"
+                        : "bg-white text-[#888] border-[#e8e8e8] hover:border-[#ccc] hover:text-[#333]"
+                    }`}
+                  >
+                    <span className="flex items-end justify-center h-[22px] mb-1.5">
+                      <span
+                        className={`block ${r.radius} border-2 ${on ? "border-white bg-white/15" : "border-current"}`}
+                        style={{ width: r.w, height: r.h }}
+                        aria-hidden
+                      />
+                    </span>
+                    <span className="block text-[11px] font-semibold leading-none">{r.label}</span>
+                    <span className={`block text-[9px] mt-0.5 leading-none ${on ? "text-white/55" : "text-[#bbb]"}`}>{r.hint}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
