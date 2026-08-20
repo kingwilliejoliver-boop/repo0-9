@@ -55,7 +55,7 @@ export default async function handler(
       const session = event.data.object as Stripe.Checkout.Session;
       const paid = session.payment_status === "paid" || session.status === "complete";
       const userId = userIdFrom(session.metadata?.user_id) || userIdFrom(session.client_reference_id);
-      if (paid && userId) {
+      if (paid && userId && userId !== "guest") {
         const plan = session.metadata?.plan === "pro" ? "pro" : "starter";
         await addPaidCredits({
           userId,

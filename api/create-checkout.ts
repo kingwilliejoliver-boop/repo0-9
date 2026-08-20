@@ -22,19 +22,28 @@ export default async function handler(
 
   const plan = req.body?.plan === "pro" ? "pro" : "starter";
   const originHeader = req.headers.origin;
-  const hostHeader = req.headers.host;
+  const hostHeader = req.headers.host ?? req.headers["x-forwarded-host"];
   const origin =
     (typeof originHeader === "string" && originHeader) ||
     (typeof hostHeader === "string" && hostHeader ? `https://${hostHeader}` : "http://localhost:8443");
+
+  let userId = "guest";
+  try {
+    const { requireUser } = await import("../lib/auth");
+    const user = await requireUser(req);
+    if (user?.userId) userId = user.userId;
+  } catch {
+    /* Guest checkout is allowed. */
+  }
 
   try {
     const stripe = new Stripe(secret);
     const session = await stripe.checkout.sessions.create({
       mode: plan === "pro" ? "subscription" : "payment",
-      client_reference_id: "guest",
-      metadata: { plan, user_id: "guest" },
+      client_reference_id: userId,
+      metadata: { plan, user_id: userId },
       subscription_data:
-        plan === "pro" ? { metadata: { plan, user_id: "guest" } } : undefined,
+        plan === "pro" ? { metadata: { plan, user_id: userId } } : undefined,
       line_items:
         plan === "pro"
           ? [

@@ -301,6 +301,8 @@ const FREE_IMAGE_LIMIT = 3;
 const PAYWALL_ENABLED = true;
 const FREE_USED_KEY = "shotfarm-free-used";
 const PAID_CREDITS_KEY = "shotfarm-paid-credits";
+const PENDING_CHECKOUT_KEY = "shotfarm-pending-checkout";
+const CREDITED_SESSIONS_KEY = "shotfarm-credited-sessions";
 const PAGE_KEY = "shotfarm-page";
 
 type Page = "home" | "generate" | "library" | "history" | "settings";
@@ -329,6 +331,50 @@ function readPaidCredits() {
 function writePaidCredits(next: number) {
   try {
     localStorage.setItem(PAID_CREDITS_KEY, String(next));
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function readPendingCheckout() {
+  try {
+    return localStorage.getItem(PENDING_CHECKOUT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writePendingCheckout(sessionId: string) {
+  try {
+    localStorage.setItem(PENDING_CHECKOUT_KEY, sessionId);
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function clearPendingCheckout() {
+  try {
+    localStorage.removeItem(PENDING_CHECKOUT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function checkoutAlreadyCredited(sessionId: string) {
+  try {
+    const seen = JSON.parse(localStorage.getItem(CREDITED_SESSIONS_KEY) || "[]") as unknown;
+    return Array.isArray(seen) && seen.includes(sessionId);
+  } catch {
+    return false;
+  }
+}
+
+function markCheckoutCredited(sessionId: string) {
+  try {
+    const seen = JSON.parse(localStorage.getItem(CREDITED_SESSIONS_KEY) || "[]") as unknown;
+    const list = Array.isArray(seen) ? seen.filter((id): id is string => typeof id === "string") : [];
+    if (!list.includes(sessionId)) list.push(sessionId);
+    localStorage.setItem(CREDITED_SESSIONS_KEY, JSON.stringify(list.slice(-40)));
   } catch {
     /* ignore quota / private mode */
   }
@@ -1449,7 +1495,10 @@ function AppShell({ session }: { session: Session }) {
   const [generateError, setGenerateError] = useState<string | null>(null);
 
   const freeUsed = session.signedIn && session.account ? session.account.freeUsed : localFreeUsed;
-  const paidCredits = session.signedIn && session.account ? session.account.paidCredits : localPaidCredits;
+  const paidCredits =
+    session.signedIn && session.account
+      ? Math.max(session.account.paidCredits, localPaidCredits)
+      : localPaidCredits;
   const canSignIn = session.configured && session.ready && !session.signedIn;
 
   const goTo = (next: Page) => {
@@ -1491,35 +1540,39 @@ function AppShell({ session }: { session: Session }) {
   }, [garmentFilter]);
 
   useEffect(() => {
+    if (session.configured && !session.ready) return;
     const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("session_id");
+    const fromUrl = params.get("session_id");
+    if (fromUrl) writePendingCheckout(fromUrl);
+    const sessionId = fromUrl || readPendingCheckout();
     if (!sessionId) return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/confirm-checkout?session_id=${encodeURIComponent(sessionId)}`);
-        const data = await res.json();
+        const token = session.signedIn ? await session.getToken() : null;
+        const headers: Record<string, string> = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+        const res = await fetch(`/api/confirm-checkout?session_id=${encodeURIComponent(sessionId)}`, { headers });
+        const data = (await res.json()) as { ok?: boolean; plan?: string; images?: number; paidCredits?: number };
         if (cancelled || !data.ok) return;
-        if (session.configured) {
+        const images = typeof data.images === "number" ? data.images : data.plan === "pro" ? 150 : 20;
+        if (session.signedIn) {
           for (let i = 0; i < 8; i += 1) {
             const account = await session.refreshAccount();
             if (account && account.paidCredits > 0) break;
             await new Promise((resolve) => setTimeout(resolve, 700));
             if (cancelled) return;
           }
-        } else if (data.plan === "pro") {
+        }
+        if (!checkoutAlreadyCredited(sessionId)) {
+          markCheckoutCredited(sessionId);
           setLocalPaidCredits((prev) => {
-            const next = prev + 150;
-            writePaidCredits(next);
-            return next;
-          });
-        } else {
-          setLocalPaidCredits((prev) => {
-            const next = prev + 20;
+            const next = prev + images;
             writePaidCredits(next);
             return next;
           });
         }
+        clearPendingCheckout();
         setPaywallOpen(false);
         setPage("generate");
         try {
@@ -1527,18 +1580,17 @@ function AppShell({ session }: { session: Session }) {
         } catch {
           /* ignore */
         }
-      } catch {
-        /* checkout confirm failed */
-      } finally {
         const url = new URL(window.location.href);
         url.searchParams.delete("session_id");
         window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+      } catch {
+        /* Keep session_id so a refresh can still apply the credits. */
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [session.configured, session.refreshAccount]);
+  }, [session.configured, session.ready, session.signedIn, session.getToken, session.refreshAccount]);
 
   const generateTemplates = TEMPLATES.filter((t) => garmentFilter === "All" || t.garment === garmentFilter);
   const filteredTemplates = generateTemplates.filter((t) => {
