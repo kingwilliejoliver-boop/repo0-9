@@ -139,6 +139,40 @@ export default async function handler(
   const model = process.env.FAL_MODEL || "fal-ai/nano-banana-2/edit";
   const imageUrls = lookImages.length > 0 ? [...lookImages, ...mockups] : mockups;
 
+  let billed: { userId: string; usedFree: boolean; freeUsed: number; paidCredits: number } | null = null;
+  try {
+    const { clerkConfigured, requireUser } = await import("../lib/auth");
+    if (clerkConfigured()) {
+      const user = await requireUser(req);
+      if (!user) {
+        res.status(401).json({ error: "Sign in to generate." });
+        return;
+      }
+      const { databaseConfigured, spendCredit } = await import("../lib/db");
+      if (databaseConfigured()) {
+        const spent = await spendCredit(user.userId);
+        if (!spent.ok) {
+          res.status(402).json({
+            error: "No images left.",
+            code: "out_of_credits",
+            freeUsed: spent.account.freeUsed,
+            paidCredits: spent.account.paidCredits,
+          });
+          return;
+        }
+        billed = {
+          userId: user.userId,
+          usedFree: spent.usedFree,
+          freeUsed: spent.account.freeUsed,
+          paidCredits: spent.account.paidCredits,
+        };
+      }
+    }
+  } catch {
+    res.status(500).json({ error: "Could not start this look." });
+    return;
+  }
+
   try {
     const fal = await fetch(`https://fal.run/${model}`, {
       method: "POST",
@@ -167,18 +201,46 @@ export default async function handler(
     };
 
     if (!fal.ok) {
+      if (billed) {
+        try {
+          const { refundCredit } = await import("../lib/db");
+          await refundCredit(billed.userId, billed.usedFree);
+        } catch {
+          /* keep the 502 */
+        }
+      }
       res.status(502).json({ error: falMessage(data) });
       return;
     }
 
     const image = data.images?.[0]?.url;
     if (!image) {
+      if (billed) {
+        try {
+          const { refundCredit } = await import("../lib/db");
+          await refundCredit(billed.userId, billed.usedFree);
+        } catch {
+          /* keep the 502 */
+        }
+      }
       res.status(502).json({ error: "Fal did not return an image. Try another mockup." });
       return;
     }
 
-    res.status(200).json({ image });
+    res.status(200).json(
+      billed
+        ? { image, freeUsed: billed.freeUsed, paidCredits: billed.paidCredits }
+        : { image },
+    );
   } catch {
+    if (billed) {
+      try {
+        const { refundCredit } = await import("../lib/db");
+        await refundCredit(billed.userId, billed.usedFree);
+      } catch {
+        /* keep the 500 */
+      }
+    }
     res.status(500).json({ error: "Fal could not apply this look." });
   }
 }

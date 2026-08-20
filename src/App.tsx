@@ -304,6 +304,7 @@ const PAID_CREDITS_KEY = "shotfarm-paid-credits";
 const PENDING_CHECKOUT_KEY = "shotfarm-pending-checkout";
 const CREDITED_SESSIONS_KEY = "shotfarm-credited-sessions";
 const PAGE_KEY = "shotfarm-page";
+const AFTER_AUTH_KEY = "shotfarm-after-auth";
 
 type Page = "home" | "generate" | "library" | "history" | "settings";
 
@@ -377,6 +378,30 @@ function markCheckoutCredited(sessionId: string) {
     localStorage.setItem(CREDITED_SESSIONS_KEY, JSON.stringify(list.slice(-40)));
   } catch {
     /* ignore quota / private mode */
+  }
+}
+
+function readAfterAuth() {
+  try {
+    return sessionStorage.getItem(AFTER_AUTH_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeAfterAuth(next: "generate" | "checkout") {
+  try {
+    sessionStorage.setItem(AFTER_AUTH_KEY, next);
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearAfterAuth() {
+  try {
+    sessionStorage.removeItem(AFTER_AUTH_KEY);
+  } catch {
+    /* ignore */
   }
 }
 
@@ -863,7 +888,7 @@ const FAQS = [
   },
   {
     q: "How many free images do I get?",
-    a: "Every account gets 3 free images. After that, buy a Pack for 20 images or Pro for 150 images a month.",
+    a: "Every account gets 3 free images after you sign in. After that, buy a Pack for 20 images or Pro for 150 images a month.",
   },
   {
     q: "What do the paid plans include?",
@@ -1500,6 +1525,7 @@ function AppShell({ session }: { session: Session }) {
       ? Math.max(session.account.paidCredits, localPaidCredits)
       : localPaidCredits;
   const canSignIn = session.configured && session.ready && !session.signedIn;
+  const needsSignIn = canSignIn;
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -1512,6 +1538,18 @@ function AppShell({ session }: { session: Session }) {
     if (PAYWALL_ENABLED && next === "generate" && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
     if (next === "home") setPaywallOpen(false);
   };
+
+  useEffect(() => {
+    if (!session.signedIn) return;
+    const next = readAfterAuth();
+    clearAfterAuth();
+    if (next === "checkout") {
+      goTo("generate");
+      setPaywallOpen(true);
+    } else if (next === "generate") {
+      goTo("generate");
+    }
+  }, [session.signedIn]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1642,6 +1680,11 @@ function AppShell({ session }: { session: Session }) {
   };
 
   const handleGenerate = async () => {
+    if (needsSignIn) {
+      writeAfterAuth("generate");
+      session.openSignIn();
+      return;
+    }
     if (PAYWALL_ENABLED && outOfCredits) {
       setPaywallOpen(true);
       return;
@@ -1674,7 +1717,9 @@ function AppShell({ session }: { session: Session }) {
       });
       const data = await res.json().catch(() => ({} as { image?: string; error?: string; code?: string; freeUsed?: number; paidCredits?: number }));
       if (res.status === 401) {
-        throw new Error("Could not apply this look. Try again.");
+        writeAfterAuth("generate");
+        session.openSignIn();
+        throw new Error("Sign in to generate.");
       }
       if (PAYWALL_ENABLED && (res.status === 402 || data.code === "out_of_credits")) {
         setPaywallOpen(true);
@@ -1710,6 +1755,11 @@ function AppShell({ session }: { session: Session }) {
   };
 
   const startCheckout = async () => {
+    if (needsSignIn) {
+      writeAfterAuth("checkout");
+      session.openSignIn();
+      return;
+    }
     const token = session.configured && session.signedIn ? await session.getToken() : null;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -1732,7 +1782,14 @@ function AppShell({ session }: { session: Session }) {
     <div className={`flex flex-col h-dvh overflow-hidden font-sans ${page === "home" ? "bg-black" : "lg:flex-row bg-white"}`}>
       {page === "home" ? (
         <LandingPage
-          onStart={() => goTo("generate")}
+          onStart={() => {
+            if (needsSignIn) {
+              writeAfterAuth("generate");
+              session.openSignIn();
+              return;
+            }
+            goTo("generate");
+          }}
           onLooks={() => goTo("library")}
           signedIn={session.signedIn}
           showSignIn={canSignIn}
@@ -2001,17 +2058,19 @@ function AppShell({ session }: { session: Session }) {
         <div className="p-4 sm:p-5 border-t border-[#ebebeb] bg-white sticky bottom-0 md:static flex-shrink-0 z-10">
           <button
             onClick={handleGenerate}
-            disabled={generating || (!outOfCredits && !canGenerate)}
+            disabled={generating || (!needsSignIn && !outOfCredits && !canGenerate)}
             className="w-full py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.99]"
             style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
           >
             <IconGenerate />
-            {generating ? "Applying look…" : "Apply this look"}
+            {generating ? "Applying look…" : needsSignIn ? "Sign in to apply" : "Apply this look"}
           </button>
           {!generating && (
             <p className={`text-[11px] text-center mt-2 ${generateError ? "text-[#111]" : "text-[#bbb]"}`}>
               {generateError
                 ? generateError
+                : needsSignIn
+                  ? "Sign in to generate and keep your images on your account"
                 : outOfCredits
                     ? "Get more images to continue"
                     : !hasMockup

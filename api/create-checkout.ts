@@ -28,12 +28,23 @@ export default async function handler(
     (typeof hostHeader === "string" && hostHeader ? `https://${hostHeader}` : "http://localhost:8443");
 
   let userId = "guest";
+  let mustSignIn = false;
   try {
-    const { requireUser } = await import("../lib/auth");
-    const user = await requireUser(req);
-    if (user?.userId) userId = user.userId;
+    const { clerkConfigured, requireUser } = await import("../lib/auth");
+    if (clerkConfigured()) {
+      mustSignIn = true;
+      const user = await requireUser(req);
+      if (user?.userId) {
+        userId = user.userId;
+        mustSignIn = false;
+      }
+    }
   } catch {
-    /* Guest checkout is allowed. */
+    /* Local checkout without Clerk still works. */
+  }
+  if (mustSignIn) {
+    res.status(401).json({ error: "Sign in to buy images." });
+    return;
   }
 
   try {
