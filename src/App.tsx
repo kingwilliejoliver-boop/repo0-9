@@ -1441,8 +1441,8 @@ function AppWithClerk() {
   const [signInOpen, setSignInOpen] = useState(false);
 
   const refreshAccount = useCallback(async () => {
-    if (!isSignedIn) {
-      setAccount(null);
+    if (!PAYWALL_ENABLED || !isSignedIn) {
+      if (!isSignedIn) setAccount(null);
       return null;
     }
     const next = await fetchAccount(getToken);
