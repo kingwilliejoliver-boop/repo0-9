@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { PAYWALL_ENABLED } from "../lib/billing";
 
 export const config = {
   api: { bodyParser: { sizeLimit: "8mb" } },
@@ -140,38 +141,40 @@ export default async function handler(
   const imageUrls = lookImages.length > 0 ? [...lookImages, ...mockups] : mockups;
 
   let billed: { userId: string; usedFree: boolean; freeUsed: number; paidCredits: number } | null = null;
-  try {
-    const { PAYWALL_ENABLED } = await import("../lib/billing");
-    const { clerkConfigured, requireUser } = await import("../lib/auth");
-    if (PAYWALL_ENABLED && clerkConfigured()) {
-      const user = await requireUser(req);
-      if (!user) {
-        res.status(401).json({ error: "Sign in to generate." });
-        return;
-      }
-      const { databaseConfigured, spendCredit } = await import("../lib/db");
-      if (databaseConfigured()) {
-        const spent = await spendCredit(user.userId);
-        if (!spent.ok) {
-          res.status(402).json({
-            error: "No images left.",
-            code: "out_of_credits",
-            freeUsed: spent.account.freeUsed,
-            paidCredits: spent.account.paidCredits,
-          });
+  if (PAYWALL_ENABLED) {
+    try {
+      const { clerkConfigured, requireUser } = await import("../lib/auth");
+      if (clerkConfigured()) {
+        const user = await requireUser(req);
+        if (!user) {
+          res.status(401).json({ error: "Sign in to generate." });
           return;
         }
-        billed = {
-          userId: user.userId,
-          usedFree: spent.usedFree,
-          freeUsed: spent.account.freeUsed,
-          paidCredits: spent.account.paidCredits,
-        };
+        const { databaseConfigured, spendCredit } = await import("../lib/db");
+        if (databaseConfigured()) {
+          const spent = await spendCredit(user.userId);
+          if (!spent.ok) {
+            res.status(402).json({
+              error: "No images left.",
+              code: "out_of_credits",
+              freeUsed: spent.account.freeUsed,
+              paidCredits: spent.account.paidCredits,
+            });
+            return;
+          }
+          billed = {
+            userId: user.userId,
+            usedFree: spent.usedFree,
+            freeUsed: spent.account.freeUsed,
+            paidCredits: spent.account.paidCredits,
+          };
+        }
       }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not start this look.";
+      res.status(500).json({ error: message || "Could not start this look." });
+      return;
     }
-  } catch {
-    res.status(500).json({ error: "Could not start this look." });
-    return;
   }
 
   try {
