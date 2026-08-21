@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { SignIn, UserButton, useAuth } from "@clerk/react";
 import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
-import raspberryHillsTee from "./assets/templates/raspberry-hills-tee.jpg";
-import raspberryHillsMockup from "./assets/templates/raspberry-hills-mockup.png";
+import raspberryHillsTee from "./assets/raspberry-hills-white.jpg";
+import raspberryHillsTemplate from "./assets/templates/raspberry-hills-tee.jpg";
+import landingMockup from "./assets/landing-mockup.jpg";
 import archivesTee from "./assets/templates/archives-tee.jpg";
 import prettyToxicTee from "./assets/templates/pretty-toxic-tee.jpg";
 import palywoodTee from "./assets/templates/palywood-tee.jpg";
@@ -15,8 +16,6 @@ import dhsCap from "./assets/templates/dhs-cap.jpg";
 import tinosCap from "./assets/templates/tinos-cap.jpg";
 import stinkyDogCap from "./assets/templates/stinky-dog-cap.jpg";
 import shotfarmLogo from "./assets/shotfarm-logo.png";
-import howItWorksMockup from "./assets/how-it-works-mockup.jpg";
-import howItWorksResult from "./assets/how-it-works-result.jpg";
 import { LOOKS } from "./looks";
 import { FREE_IMAGE_LIMIT, PAYWALL_ENABLED } from "../lib/billing";
 import LooksEditor from "./LooksEditor";
@@ -269,7 +268,7 @@ async function toJpegDataUrl(src: string, max = 1280, aspectRatio?: string) {
 
 const LOOK_IMAGES: Record<number, string> = {
   3: saintDistressedTee,
-  5: raspberryHillsTee,
+  5: raspberryHillsTemplate,
   6: archivesTee,
   7: prettyToxicTee,
   8: palywoodTee,
@@ -420,7 +419,7 @@ const PLANS = [
 
 const HISTORY = [
   { id: 3, img: saintDistressedTee, prompt: "Saint distressed tee" },
-  { id: 5, img: raspberryHillsTee, prompt: "Raspberry Hills tee" },
+  { id: 5, img: raspberryHillsTemplate, prompt: "Raspberry Hills tee" },
   { id: 6, img: archivesTee, prompt: "Archives tee" },
   { id: 7, img: prettyToxicTee, prompt: "Pretty Toxic tee" },
   { id: 8, img: palywoodTee, prompt: "Palywood tee" },
@@ -845,9 +844,21 @@ function BeforeAfterSlider({
         updateFromX(e.clientX);
       }}
     >
-      <img src={afterSrc} alt={afterLabel} className="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable={false} />
+      <img
+        src={afterSrc}
+        alt={afterLabel}
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ transform: "translateY(7%) scale(1.28)" }}
+        draggable={false}
+      />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-        <img src={beforeSrc} alt="Your mockup" className="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable={false} />
+        <img
+          src={beforeSrc}
+          alt="Your mockup"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ objectPosition: "center 100%" }}
+          draggable={false}
+        />
       </div>
       <div className="absolute inset-y-0 w-px bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.15)]" style={{ left: `${pos}%` }}>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-[#ebebeb] shadow-md flex items-center justify-center text-[#111]">
@@ -948,13 +959,9 @@ function UploadMockupDemo() {
       aria-hidden
     >
       <p className="text-[10px] font-semibold text-[#aaa] tracking-wide mb-2">Your mockup</p>
-      <div className="flex-1 min-h-0 flex gap-2">
-        <div className="flex-1 min-w-0 rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center p-2">
-          <img src={howItWorksMockup} alt="" className="max-w-full max-h-full object-contain" />
-        </div>
-        <div className="w-12 flex-shrink-0 rounded-lg border-2 border-dashed border-[#ddd] flex flex-col items-center justify-center gap-0.5 text-[#bbb]">
-          <IconUpload />
-          <span className="text-[8px] font-semibold tracking-wide">ADD</span>
+      <div className="flex-1 min-h-0">
+        <div className="w-full h-full rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center p-2">
+          <img src={landingMockup} alt="" className="max-w-[90%] max-h-[90%] object-contain" />
         </div>
       </div>
     </div>
@@ -965,10 +972,9 @@ function PickLookDemo() {
   const looks = [3, 5, 8, 11]
     .map((id) => TEMPLATES.find((t) => t.id === id))
     .filter((t): t is (typeof TEMPLATES)[number] => Boolean(t));
-  const trinity = looks[3];
-  const [picked, setPicked] = useState(3);
-  const [clicking, setClicking] = useState(false);
+  const [picked, setPicked] = useState(0);
   const [preview, setPreview] = useState(true);
+  const pickedLook = looks[picked];
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -980,18 +986,11 @@ function PickLookDemo() {
     (async () => {
       while (!cancelled) {
         setPreview(false);
-        for (let i = 0; i < 3; i += 1) {
-          setPicked(i);
-          await wait(700);
-          if (cancelled) return;
-        }
         setPicked(3);
-        await wait(550);
+        await wait(500);
         if (cancelled) return;
-        setClicking(true);
-        await wait(200);
-        setClicking(false);
-        await wait(120);
+        setPicked(0);
+        await wait(550);
         if (cancelled) return;
         setPreview(true);
         await wait(2600);
@@ -1048,7 +1047,7 @@ function PickLookDemo() {
                 style={{
                   left: picked % 2 === 0 ? "28%" : "76%",
                   top: picked < 2 ? "22%" : "68%",
-                  transform: `translate(-50%, -20%) scale(${clicking ? 0.82 : 1})`,
+                  transform: "translate(-50%, -20%)",
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" className="drop-shadow-md">
@@ -1064,30 +1063,24 @@ function PickLookDemo() {
           </div>
         </div>
       </div>
-      {preview && trinity && (
+      {preview && pickedLook && (
         <div className="absolute inset-0 z-20 flex items-center justify-center p-2">
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative h-full w-full bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col">
             <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 border-b border-[#ebebeb] flex-shrink-0">
               <div className="min-w-0">
-                <p className="text-[9px] font-semibold text-[#111] truncate">{trinity.name}</p>
-                <p className="text-[7px] text-[#888]">{trinity.shot} · {trinity.garment}</p>
+                <p className="text-[9px] font-semibold text-[#111] truncate">{pickedLook.name}</p>
+                <p className="text-[7px] text-[#888]">{pickedLook.shot} · {pickedLook.garment}</p>
               </div>
               <span className="w-4 h-4 flex items-center justify-center text-[#888] flex-shrink-0">
                 <IconClose />
               </span>
             </div>
             <div className="flex-1 min-h-0 bg-[#f7f7f7] flex items-center justify-center p-2">
-              <img src={trinity.img} alt="" className="max-h-full max-w-full object-contain rounded" />
+              <img src={pickedLook.img} alt="" className="max-h-full max-w-full object-contain rounded" />
             </div>
             <div className="px-2.5 py-2 border-t border-[#ebebeb] flex-shrink-0">
-              <p className="text-[7px] text-[#888] leading-snug mb-1.5 line-clamp-2">{trinity.summary}</p>
-              <div
-                className="w-full py-1.5 rounded-md text-center text-[8px] font-semibold text-white"
-                style={{ backgroundColor: "#111", letterSpacing: "0.04em" }}
-              >
-                Use this look
-              </div>
+              <p className="text-[7px] text-[#888] leading-snug line-clamp-2">{pickedLook.summary}</p>
             </div>
           </div>
         </div>
@@ -1132,10 +1125,10 @@ function LandingPage({
       <section className="relative z-10 flex flex-col items-center px-6 pt-12 pb-24 gap-10">
         <div className="text-center max-w-sm">
           <h1 className="type-headline text-[36px] sm:text-[48px] text-white" style={{ color: "#ffffff" }}>
-            Upload a mockup.<br />Get the shot.
+            From mockup<br />to real product image
           </h1>
           <p className="type-subtext mt-4 text-[16px] sm:text-[18px] text-white" style={{ color: "#ffffff" }}>
-            Skip the photoshoot.<br />We apply a locked look to your mockup.
+            Skip the photoshoot.<br />Start selling your product now
           </p>
           <button
             type="button"
@@ -1148,7 +1141,7 @@ function LandingPage({
         </div>
         <div className="w-full max-w-[420px]">
           <BeforeAfterSlider
-            beforeSrc={raspberryHillsMockup}
+            beforeSrc={landingMockup}
             afterSrc={raspberryHillsTee}
             afterLabel="Raspberry Hills"
           />
@@ -1165,9 +1158,9 @@ function LandingPage({
         </div>
         <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
           {[
-            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: howItWorksMockup as string | null, imgLabel: "Mockup example", fit: "contain", frame: "square" },
+            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: landingMockup as string | null, imgLabel: "Mockup example", fit: "contain", frame: "square" },
             { n: "02", title: "Pick a look", body: "Choose from our set templates.", img: trinityTee as string | null, imgLabel: "Trinity Tee", fit: "cover", frame: "square" },
-            { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: howItWorksResult as string | null, imgLabel: "Result example", fit: "cover", frame: "portrait" },
+            { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: raspberryHillsTee as string | null, imgLabel: "Result example", fit: "contain", frame: "portrait" },
           ].map((step) => (
             <div key={step.n} className="text-center">
               {step.n === "01" ? (
@@ -1177,7 +1170,7 @@ function LandingPage({
               ) : step.img ? (
                 <div
                   className={`w-full rounded-xl mb-3 overflow-hidden ${
-                    step.frame === "portrait" ? "aspect-[3/4]" : "aspect-square"
+                    step.frame === "portrait" ? "aspect-[3/4] bg-[#f4f4f4] border border-[#ebebeb]" : "aspect-square"
                   }`}
                 >
                   <img
