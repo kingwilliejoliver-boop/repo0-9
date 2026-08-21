@@ -141,8 +141,9 @@ export default async function handler(
 
   let billed: { userId: string; usedFree: boolean; freeUsed: number; paidCredits: number } | null = null;
   try {
+    const { PAYWALL_ENABLED } = await import("../lib/billing");
     const { clerkConfigured, requireUser } = await import("../lib/auth");
-    if (clerkConfigured()) {
+    if (PAYWALL_ENABLED && clerkConfigured()) {
       const user = await requireUser(req);
       if (!user) {
         res.status(401).json({ error: "Sign in to generate." });

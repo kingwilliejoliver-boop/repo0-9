@@ -18,6 +18,7 @@ import shotfarmLogo from "./assets/shotfarm-logo.png";
 import howItWorksMockup from "./assets/how-it-works-mockup.jpg";
 import howItWorksResult from "./assets/how-it-works-result.jpg";
 import { LOOKS } from "./looks";
+import { FREE_IMAGE_LIMIT, PAYWALL_ENABLED } from "../lib/billing";
 import LooksEditor from "./LooksEditor";
 import StarsGalaxy from "./StarsGalaxy";
 import { clerkAppearance, clerkLocalization, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
@@ -297,8 +298,6 @@ const ASPECT_RATIOS = [
   { id: "4:3", label: "Photo", hint: "Classic", w: 18, h: 14, radius: "rounded-[4px]" },
   { id: "16:9", label: "Wide", hint: "Landscape", w: 20, h: 11, radius: "rounded-[3px]" },
 ] as const;
-const FREE_IMAGE_LIMIT = 3;
-const PAYWALL_ENABLED = true;
 const FREE_USED_KEY = "shotfarm-free-used";
 const PAID_CREDITS_KEY = "shotfarm-paid-credits";
 const PENDING_CHECKOUT_KEY = "shotfarm-pending-checkout";
@@ -1525,7 +1524,7 @@ function AppShell({ session }: { session: Session }) {
       ? Math.max(session.account.paidCredits, localPaidCredits)
       : localPaidCredits;
   const canSignIn = session.configured && session.ready && !session.signedIn;
-  const needsSignIn = canSignIn;
+  const needsSignIn = PAYWALL_ENABLED && canSignIn;
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -1545,7 +1544,7 @@ function AppShell({ session }: { session: Session }) {
     clearAfterAuth();
     if (next === "checkout") {
       goTo("generate");
-      setPaywallOpen(true);
+      if (PAYWALL_ENABLED) setPaywallOpen(true);
     } else if (next === "generate") {
       goTo("generate");
     }
@@ -1716,7 +1715,7 @@ function AppShell({ session }: { session: Session }) {
         }),
       });
       const data = await res.json().catch(() => ({} as { image?: string; error?: string; code?: string; freeUsed?: number; paidCredits?: number }));
-      if (res.status === 401) {
+      if (res.status === 401 && PAYWALL_ENABLED) {
         writeAfterAuth("generate");
         session.openSignIn();
         throw new Error("Sign in to generate.");
