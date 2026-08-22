@@ -294,6 +294,7 @@ const TEMPLATES = LOOKS.map((look) => ({
 
 const LOOKS_PER_PAGE = 6;
 const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Long sleeve", "Hat"] as const;
+const COMING_SOON = import.meta.env.VITE_COMING_SOON !== "false";
 const ASPECT_RATIOS = [
   { id: "1:1", label: "Feed", hint: "Square", w: 16, h: 16, radius: "rounded-[4px]" },
   { id: "3:4", label: "Post", hint: "Portrait", w: 13, h: 17, radius: "rounded-[4px]" },
@@ -956,6 +957,87 @@ function FaqSection() {
   );
 }
 
+function ComingSoonPage() {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) throw new Error(data.error || "Could not join the waitlist.");
+      setSubmitted(true);
+      setEmail("");
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : "Could not join the waitlist.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <main className="coming-soon relative min-h-dvh overflow-hidden bg-black text-white">
+      <StarsGalaxy className="absolute inset-0 h-full w-full" edgeFade="bottom" stars={850} speed={1.5} />
+      <div className="relative z-10 flex min-h-dvh flex-col px-6 py-5 sm:px-10 sm:py-7">
+        <header className="flex items-center justify-between">
+          <BrandLockup />
+          <span className="text-[11px] uppercase tracking-[0.18em] text-white/45">Coming soon</span>
+        </header>
+        <section className="flex flex-1 items-center justify-center py-20">
+          <div className="w-full max-w-xl text-center">
+            <p className="mb-5 text-[11px] uppercase tracking-[0.24em] text-white/45">ShotFarm</p>
+            <h1 className="type-headline text-[42px] leading-[1.04] text-white sm:text-[68px]">
+              Real product images<br />from your mockup.
+            </h1>
+            <p className="type-subtext mx-auto mt-6 max-w-md text-[16px] leading-relaxed text-white/70 sm:text-[18px]">
+              We are putting the finishing touches on a faster way to make your next product shot.
+            </p>
+            {submitted ? (
+              <div className="mx-auto mt-9 max-w-md border border-white/15 bg-white/[0.06] px-5 py-4 text-sm text-white/85">
+                You are on the list. We will let you know when ShotFarm is ready.
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="mx-auto mt-9 flex w-full max-w-md flex-col gap-2.5 sm:flex-row">
+                <label className="sr-only" htmlFor="waitlist-email">Email address</label>
+                <input
+                  id="waitlist-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  className="min-h-12 min-w-0 flex-1 border border-white/15 bg-white/[0.08] px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/45"
+                />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="min-h-12 border border-white/15 bg-white text-sm font-medium text-black transition-colors hover:bg-white/90 disabled:cursor-wait disabled:opacity-60 sm:px-5"
+                >
+                  {submitting ? "Joining..." : "Notify me"}
+                </button>
+              </form>
+            )}
+            {error ? <p className="mt-3 text-xs text-white/70">{error}</p> : null}
+          </div>
+        </section>
+        <footer className="flex items-center justify-between text-[11px] text-white/35">
+          <span>© 2026 ShotFarm</span>
+          <span>Built for the next drop</span>
+        </footer>
+      </div>
+    </main>
+  );
+}
+
 function UploadMockupDemo() {
   return (
     <div
@@ -1428,6 +1510,7 @@ function LibraryPage({
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  if (COMING_SOON) return <ComingSoonPage />;
   if (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) return <AppWithClerk />;
   return <AppShell session={localSession} />;
 }

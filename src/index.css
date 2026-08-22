@@ -44,6 +44,11 @@ body {
   color: #111111;
 }
 
+.coming-soon .type-headline,
+.coming-soon .type-subtext {
+  color: #ffffff;
+}
+
 .cl-modalBackdrop {
   display: flex !important;
   align-items: center !important;
