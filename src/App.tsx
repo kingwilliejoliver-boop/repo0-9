@@ -987,52 +987,34 @@ function ComingSoonPage() {
   return (
     <main className="coming-soon relative min-h-dvh overflow-hidden bg-black text-white">
       <StarsGalaxy className="absolute inset-0 h-full w-full" edgeFade="bottom" stars={850} speed={1.5} />
-      <div className="relative z-10 flex min-h-dvh flex-col px-6 py-5 sm:px-10 sm:py-7">
-        <header className="flex items-center justify-between">
-          <BrandLockup />
-          <span className="text-[11px] uppercase tracking-[0.18em] text-white/45">Coming soon</span>
-        </header>
-        <section className="flex flex-1 items-center justify-center py-20">
-          <div className="w-full max-w-xl text-center">
-            <p className="mb-5 text-[11px] uppercase tracking-[0.24em] text-white/45">ShotFarm</p>
-            <h1 className="type-headline text-[42px] leading-[1.04] text-white sm:text-[68px]">
-              Real product images<br />from your mockup.
-            </h1>
-            <p className="type-subtext mx-auto mt-6 max-w-md text-[16px] leading-relaxed text-white/70 sm:text-[18px]">
-              We are putting the finishing touches on a faster way to make your next product shot.
-            </p>
-            {submitted ? (
-              <div className="mx-auto mt-9 max-w-md border border-white/15 bg-white/[0.06] px-5 py-4 text-sm text-white/85">
-                You are on the list. We will let you know when ShotFarm is ready.
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="mx-auto mt-9 flex w-full max-w-md flex-col gap-2.5 sm:flex-row">
-                <label className="sr-only" htmlFor="waitlist-email">Email address</label>
-                <input
-                  id="waitlist-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
-                  className="min-h-12 min-w-0 flex-1 border border-white/15 bg-white/[0.08] px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/45"
-                />
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="min-h-12 border border-white/15 bg-white text-sm font-medium text-black transition-colors hover:bg-white/90 disabled:cursor-wait disabled:opacity-60 sm:px-5"
-                >
-                  {submitting ? "Joining..." : "Notify me"}
-                </button>
-              </form>
-            )}
-            {error ? <p className="mt-3 text-xs text-white/70">{error}</p> : null}
-          </div>
-        </section>
-        <footer className="flex items-center justify-between text-[11px] text-white/35">
-          <span>© 2026 ShotFarm</span>
-          <span>Built for the next drop</span>
-        </footer>
+      <div className="relative z-10 flex min-h-dvh items-center justify-center px-6">
+        <img
+          src={shotfarmLogo}
+          alt="ShotFarm"
+          width={44}
+          height={44}
+          className="absolute top-7 left-1/2 h-11 w-11 -translate-x-1/2 rounded-[11px]"
+        />
+        <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-2.5 sm:flex-row">
+          <label className="sr-only" htmlFor="waitlist-email">Email address</label>
+          <input
+            id="waitlist-email"
+            type="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@example.com"
+            className="min-h-12 min-w-0 flex-1 border border-white/15 bg-white/[0.08] px-4 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/45"
+          />
+          <button
+            type="submit"
+            disabled={submitting}
+            className="min-h-12 border border-white/15 bg-white text-sm font-medium text-black transition-colors hover:bg-white/90 disabled:cursor-wait disabled:opacity-60 sm:px-5"
+          >
+            {submitting ? "Joining..." : submitted ? "Joined" : "Notify me"}
+          </button>
+          <span className="sr-only" aria-live="polite">{error || (submitted ? "Email added to the waitlist." : "")}</span>
+        </form>
       </div>
     </main>
   );
