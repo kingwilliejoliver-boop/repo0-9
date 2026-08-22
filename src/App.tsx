@@ -4,7 +4,8 @@ import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryHillsTee from "./assets/raspberry-hills-white.jpg";
 import raspberryHillsTemplate from "./assets/templates/raspberry-hills-tee.jpg";
 import landingMockup from "./assets/landing-mockup.jpg";
-import completeControlLongSleeve from "./assets/8ae30d2206cae072604ce4e7c225d181.jpg";
+import completeControlLongSleeve from "./assets/gTtqOYCJbVo5MUj9JPBzm_kNXFQ69K.jpg";
+import completeControlDistressedTee from "./assets/LXtAAMhNx7GBk_8PmuMw2_bReF0ypb.jpg";
 import archivesTee from "./assets/templates/archives-tee.jpg";
 import prettyToxicTee from "./assets/templates/pretty-toxic-tee.jpg";
 import palywoodTee from "./assets/templates/palywood-tee.jpg";
@@ -282,6 +283,7 @@ const LOOK_IMAGES: Record<number, string> = {
   15: tinosCap,
   16: stinkyDogCap,
   17: completeControlLongSleeve,
+  18: completeControlDistressedTee,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({

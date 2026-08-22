@@ -192,6 +192,16 @@ export const LOOKS: Look[] = [
     refs: [],
     aspect: "portrait",
   },
+  {
+    id: 18,
+    name: "Complete Control Distressed Tee",
+    garment: "Tee",
+    shot: "Studio",
+    summary: "Faded gray distressed tee with torn sleeves and hem on a white studio background.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
 ];
 /* looks:end */
 
