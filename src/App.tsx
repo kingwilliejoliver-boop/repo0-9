@@ -295,6 +295,8 @@ const TEMPLATES = LOOKS.map((look) => ({
 const LOOKS_PER_PAGE = 6;
 const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Long sleeve", "Hat"] as const;
 const COMING_SOON = import.meta.env.VITE_COMING_SOON !== "false";
+const COMING_SOON_ACCESS_CODE = "Lovehurtme23$";
+const COMING_SOON_ACCESS_KEY = "shotfarm-coming-soon-access";
 const ASPECT_RATIOS = [
   { id: "1:1", label: "Feed", hint: "Square", w: 16, h: 16, radius: "rounded-[4px]" },
   { id: "3:4", label: "Post", hint: "Portrait", w: 13, h: 17, radius: "rounded-[4px]" },
@@ -957,14 +959,22 @@ function FaqSection() {
   );
 }
 
-function ComingSoonPage() {
+function ComingSoonPage({ onUnlock }: { onUnlock: () => void }) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (email === COMING_SOON_ACCESS_CODE) {
+      try {
+        localStorage.setItem(COMING_SOON_ACCESS_KEY, "true");
+      } catch {
+        /* Continue for this session if storage is unavailable. */
+      }
+      onUnlock();
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -999,7 +1009,7 @@ function ComingSoonPage() {
           <label className="sr-only" htmlFor="waitlist-email">Email address</label>
           <input
             id="waitlist-email"
-            type="email"
+            type="text"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -1492,7 +1502,14 @@ function LibraryPage({
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  if (COMING_SOON) return <ComingSoonPage />;
+  const [comingSoonUnlocked, setComingSoonUnlocked] = useState(() => {
+    try {
+      return localStorage.getItem(COMING_SOON_ACCESS_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+  if (COMING_SOON && !comingSoonUnlocked) return <ComingSoonPage onUnlock={() => setComingSoonUnlocked(true)} />;
   if (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) return <AppWithClerk />;
   return <AppShell session={localSession} />;
 }
