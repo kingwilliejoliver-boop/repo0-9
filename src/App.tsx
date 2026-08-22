@@ -4,6 +4,7 @@ import saintDistressedTee from "./assets/templates/saint-distressed-tee.jpg";
 import raspberryHillsTee from "./assets/raspberry-hills-white.jpg";
 import raspberryHillsTemplate from "./assets/templates/raspberry-hills-tee.jpg";
 import landingMockup from "./assets/landing-mockup.jpg";
+import completeControlLongSleeve from "./assets/8ae30d2206cae072604ce4e7c225d181.jpg";
 import archivesTee from "./assets/templates/archives-tee.jpg";
 import prettyToxicTee from "./assets/templates/pretty-toxic-tee.jpg";
 import palywoodTee from "./assets/templates/palywood-tee.jpg";
@@ -280,6 +281,7 @@ const LOOK_IMAGES: Record<number, string> = {
   14: dhsCap,
   15: tinosCap,
   16: stinkyDogCap,
+  17: completeControlLongSleeve,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
@@ -289,7 +291,7 @@ const TEMPLATES = LOOKS.map((look) => ({
 }));
 
 const LOOKS_PER_PAGE = 6;
-const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Hat"] as const;
+const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Long sleeve", "Hat"] as const;
 const ASPECT_RATIOS = [
   { id: "1:1", label: "Feed", hint: "Square", w: 16, h: 16, radius: "rounded-[4px]" },
   { id: "3:4", label: "Post", hint: "Portrait", w: 13, h: 17, radius: "rounded-[4px]" },
@@ -1018,7 +1020,7 @@ function PickLookDemo() {
             </div>
           </div>
           <div className="flex gap-1.5 mb-2">
-            {["All", "Tee", "Hoodie", "Hat"].map((garment) => (
+            {["All", "Tee", "Hoodie", "Long sleeve", "Hat"].map((garment) => (
               <span key={garment} className={`text-[8px] ${garment === "All" ? "text-[#111]" : "text-[#bbb]"}`}>
                 {garment}
               </span>
@@ -1622,7 +1624,9 @@ function AppShell({ session }: { session: Session }) {
     };
   }, [session.configured, session.ready, session.signedIn, session.getToken, session.refreshAccount]);
 
-  const generateTemplates = TEMPLATES.filter((t) => garmentFilter === "All" || t.garment === garmentFilter);
+  const generateTemplates = TEMPLATES.filter(
+    (t) => t.garment !== "Hat" && (garmentFilter === "All" || t.garment === garmentFilter),
+  );
   const filteredTemplates = generateTemplates.filter((t) => {
     const q = lookQuery.trim().toLowerCase();
     return (

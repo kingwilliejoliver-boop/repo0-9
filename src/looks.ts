@@ -1,4 +1,4 @@
-export const GARMENTS = ["Tee", "Hoodie", "Hat", "Sweatshirt", "Jeans"] as const;
+export const GARMENTS = ["Tee", "Hoodie", "Long sleeve", "Hat", "Sweatshirt", "Jeans"] as const;
 export const SHOTS = ["Hanger", "Studio", "Flat lay", "On body"] as const;
 export const LOOK_ASPECTS = ["portrait", "square"] as const;
 
@@ -179,6 +179,16 @@ export const LOOKS: Look[] = [
     shot: "Studio",
     summary: "Royal blue unstructured cap on wood, white front embroidery.",
     prompt: HAT_TRANSFER_PROMPT,
+    refs: [],
+    aspect: "portrait",
+  },
+  {
+    id: 17,
+    name: "Complete Control Long Sleeve",
+    garment: "Long sleeve",
+    shot: "Studio",
+    summary: "Faded black long sleeve with front graphic on a white studio background.",
+    prompt: TEMPLATE_TRANSFER_PROMPT,
     refs: [],
     aspect: "portrait",
   },
