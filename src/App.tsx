@@ -954,25 +954,22 @@ const FAQS = [
 
 function FaqSection() {
   return (
-    <section id="faq" className="px-6 pt-20 pb-10">
+    <section id="faq" className="faq-section px-6 pt-16 pb-20 bg-white">
       <div className="max-w-2xl mx-auto">
-        <h2 className="type-headline text-[32px] sm:text-[40px] text-center mb-8" style={{ color: "#ffffff" }}>FAQ</h2>
+        <h2 className="type-headline text-[32px] sm:text-[40px] text-center mb-8">FAQ</h2>
         <div className="flex flex-col gap-2.5">
           {FAQS.map((item) => (
-            <details key={item.q} className="faq-glass group rounded-3xl overflow-hidden">
+            <details key={item.q} className="faq-card group rounded-3xl overflow-hidden">
               <summary className="list-none px-6 py-6 cursor-pointer [-webkit-tap-highlight-color:transparent] [&::-webkit-details-marker]:hidden">
                 <div className="flex items-center gap-3">
-                  <span className="type-headline flex-1 text-[16px] sm:text-[18px]" style={{ color: "#ffffff" }}>{item.q}</span>
-                  <span className="relative w-7 h-7 rounded-full bg-white/15 flex-shrink-0" aria-hidden>
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-white" />
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-white origin-center transition-transform duration-200 group-open:scale-y-0" />
+                  <span className="type-headline flex-1 text-[16px] sm:text-[18px]">{item.q}</span>
+                  <span className="relative w-7 h-7 rounded-full bg-[#111]/8 flex-shrink-0" aria-hidden>
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-[#111]" />
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-[#111] origin-center transition-transform duration-200 group-open:scale-y-0" />
                   </span>
                 </div>
               </summary>
-              <p
-                className="type-subtext px-6 pb-6 text-[15px] sm:text-base"
-                style={{ color: "rgba(255,255,255,0.78)" }}
-              >
+              <p className="type-subtext px-6 pb-6 text-[15px] sm:text-base text-[#666]">
                 {item.a}
               </p>
             </details>
@@ -1323,19 +1320,18 @@ function LandingPage({
         </div>
       </section>
 
+      <FaqSection />
+
       <div className="footer-stars-wrap">
         <StarsGalaxy className="hero-smoke" edgeFade="top" stableHeight />
-        <div className="relative z-10">
-          <FaqSection />
-          <footer className="px-6 pt-10 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[12px] text-white/45">© 2026 ShotFarm</p>
-            <nav className="flex items-center gap-5 text-[12px] text-white/55">
-              <button type="button" onClick={onLooks} className="hover:text-white cursor-pointer">Looks</button>
-              <button type="button" className="hover:text-white cursor-pointer">Privacy</button>
-              <button type="button" className="hover:text-white cursor-pointer">Terms</button>
-            </nav>
-          </footer>
-        </div>
+        <footer className="relative z-10 px-6 pt-24 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[12px] text-white/45">© 2026 ShotFarm</p>
+          <nav className="flex items-center gap-5 text-[12px] text-white/55">
+            <button type="button" onClick={onLooks} className="hover:text-white cursor-pointer">Looks</button>
+            <button type="button" className="hover:text-white cursor-pointer">Privacy</button>
+            <button type="button" className="hover:text-white cursor-pointer">Terms</button>
+          </nav>
+        </footer>
       </div>
       </div>
     </div>

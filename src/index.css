@@ -142,9 +142,28 @@ input[type='range'] {
   position: relative;
   width: 100%;
   min-width: 100%;
+  min-height: 16rem;
   margin: 0;
   background: #000000;
   overflow: hidden;
+}
+
+.footer-stars-wrap::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10rem;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.92) 18%,
+    rgba(255, 255, 255, 0.45) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 .footer-stars-wrap .hero-smoke {
@@ -162,9 +181,14 @@ input[type='range'] {
   display: block;
 }
 
-.footer-stars-wrap .type-headline,
-.footer-stars-wrap .type-subtext {
-  color: #ffffff;
+.faq-card {
+  background: #fafafa;
+  border: 1px solid #ebebeb;
+}
+
+.faq-card:hover {
+  background: #f4f4f4;
+  border-color: #ddd;
 }
 
 .faq-glass {
