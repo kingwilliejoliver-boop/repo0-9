@@ -2198,7 +2198,7 @@ function AppShell({ session }: { session: Session }) {
         </div>
 
         {/* Generate */}
-        <div className="p-4 sm:p-5 border-t border-[#ebebeb] bg-white sticky bottom-0 md:static flex-shrink-0 z-10">
+        <div className={`p-4 sm:p-5 border-t border-[#ebebeb] bg-white sticky bottom-0 md:static flex-shrink-0 z-10 ${generateLocked ? "max-md:hidden" : ""}`}>
           <button
             onClick={handleGenerate}
             disabled={generating || (!needsSignIn && !outOfCredits && !canGenerate)}
