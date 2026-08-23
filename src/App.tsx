@@ -1568,6 +1568,7 @@ function LibraryPage({
   onUse,
   onStart,
   locked = false,
+  authLocked = false,
 }: {
   templates: typeof TEMPLATES;
   total: number;
@@ -1579,6 +1580,7 @@ function LibraryPage({
   onUse: (id: number) => void;
   onStart: () => void;
   locked?: boolean;
+  authLocked?: boolean;
 }) {
   const [setIndex, setSetIndex] = useState(0);
   const pageCount = Math.max(1, Math.ceil(templates.length / LOOKS_PER_PAGE));
@@ -1600,7 +1602,11 @@ function LibraryPage({
           <div className="min-w-0">
             <h1 className="type-headline text-2xl sm:text-[28px]">Templates</h1>
             <p className="type-subtext text-[15px] sm:text-base mt-2">
-              {locked ? "Browse the set. Buy a Pack to preview and apply." : "The set we apply to your mockup."}
+              {locked
+                ? authLocked
+                  ? "Sign in to preview and apply looks."
+                  : "Browse the set. Buy a Pack to preview and apply."
+                : "The set we apply to your mockup."}
             </p>
           </div>
           <button
@@ -1800,8 +1806,10 @@ function AppShell({ session }: { session: Session }) {
   const freeLeft = Math.max(0, FREE_IMAGE_LIMIT - freeUsed);
   const imagesLeft = freeLeft + paidCredits;
   const outOfCredits = PAYWALL_ENABLED && imagesLeft <= 0;
-  const paywallLocked = outOfCredits && !needsSignIn;
-  const generateLocked = paywallLocked && (page === "generate" || page === "history");
+  const authLocked = needsSignIn;
+  const paywallLocked = outOfCredits && session.signedIn;
+  const appLocked = authLocked || paywallLocked;
+  const generateLocked = appLocked && (page === "generate" || page === "history");
   const mobileMenuAbovePaywall = generateLocked;
 
   const goTo = (next: Page) => {
@@ -1838,9 +1846,21 @@ function AppShell({ session }: { session: Session }) {
     }
   }, [session.signedIn]);
 
+  useEffect(() => {
+    if (!session.ready || session.signedIn) return;
+    if (page === "generate" || page === "history" || page === "library") {
+      setPaywallOpen(false);
+      session.openSignIn();
+    }
+  }, [session.signedIn, session.ready, page]);
+
   const openPaywall = () => setPaywallOpen(true);
 
   const handleLibraryPreview = (id: number) => {
+    if (authLocked) {
+      session.openSignIn();
+      return;
+    }
     if (paywallLocked) {
       openPaywall();
       return;
@@ -2182,7 +2202,7 @@ function AppShell({ session }: { session: Session }) {
                 ? `${paidCredits} remaining on your account`
                 : "Buy a Pack or Pro to generate"}
             </p>
-            {outOfCredits && (
+            {paywallLocked && (
               <button
                 type="button"
                 onClick={() => setPaywallOpen(true)}
@@ -2190,6 +2210,16 @@ function AppShell({ session }: { session: Session }) {
                 style={{ letterSpacing: "0.04em" }}
               >
                 Get more
+              </button>
+            )}
+            {authLocked && (
+              <button
+                type="button"
+                onClick={() => session.openSignIn()}
+                className="mt-2.5 w-full py-2 rounded-lg bg-[#111] text-white text-[11px] font-semibold tracking-wide cursor-pointer hover:opacity-90"
+                style={{ letterSpacing: "0.04em" }}
+              >
+                Sign in
               </button>
             )}
           </div>
@@ -2207,7 +2237,8 @@ function AppShell({ session }: { session: Session }) {
           onQuery={setLookQuery}
           garmentFilter={garmentFilter}
           onGarmentFilter={setGarmentFilter}
-          locked={paywallLocked}
+          locked={appLocked}
+          authLocked={authLocked}
           onPreview={handleLibraryPreview}
           onUse={handleLibraryUse}
           onStart={() => openGenerate()}
@@ -2461,7 +2492,7 @@ function AppShell({ session }: { session: Session }) {
       )}
       </div>
       </div>
-      {generateLocked && (
+      {generateLocked && paywallLocked && (
         <Paywall
           selectedPlan={selectedPlan}
           onSelectPlan={setSelectedPlan}
@@ -2485,7 +2516,7 @@ function AppShell({ session }: { session: Session }) {
           }}
         />
       )}
-      {PAYWALL_ENABLED && paywallOpen && page === "library" && (
+      {PAYWALL_ENABLED && paywallOpen && paywallLocked && page === "library" && (
         <Paywall
           selectedPlan={selectedPlan}
           onSelectPlan={setSelectedPlan}
