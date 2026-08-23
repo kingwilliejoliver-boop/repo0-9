@@ -726,8 +726,98 @@ function Paywall({
     }
   };
 
+  const sheet = (
+    <div className="relative w-full sm:max-w-[420px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden pointer-events-auto pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="px-6 pt-6 pb-5 border-b border-[#ebebeb]">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="type-headline text-2xl">Get images</p>
+            <p className="type-subtext text-[15px] sm:text-base mt-2">Buy a Pack or Pro to apply looks to your mockups.</p>
+          </div>
+          {dismissible ? (
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-[#888] hover:bg-[#f4f4f4] hover:text-[#111] cursor-pointer flex-shrink-0"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="px-6 py-5 flex flex-col gap-2.5">
+        {PLANS.map((p) => {
+          const active = selectedPlan === p.id;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => onSelectPlan(p.id)}
+              className={`w-full text-left rounded-xl border px-4 py-3.5 transition-all cursor-pointer ${
+                active ? "border-[#111] bg-[#fafafa]" : "border-[#ebebeb] hover:border-[#ccc]"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="type-headline text-sm">{p.name}</span>
+                    {p.recommended && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-[#111] text-white">Best value</span>
+                    )}
+                  </div>
+                  <p className="type-subtext text-[13px] mt-0.5">
+                    {p.interval === "once" ? `${p.images} images · ${p.blurb}` : `${p.images} images / month · ${p.blurb}`}
+                  </p>
+                </div>
+                <p className="type-headline text-xl">
+                  ${p.price}
+                  {p.interval === "month" && <span className="text-xs font-medium text-[#aaa] tracking-normal">/mo</span>}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="px-6 pb-6 pt-1">
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={busy}
+          className="w-full py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
+        >
+          {busy ? "Redirecting…" : `Continue with ${plan.name}`}
+        </button>
+        <p className={`text-[11px] text-center mt-2.5 ${error ? "text-[#111]" : "text-[#bbb]"}`}>
+          {error
+            ? error
+            : plan.interval === "once"
+              ? "One-time. Credits don't expire."
+              : "Cancel anytime. Unused images don't roll over."}
+        </p>
+      </div>
+    </div>
+  );
+
+  if (inset) {
+    return (
+      <>
+        <div className="absolute inset-x-0 top-0 bottom-0 z-[60] bg-black/25 pointer-events-none sm:hidden" aria-hidden />
+        <div className="absolute bottom-0 left-0 right-0 z-[70] pointer-events-none sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-6">
+          <div className="hidden sm:block absolute inset-0 bg-black/40 pointer-events-none" aria-hidden />
+          {sheet}
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div className={`${inset ? "absolute" : "fixed"} inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6 pointer-events-auto`}>
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6 pointer-events-auto">
       {dismissible ? (
         <button
           type="button"
@@ -738,81 +828,7 @@ function Paywall({
       ) : (
         <div className="absolute inset-0 bg-black/40" aria-hidden />
       )}
-      <div className="relative w-full sm:max-w-[420px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-6 pt-6 pb-5 border-b border-[#ebebeb]">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="type-headline text-2xl">Get images</p>
-              <p className="type-subtext text-[15px] sm:text-base mt-2">Buy a Pack or Pro to apply looks to your mockups.</p>
-            </div>
-            {dismissible ? (
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={onClose}
-                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#888] hover:bg-[#f4f4f4] hover:text-[#111] cursor-pointer flex-shrink-0"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="px-6 py-5 flex flex-col gap-2.5">
-          {PLANS.map((p) => {
-            const active = selectedPlan === p.id;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => onSelectPlan(p.id)}
-                className={`w-full text-left rounded-xl border px-4 py-3.5 transition-all cursor-pointer ${
-                  active ? "border-[#111] bg-[#fafafa]" : "border-[#ebebeb] hover:border-[#ccc]"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="type-headline text-sm">{p.name}</span>
-                      {p.recommended && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-[#111] text-white">Best value</span>
-                      )}
-                    </div>
-                    <p className="type-subtext text-[13px] mt-0.5">
-                      {p.interval === "once" ? `${p.images} images · ${p.blurb}` : `${p.images} images / month · ${p.blurb}`}
-                    </p>
-                  </div>
-                  <p className="type-headline text-xl">
-                    ${p.price}
-                    {p.interval === "month" && <span className="text-xs font-medium text-[#aaa] tracking-normal">/mo</span>}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="px-6 pb-6 pt-1">
-          <button
-            type="button"
-            onClick={handleContinue}
-            disabled={busy}
-            className="w-full py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: "#111", fontSize: "15px", letterSpacing: "0.04em" }}
-          >
-            {busy ? "Redirecting…" : `Continue with ${plan.name}`}
-          </button>
-          <p className={`text-[11px] text-center mt-2.5 ${error ? "text-[#111]" : "text-[#bbb]"}`}>
-            {error
-              ? error
-              : plan.interval === "once"
-                ? "One-time. Credits don't expire."
-                : "Cancel anytime. Unused images don't roll over."}
-          </p>
-        </div>
-      </div>
+      {sheet}
     </div>
   );
 }
@@ -2025,7 +2041,7 @@ function AppShell({ session }: { session: Session }) {
         </div>
       </aside>
 
-      <div className={`flex-1 flex flex-col min-h-0 relative ${page === "library" || page === "settings" ? "overflow-hidden" : "md:flex-row overflow-y-auto overscroll-contain md:overflow-hidden"}`}>
+      <div className={`flex-1 flex flex-col min-h-0 relative overflow-hidden ${page === "library" || page === "settings" ? "" : "md:flex-row"}`}>
 
       {page === "library" ? (
         <LibraryPage
@@ -2049,8 +2065,13 @@ function AppShell({ session }: { session: Session }) {
           </div>
         )
       ) : (
-      <>
-      <div className={`flex-1 flex flex-col min-h-0 md:flex-row ${generateLocked ? "pointer-events-none select-none opacity-50 blur-[1px]" : ""}`}>
+      <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col md:flex-row">
+      <div
+        className={`flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y md:overflow-hidden md:flex md:flex-row md:flex-1 ${
+          generateLocked ? "max-md:pb-[min(22rem,52dvh)]" : ""
+        }`}
+      >
+      <div className={`flex flex-col min-h-0 w-full md:flex-row md:flex-1 ${generateLocked ? "pointer-events-none select-none opacity-50 blur-[1px]" : ""}`}>
       {/* ── Control Panel ────────────────────────────────────────────────── */}
       <div className="w-full md:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col min-h-0 md:h-full border-b md:border-b-0 md:border-r border-[#ebebeb] bg-[#fafafa]">
 
@@ -2283,6 +2304,7 @@ function AppShell({ session }: { session: Session }) {
       </main>
       )}
       </div>
+      </div>
       {generateLocked && (
         <Paywall
           selectedPlan={selectedPlan}
@@ -2293,7 +2315,7 @@ function AppShell({ session }: { session: Session }) {
           inset
         />
       )}
-      </>
+      </div>
       )}
       </div>
         </>
