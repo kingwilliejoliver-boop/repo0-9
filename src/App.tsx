@@ -725,8 +725,8 @@ function Paywall({
         <div className="px-6 pt-6 pb-5 border-b border-[#ebebeb]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="type-headline text-2xl">Keep creating</p>
-              <p className="type-subtext text-[15px] sm:text-base mt-2">You've used your 3 free images. Get more to keep applying looks to your mockups.</p>
+              <p className="type-headline text-2xl">Get images</p>
+              <p className="type-subtext text-[15px] sm:text-base mt-2">Buy a Pack or Pro to apply looks to your mockups.</p>
             </div>
             <button
               type="button"
@@ -904,12 +904,12 @@ const FAQS = [
     a: "No. A digital mockup, flat lay, or hanger shot is enough. ShotFarm is built for brands that need the look without booking a studio.",
   },
   {
-    q: "How many free images do I get?",
-    a: "Every account gets 3 free images after you sign in. After that, buy a Pack for 20 images or Pro for 150 images a month.",
+    q: "How much does it cost?",
+    a: "Pack is $9 for 20 images, one time. Pro is $49 a month for 150 images. Credits stay on your signed-in account so you can use them on any device.",
   },
   {
-    q: "What do the paid plans include?",
-    a: "Pack is $9 for 20 images, one time. Pro is $49 a month for 150 images. Credits stay on your signed-in account so you can use them on any device.",
+    q: "What do Pack and Pro include?",
+    a: "Each image is one apply — upload your mockup, pick a look, download the result. Pack is a one-time purchase. Pro renews monthly with 150 fresh images.",
   },
   {
     q: "Can I use the images in my store?",
@@ -1282,7 +1282,7 @@ function LandingPage({
           >
             {startLabel}
           </button>
-          {signedIn ? null : <p className="text-[12px] text-[#bbb] mt-3">3 free images to start</p>}
+          {signedIn ? null : <p className="text-[12px] text-[#bbb] mt-3">Sign in, then buy a Pack to start</p>}
         </div>
       </section>
 
@@ -1954,18 +1954,16 @@ function AppShell({ session }: { session: Session }) {
           {PAYWALL_ENABLED && (
           <div className="mt-3 px-3 py-3 rounded-xl bg-[#f7f7f7]">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] text-[#888]">{paidCredits > 0 ? "Images" : "Free images"}</span>
+              <span className="text-[11px] text-[#888]">Images</span>
               <span className="text-[11px] font-semibold text-[#111]">{`${imagesLeft} left`}</span>
             </div>
             <div className="h-1 rounded-full bg-[#e8e8e8] overflow-hidden">
-              <div className="h-full rounded-full bg-[#111]" style={{ width: `${Math.min(100, (imagesLeft / Math.max(imagesLeft, FREE_IMAGE_LIMIT)) * 100)}%` }} />
+              <div className="h-full rounded-full bg-[#111]" style={{ width: imagesLeft > 0 ? "100%" : "0%" }} />
             </div>
             <p className="text-[10px] text-[#bbb] mt-1.5">
               {paidCredits > 0
-                ? `${paidCredits} paid · ${freeLeft} free`
-                : outOfCredits
-                  ? "You've used your 3 free images"
-                  : `${freeUsed} / ${FREE_IMAGE_LIMIT} used · that's all for free`}
+                ? `${paidCredits} remaining on your account`
+                : "Buy a Pack or Pro to generate"}
             </p>
             {outOfCredits && (
               <button
@@ -2152,7 +2150,7 @@ function AppShell({ session }: { session: Session }) {
                 : needsSignIn
                   ? "Sign in to generate and keep your images on your account"
                 : outOfCredits
-                    ? "Get more images to continue"
+                    ? "Buy a Pack or Pro to continue"
                     : !hasMockup
                     ? hatLook || showHatUpload
                       ? "Upload the front of your hat"
