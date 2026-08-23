@@ -28,6 +28,8 @@ export async function requireUser(req: { headers?: Record<string, unknown> }): P
   const authorizedParties = [
     origin,
     process.env.CLERK_AUTHORIZED_PARTY,
+    "https://shotfarm.io",
+    "https://www.shotfarm.io",
     "https://repo0-9.vercel.app",
   ].filter((value): value is string => Boolean(value));
 
