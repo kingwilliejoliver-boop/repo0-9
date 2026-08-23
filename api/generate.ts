@@ -29,19 +29,23 @@ function readLookPrompt(id: number) {
   return readFileSync(file, "utf8").trim();
 }
 
-function asAngle(value: unknown) {
+type HatAngle = "front" | "side" | "back" | "brim";
+
+function asAngle(value: unknown): HatAngle | null {
   return value === "front" || value === "side" || value === "back" || value === "brim" ? value : null;
 }
 
-function hatAngles(mockupCount: number, requested: unknown) {
-  const listed = Array.isArray(requested) ? requested.map(asAngle).filter((a): a is string => Boolean(a)) : [];
+function hatAngles(mockupCount: number, requested: unknown): HatAngle[] {
+  const listed = Array.isArray(requested)
+    ? requested.map(asAngle).filter((a): a is HatAngle => a !== null)
+    : [];
   if (listed.length === mockupCount) return listed;
   if (mockupCount <= 1) return ["front"];
   if (mockupCount === 2) return ["front", "side"];
   return ["front", "side", "back"].slice(0, mockupCount);
 }
 
-function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number, hat: boolean, angles: string[]) {
+function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number, hat: boolean, angles: HatAngle[]) {
   const refs: string[] = [];
   for (let i = 0; i < lookRefCount; i += 1) {
     refs.push(
