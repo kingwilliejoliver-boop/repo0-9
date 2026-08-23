@@ -1056,8 +1056,8 @@ function ComingSoonPage({ onUnlock }: { onUnlock: () => void }) {
 
 function UploadMockupDemo() {
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center p-2">
-      <img src={landingMockup} alt="" className="max-w-[90%] max-h-[90%] object-contain" />
+    <div className="w-full h-full min-h-[240px] rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center p-1.5">
+      <img src={landingMockup} alt="" className="max-w-full max-h-full object-contain" />
     </div>
   );
 }
@@ -1097,26 +1097,26 @@ function PickLookDemo() {
   }, []);
 
   return (
-    <div className="w-full h-full overflow-hidden text-left relative" aria-hidden>
-      <div className="absolute inset-0 flex items-center justify-center p-3">
-        <div className="w-full origin-center scale-[0.8]">
-          <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[8px] font-semibold text-[#aaa] tracking-wide">Choose a look</p>
-            <div className="flex items-center gap-0.5 text-[#ccc] scale-[0.6] origin-right">
+    <div className="w-full h-full min-h-[240px] overflow-hidden text-left relative" aria-hidden>
+      <div className="absolute inset-0 flex items-center justify-center p-2">
+        <div className="w-full h-full origin-center">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-semibold text-[#aaa] tracking-wide">Choose a look</p>
+            <div className="flex items-center gap-0.5 text-[#ccc]">
               <IconChevron dir="left" />
-              <span className="text-[7px] tabular-nums w-5 text-center">1/3</span>
+              <span className="text-[9px] tabular-nums w-6 text-center">1/3</span>
               <IconChevron dir="right" />
             </div>
           </div>
-          <div className="flex gap-1.5 mb-2">
+          <div className="flex gap-2 mb-2.5">
             {["All", "Tee", "Hoodie", "Long sleeve", "Hat"].map((garment) => (
-              <span key={garment} className={`text-[8px] ${garment === "All" ? "text-[#111]" : "text-[#bbb]"}`}>
+              <span key={garment} className={`text-[10px] ${garment === "All" ? "text-[#111]" : "text-[#bbb]"}`}>
                 {garment}
               </span>
             ))}
           </div>
           <div className="relative">
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-2">
               {looks.map((tpl, i) => (
                 <div key={tpl.id}>
                   <div
@@ -1126,7 +1126,7 @@ function PickLookDemo() {
                   >
                     <img src={tpl.img} alt="" className="w-full h-full object-cover" />
                   </div>
-                  <p className={`mt-0.5 text-[7px] leading-tight truncate ${picked === i ? "text-[#111] font-medium" : "text-[#888]"}`}>
+                  <p className={`mt-1 text-[9px] leading-tight truncate ${picked === i ? "text-[#111] font-medium" : "text-[#888]"}`}>
                     {tpl.name}
                   </p>
                 </div>
@@ -1141,7 +1141,7 @@ function PickLookDemo() {
                   transform: "translate(-50%, -20%)",
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" className="drop-shadow-md">
+                <svg width="18" height="18" viewBox="0 0 24 24" className="drop-shadow-md">
                   <path
                     fill="#111"
                     stroke="#fff"
@@ -1155,23 +1155,23 @@ function PickLookDemo() {
         </div>
       </div>
       {preview && pickedLook && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center p-2">
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-2.5">
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative h-full w-full bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 border-b border-[#ebebeb] flex-shrink-0">
+            <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[#ebebeb] flex-shrink-0">
               <div className="min-w-0">
-                <p className="text-[9px] font-semibold text-[#111] truncate">{pickedLook.name}</p>
-                <p className="text-[7px] text-[#888]">{pickedLook.shot} · {pickedLook.garment}</p>
+                <p className="text-[11px] font-semibold text-[#111] truncate">{pickedLook.name}</p>
+                <p className="text-[9px] text-[#888]">{pickedLook.shot} · {pickedLook.garment}</p>
               </div>
-              <span className="w-4 h-4 flex items-center justify-center text-[#888] flex-shrink-0">
+              <span className="w-5 h-5 flex items-center justify-center text-[#888] flex-shrink-0">
                 <IconClose />
               </span>
             </div>
-            <div className="flex-1 min-h-0 bg-[#f7f7f7] flex items-center justify-center p-2">
+            <div className="flex-1 min-h-0 bg-[#f7f7f7] flex items-center justify-center p-2.5">
               <img src={pickedLook.img} alt="" className="max-h-full max-w-full object-contain rounded" />
             </div>
-            <div className="px-2.5 py-2 border-t border-[#ebebeb] flex-shrink-0">
-              <p className="text-[7px] text-[#888] leading-snug line-clamp-2">{pickedLook.summary}</p>
+            <div className="px-3 py-2 border-t border-[#ebebeb] flex-shrink-0">
+              <p className="text-[9px] text-[#888] leading-snug line-clamp-2">{pickedLook.summary}</p>
             </div>
           </div>
         </div>
@@ -1241,10 +1241,10 @@ function LandingPage({
       </div>
 
       <section className="px-6 pt-20 pb-16 bg-white">
-        <div className="max-w-2xl mx-auto text-left mb-10">
+        <div className="max-w-6xl mx-auto text-left mb-10">
           <h2 className="type-headline text-[30px] tracking-[-0.043em] leading-[1.25]">How ShotFarm helps with your mockup</h2>
         </div>
-        <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
               n: "01",
@@ -1276,20 +1276,20 @@ function LandingPage({
           ].map((step) => (
             <div
               key={step.n}
-              className="w-full aspect-square rounded-xl bg-[#fafafa] border border-[#ebebeb] overflow-hidden flex flex-col p-3 text-left"
+              className="w-full min-h-[560px] rounded-xl bg-[#fafafa] border border-[#ebebeb] overflow-hidden flex flex-col p-4 text-left"
             >
               <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em] shrink-0">{step.n}</p>
-              <h2 className="type-headline text-[26px] tracking-[-0.019em] leading-[1.25] mt-1 shrink-0">{step.title}</h2>
-              <p className="type-subtext mt-1 text-[15px] leading-[1.5] text-[#666] shrink-0">{step.body}</p>
-              <div className="flex-1 min-h-0 mt-2">
+              <h2 className="type-headline text-[20px] sm:text-[22px] tracking-[-0.019em] leading-[1.25] mt-1 shrink-0 line-clamp-3">{step.title}</h2>
+              <p className="type-subtext mt-1.5 text-[14px] leading-[1.45] text-[#666] shrink-0 line-clamp-3">{step.body}</p>
+              <div className="flex-1 min-h-[280px] mt-3">
                 {step.n === "01" ? (
                   <UploadMockupDemo />
                 ) : step.n === "02" ? (
                   <PickLookDemo />
                 ) : step.img ? (
                   <div
-                    className={`w-full h-full rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center ${
-                      step.fit === "cover" ? "" : "p-2"
+                    className={`w-full h-full min-h-[240px] rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center ${
+                      step.fit === "cover" ? "" : "p-1.5"
                     }`}
                   >
                     <img
