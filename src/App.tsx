@@ -295,8 +295,6 @@ const TEMPLATES = LOOKS.map((look) => ({
 const LOOKS_PER_PAGE = 6;
 const GARMENT_FILTERS = ["All", "Tee", "Hoodie", "Long sleeve", "Hat"] as const;
 const COMING_SOON = import.meta.env.VITE_COMING_SOON !== "false";
-const COMING_SOON_ACCESS_CODE = "Lovehurtme23$";
-const COMING_SOON_ACCESS_KEY = "shotfarm-coming-soon-access";
 const ASPECT_RATIOS = [
   { id: "1:1", label: "Feed", hint: "Square", w: 16, h: 16, radius: "rounded-[4px]" },
   { id: "3:4", label: "Post", hint: "Portrait", w: 13, h: 17, radius: "rounded-[4px]" },
@@ -980,22 +978,13 @@ function FaqSection() {
   );
 }
 
-function ComingSoonPage({ onUnlock }: { onUnlock: () => void }) {
+function ComingSoonPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (email === COMING_SOON_ACCESS_CODE) {
-      try {
-        localStorage.setItem(COMING_SOON_ACCESS_KEY, "true");
-      } catch {
-        /* Continue for this session if storage is unavailable. */
-      }
-      onUnlock();
-      return;
-    }
     setSubmitting(true);
     setError(null);
     try {
@@ -1030,7 +1019,7 @@ function ComingSoonPage({ onUnlock }: { onUnlock: () => void }) {
           <label className="sr-only" htmlFor="waitlist-email">Email address</label>
           <input
             id="waitlist-email"
-            type="text"
+            type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -1177,6 +1166,159 @@ function PickLookDemo() {
   );
 }
 
+type LandingView = "main" | "privacy" | "terms";
+
+function readLandingView(): LandingView {
+  const hash = window.location.hash.replace(/^#/, "");
+  if (hash === "privacy" || hash === "terms") return hash;
+  return "main";
+}
+
+function LegalPage({
+  title,
+  onBack,
+  children,
+}: {
+  title: string;
+  onBack: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="w-full min-h-dvh overflow-y-auto bg-white text-[#111]">
+      <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-4 border-b border-[#ebebeb] bg-white/95 backdrop-blur-sm">
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-sm text-[#666] hover:text-[#111] cursor-pointer"
+        >
+          ← Back
+        </button>
+        <h1 className="type-headline text-lg">{title}</h1>
+      </header>
+      <article className="max-w-2xl mx-auto px-6 py-10 type-subtext text-[15px] leading-relaxed text-[#444] space-y-4">
+        {children}
+      </article>
+    </div>
+  );
+}
+
+function PrivacyPage({ onBack }: { onBack: () => void }) {
+  return (
+    <LegalPage title="Privacy Policy" onBack={onBack}>
+      <p className="text-[13px] text-[#888]">Last updated: August 23, 2026</p>
+      <p>
+        ShotFarm ("we", "us") operates shotfarm.io. This policy explains what we collect, how we use it,
+        and your choices when you use our AI product image service.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Information we collect</h2>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>Account data: email address and authentication identifiers when you sign in via Clerk.</li>
+        <li>Payment data: billing details processed by Stripe. We do not store full card numbers.</li>
+        <li>Uploads: mockup images and reference files you submit for generation.</li>
+        <li>Generated output: images produced by the service and associated metadata (look, aspect ratio, timestamps).</li>
+        <li>Usage data: credit balance, purchase history, and basic logs needed to operate the product.</li>
+      </ul>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">How we use information</h2>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>Provide and improve the ShotFarm service, including image generation and account management.</li>
+        <li>Process payments, grant credits, and prevent fraud or abuse.</li>
+        <li>Respond to support requests and send service-related communications.</li>
+      </ul>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Third-party services</h2>
+      <p>We use trusted providers to run ShotFarm, including:</p>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>Clerk — authentication</li>
+        <li>Stripe — payments and subscriptions</li>
+        <li>Neon — database hosting</li>
+        <li>Fal — AI image generation</li>
+        <li>Vercel — hosting and infrastructure</li>
+      </ul>
+      <p>These providers process data according to their own privacy policies and our agreements with them.</p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Retention</h2>
+      <p>
+        We retain account and billing records as long as your account is active and as required for legal,
+        tax, or security purposes. You may request deletion of your account by contacting us.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Your rights</h2>
+      <p>
+        Depending on where you live, you may have rights to access, correct, delete, or export personal data.
+        Contact us at <a href="mailto:support@shotfarm.io" className="text-[#111] underline">support@shotfarm.io</a> to
+        make a request.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Contact</h2>
+      <p>
+        Questions about this policy:{" "}
+        <a href="mailto:support@shotfarm.io" className="text-[#111] underline">support@shotfarm.io</a>
+      </p>
+    </LegalPage>
+  );
+}
+
+function TermsPage({ onBack }: { onBack: () => void }) {
+  return (
+    <LegalPage title="Terms of Service" onBack={onBack}>
+      <p className="text-[13px] text-[#888]">Last updated: August 23, 2026</p>
+      <p>
+        These Terms govern your use of ShotFarm at shotfarm.io. By creating an account or using the service,
+        you agree to these Terms.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">The service</h2>
+      <p>
+        ShotFarm transforms apparel mockups into product-style images using AI. Features, pricing, and availability
+        may change as we improve the product.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Accounts</h2>
+      <p>
+        You must provide accurate information and keep your sign-in credentials secure. You are responsible for
+        activity under your account.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Payments and credits</h2>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>ShotFarm is a paid service. Generations require purchased credits unless we explicitly offer a promotion.</li>
+        <li>Pack ($9) grants 20 one-time credits. Pro ($49/month) grants 150 credits per billing period.</li>
+        <li>Payments are processed by Stripe. Subscriptions renew automatically until canceled in Stripe or via support.</li>
+        <li>Credits are non-transferable and have no cash value except where required by law.</li>
+        <li>Refunds are handled case by case for failed generations or billing errors. Contact support@shotfarm.io.</li>
+      </ul>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Your content</h2>
+      <p>
+        You retain ownership of mockups and other materials you upload. You grant ShotFarm a limited license to
+        process that content solely to provide the service. You confirm you have the rights to upload and use
+        the content you submit.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Acceptable use</h2>
+      <p>You may not use ShotFarm to:</p>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>Violate laws or third-party rights, including trademarks and copyrights.</li>
+        <li>Upload illegal, harmful, or deceptive content.</li>
+        <li>Attempt to bypass paywalls, scrape the service, or interfere with its operation.</li>
+        <li>Resell or redistribute the service without permission.</li>
+      </ul>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">AI output</h2>
+      <p>
+        Generated images are provided "as is." Results may vary. You are responsible for reviewing output before
+        commercial use and for complying with applicable advertising and consumer laws.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Limitation of liability</h2>
+      <p>
+        To the fullest extent permitted by law, ShotFarm is not liable for indirect, incidental, or consequential
+        damages arising from use of the service. Our total liability for any claim is limited to the amount you
+        paid us in the twelve months before the claim.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Termination</h2>
+      <p>
+        We may suspend or terminate access for violations of these Terms or to protect the service. You may stop
+        using ShotFarm at any time.
+      </p>
+      <h2 className="type-headline text-[18px] text-[#111] pt-2">Contact</h2>
+      <p>
+        Questions about these Terms:{" "}
+        <a href="mailto:support@shotfarm.io" className="text-[#111] underline">support@shotfarm.io</a>
+      </p>
+    </LegalPage>
+  );
+}
+
 function LandingPage({
   onStart,
   onLooks,
@@ -1191,6 +1333,26 @@ function LandingPage({
   onSignIn: () => void;
 }) {
   const startLabel = signedIn ? "Generate" : "Get started";
+  const [view, setView] = useState<LandingView>(readLandingView);
+
+  const openView = useCallback((next: LandingView) => {
+    setView(next);
+    window.location.hash = next === "main" ? "" : next;
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => setView(readLandingView());
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  if (view === "privacy") {
+    return <PrivacyPage onBack={() => openView("main")} />;
+  }
+  if (view === "terms") {
+    return <TermsPage onBack={() => openView("main")} />;
+  }
 
   return (
     <div className="w-full min-w-0 flex-1 min-h-0 overflow-y-auto overscroll-contain">
@@ -1328,8 +1490,8 @@ function LandingPage({
           <p className="text-[12px] text-white/45">© 2026 ShotFarm</p>
           <nav className="flex items-center gap-5 text-[12px] text-white/55">
             <button type="button" onClick={onLooks} className="hover:text-white cursor-pointer">Looks</button>
-            <button type="button" className="hover:text-white cursor-pointer">Privacy</button>
-            <button type="button" className="hover:text-white cursor-pointer">Terms</button>
+            <button type="button" onClick={() => openView("privacy")} className="hover:text-white cursor-pointer">Privacy</button>
+            <button type="button" onClick={() => openView("terms")} className="hover:text-white cursor-pointer">Terms</button>
           </nav>
         </footer>
       </div>
@@ -1540,14 +1702,7 @@ function LibraryPage({
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [comingSoonUnlocked, setComingSoonUnlocked] = useState(() => {
-    try {
-      return localStorage.getItem(COMING_SOON_ACCESS_KEY) === "true";
-    } catch {
-      return false;
-    }
-  });
-  if (COMING_SOON && !comingSoonUnlocked) return <ComingSoonPage onUnlock={() => setComingSoonUnlocked(true)} />;
+  if (COMING_SOON) return <ComingSoonPage />;
   if (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) return <AppWithClerk />;
   return <AppShell session={localSession} />;
 }

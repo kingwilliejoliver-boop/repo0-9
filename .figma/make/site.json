@@ -5,7 +5,7 @@
     "icon": "/favicon.png"
   },
   "robots": {
-    "index": false
+    "index": true
   },
   "accessibility": {
     "addBypassLinks": false,
