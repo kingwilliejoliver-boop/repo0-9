@@ -1056,16 +1056,8 @@ function ComingSoonPage({ onUnlock }: { onUnlock: () => void }) {
 
 function UploadMockupDemo() {
   return (
-    <div
-      className="w-full aspect-square rounded-xl mb-3 bg-[#fafafa] border border-[#ebebeb] overflow-hidden text-left p-3 flex flex-col"
-      aria-hidden
-    >
-      <p className="text-[10px] font-semibold text-[#aaa] tracking-wide mb-2">Your mockup</p>
-      <div className="flex-1 min-h-0">
-        <div className="w-full h-full rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center p-2">
-          <img src={landingMockup} alt="" className="max-w-[90%] max-h-[90%] object-contain" />
-        </div>
-      </div>
+    <div className="w-full h-full rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center p-2">
+      <img src={landingMockup} alt="" className="max-w-[90%] max-h-[90%] object-contain" />
     </div>
   );
 }
@@ -1105,10 +1097,7 @@ function PickLookDemo() {
   }, []);
 
   return (
-    <div
-      className="w-full aspect-square rounded-xl mb-3 bg-[#fafafa] border border-[#ebebeb] overflow-hidden text-left relative"
-      aria-hidden
-    >
+    <div className="w-full h-full overflow-hidden text-left relative" aria-hidden>
       <div className="absolute inset-0 flex items-center justify-center p-3">
         <div className="w-full origin-center scale-[0.8]">
           <div className="flex items-center justify-between mb-1.5">
@@ -1251,49 +1240,73 @@ function LandingPage({
       </section>
       </div>
 
-      <section className="px-6 py-16 bg-white">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <h2 className="type-headline text-[36px] sm:text-[48px]">How it works</h2>
-          <p className="type-subtext mt-4 text-[16px] sm:text-[18px]">
-            Upload a garment. Pick a template.<br />We apply it for you.
-          </p>
+      <section className="px-6 pt-20 pb-16 bg-white">
+        <div className="max-w-2xl mx-auto text-left mb-10">
+          <h2 className="type-headline text-[30px] tracking-[-0.043em] leading-[1.25]">How ShotFarm helps with your mockup</h2>
         </div>
         <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
           {[
-            { n: "01", title: "Upload your mockup", body: "A digital garment shot is enough.", img: landingMockup as string | null, imgLabel: "Mockup example", fit: "contain", frame: "square" },
-            { n: "02", title: "Pick a look", body: "Choose from our set templates.", img: trinityTee as string | null, imgLabel: "Trinity Tee", fit: "cover", frame: "square" },
-            { n: "03", title: "We apply it", body: "Your piece comes back in that look.", img: raspberryHillsTee as string | null, imgLabel: "Result example", fit: "contain", frame: "portrait" },
+            {
+              n: "01",
+              title: "ShotFarm takes in your mockup",
+              body: "It picks up your garment and design in real time, so it can apply the look when you need it.",
+              img: landingMockup as string | null,
+              imgLabel: "Mockup example",
+              fit: "contain",
+              frame: "square",
+            },
+            {
+              n: "02",
+              title: "When you need the shot, ShotFarm applies it instantly",
+              body: "Pick a look and ShotFarm restyles your mockup in the moment.",
+              img: trinityTee as string | null,
+              imgLabel: "Trinity Tee",
+              fit: "cover",
+              frame: "square",
+            },
+            {
+              n: "03",
+              title: "Instant product images",
+              body: "The easiest way to get a finished shot from your mockup.",
+              img: raspberryHillsTee as string | null,
+              imgLabel: "Result example",
+              fit: "contain",
+              frame: "portrait",
+            },
           ].map((step) => (
-            <div key={step.n} className="text-center">
-              {step.n === "01" ? (
-                <UploadMockupDemo />
-              ) : step.n === "02" ? (
-                <PickLookDemo />
-              ) : step.img ? (
-                <div
-                  className={`w-full rounded-xl mb-3 overflow-hidden ${
-                    step.frame === "portrait" ? "aspect-[3/4] bg-[#f4f4f4] border border-[#ebebeb]" : "aspect-square"
-                  }`}
-                >
-                  <img
-                    src={step.img}
-                    alt={step.imgLabel}
-                    className={`w-full h-full ${step.fit === "cover" ? "object-cover" : "object-contain p-4 bg-[#f4f4f4]"}`}
-                  />
-                </div>
-              ) : (
-                <div
-                  className="w-full aspect-square rounded-xl mb-3 bg-[#f4f4f4] border border-dashed border-[#ddd] flex items-center justify-center"
-                  aria-hidden
-                >
-                  <span className="text-[11px] text-[#bbb] tracking-[0.08em]">{step.imgLabel}</span>
-                </div>
-              )}
-              <div className="flex items-baseline justify-center gap-2">
-                <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em]">{step.n}</p>
-                <h2 className="type-headline text-[18px] sm:text-[20px]">{step.title}</h2>
+            <div
+              key={step.n}
+              className="w-full aspect-square rounded-xl bg-[#fafafa] border border-[#ebebeb] overflow-hidden flex flex-col p-3 text-left"
+            >
+              <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em] shrink-0">{step.n}</p>
+              <h2 className="type-headline text-[26px] tracking-[-0.019em] leading-[1.25] mt-1 shrink-0">{step.title}</h2>
+              <p className="type-subtext mt-1 text-[15px] leading-[1.5] text-[#666] shrink-0">{step.body}</p>
+              <div className="flex-1 min-h-0 mt-2">
+                {step.n === "01" ? (
+                  <UploadMockupDemo />
+                ) : step.n === "02" ? (
+                  <PickLookDemo />
+                ) : step.img ? (
+                  <div
+                    className={`w-full h-full rounded-lg overflow-hidden border border-[#e8e8e8] bg-white flex items-center justify-center ${
+                      step.fit === "cover" ? "" : "p-2"
+                    }`}
+                  >
+                    <img
+                      src={step.img}
+                      alt={step.imgLabel}
+                      className={`max-w-full max-h-full ${step.fit === "cover" ? "w-full h-full object-cover" : "object-contain"}`}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="w-full h-full rounded-lg border border-dashed border-[#ddd] bg-[#f4f4f4] flex items-center justify-center"
+                    aria-hidden
+                  >
+                    <span className="text-[11px] text-[#bbb] tracking-[0.08em]">{step.imgLabel}</span>
+                  </div>
+                )}
               </div>
-              <p className="type-subtext mt-1 text-[14px] sm:text-[15px]">{step.body}</p>
             </div>
           ))}
         </div>
