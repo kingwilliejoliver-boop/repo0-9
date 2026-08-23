@@ -1224,7 +1224,7 @@ function LandingPage({
         ) : null}
       </header>
 
-      <section className="relative z-10 flex flex-col items-center px-6 pt-12 pb-24 gap-10">
+      <section className="relative z-10 flex flex-col items-center px-6 pt-6 pb-24 gap-10">
         <div className="text-center max-w-sm">
           <h1 className="type-headline text-[36px] sm:text-[48px] text-white" style={{ color: "#ffffff" }}>
             From mockup<br />to real product image
@@ -1241,7 +1241,7 @@ function LandingPage({
             {startLabel}
           </button>
         </div>
-        <div className="w-full max-w-[420px]">
+        <div className="w-full max-w-[340px]">
           <BeforeAfterSlider
             beforeSrc={landingMockup}
             afterSrc={raspberryHillsTee}
