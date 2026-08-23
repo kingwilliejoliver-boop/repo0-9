@@ -2,7 +2,19 @@
   "functions": {
     "api/generate.ts": {
       "maxDuration": 60,
-      "includeFiles": "api/prompts/**"
+      "includeFiles": "{lib/**,api/prompts/**}"
+    },
+    "api/me.ts": {
+      "includeFiles": "lib/**"
+    },
+    "api/create-checkout.ts": {
+      "includeFiles": "lib/**"
+    },
+    "api/confirm-checkout.ts": {
+      "includeFiles": "lib/**"
+    },
+    "api/stripe-webhook.ts": {
+      "includeFiles": "lib/**"
     }
   }
 }
