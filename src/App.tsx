@@ -1401,14 +1401,15 @@ function LandingPage({
 
       <section className="px-6 pt-20 pb-16 bg-white">
         <div className="max-w-6xl mx-auto text-left mb-10">
-          <h2 className="type-headline text-[30px] tracking-[-0.043em] leading-[1.25]">How ShotFarm helps with your mockup</h2>
+          <h2 className="type-headline text-[30px] tracking-[-0.043em] leading-[1.25]">Turn your mockup into a real product image</h2>
         </div>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
               n: "01",
-              title: "ShotFarm takes in your mockup",
-              body: "It picks up your garment and design in real time, so it can apply the look when you need it.",
+              title: "Upload your mockup",
+              subtitle: "Start with your design.",
+              body: "Upload your clothing mockup and ShotFarm keeps your colors, graphics, and product details intact.",
               img: landingMockup as string | null,
               imgLabel: "Mockup example",
               fit: "contain",
@@ -1416,8 +1417,9 @@ function LandingPage({
             },
             {
               n: "02",
-              title: "When you need the shot, ShotFarm applies it instantly",
-              body: "Pick a look and ShotFarm restyles your mockup in the moment.",
+              title: "Pick a template",
+              subtitle: "Choose how you want it photographed.",
+              body: "Select a product template you like, and ShotFarm applies its look and presentation to your mockup.",
               img: trinityTee as string | null,
               imgLabel: "Trinity Tee",
               fit: "cover",
@@ -1425,8 +1427,9 @@ function LandingPage({
             },
             {
               n: "03",
-              title: "Instant product images",
-              body: "The easiest way to get a finished shot from your mockup.",
+              title: "Get your product image",
+              subtitle: "Ready to market your product.",
+              body: "ShotFarm turns your mockup into a realistic product image you can use for your website, ads, and social media.",
               img: raspberryHillsTee as string | null,
               imgLabel: "Result example",
               fit: "contain",
@@ -1437,9 +1440,9 @@ function LandingPage({
               key={step.n}
               className="w-full min-h-[560px] rounded-xl bg-[#fafafa] border border-[#ebebeb] overflow-hidden flex flex-col p-4 text-left"
             >
-              <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em] shrink-0">{step.n}</p>
-              <h2 className="type-headline text-[20px] sm:text-[22px] tracking-[-0.019em] leading-[1.25] mt-1 shrink-0 line-clamp-3">{step.title}</h2>
-              <p className="type-subtext mt-1.5 text-[14px] leading-[1.45] text-[#666] shrink-0 line-clamp-3">{step.body}</p>
+              <p className="text-[11px] font-medium text-[#bbb] tracking-[0.16em] shrink-0">{step.title}</p>
+              <h2 className="type-headline text-[20px] sm:text-[22px] tracking-[-0.019em] leading-[1.25] mt-1 shrink-0">{step.subtitle}</h2>
+              <p className="type-subtext mt-1.5 text-[14px] leading-[1.45] text-[#666] shrink-0">{step.body}</p>
               <div className="flex-1 min-h-[280px] mt-3">
                 {step.n === "01" ? (
                   <UploadMockupDemo />
@@ -1476,7 +1479,7 @@ function LandingPage({
             className="px-5 py-2.5 rounded-lg bg-[#111] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
             style={{ letterSpacing: "0.04em" }}
           >
-            {startLabel}
+            Create your first shot
           </button>
           {signedIn ? null : <p className="text-[12px] text-[#bbb] mt-3">Sign in, then buy a Pack to start</p>}
         </div>
