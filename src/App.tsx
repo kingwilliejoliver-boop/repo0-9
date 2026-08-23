@@ -119,11 +119,16 @@ function IconChevron({ dir }: { dir: "left" | "right" }) {
     </svg>
   );
 }
-function BrandLockup() {
+function BrandLockup({ light = false }: { light?: boolean }) {
   return (
     <div className="flex items-center gap-2.5 min-w-0">
       <img src={shotfarmLogo} alt="" width={32} height={32} className="w-8 h-8 rounded-[8px] flex-shrink-0" />
-      <p className="type-headline text-lg">ShotFarm</p>
+      <p
+        className="type-headline text-lg"
+        style={light ? { color: "#ffffff" } : undefined}
+      >
+        ShotFarm
+      </p>
     </div>
   );
 }
@@ -950,24 +955,62 @@ const FAQS = [
   },
 ];
 
+function LandingCtaSection({
+  onStart,
+  startLabel,
+}: {
+  onStart: () => void;
+  startLabel: string;
+}) {
+  return (
+    <section className="relative z-10 px-6 sm:px-8 pt-20 pb-16 sm:pt-24 sm:pb-20">
+      <div className="max-w-6xl mx-auto">
+        <h2
+          className="type-headline text-[32px] sm:text-[40px] md:text-[44px] tracking-[-0.03em] leading-[1.12] max-w-xl text-white"
+          style={{ color: "#ffffff" }}
+        >
+          Product images that help you sell, not just mockups.
+        </h2>
+        <p className="type-subtext mt-2.5 text-[17px] sm:text-[18px] max-w-lg" style={{ color: "#ffffff" }}>
+          Try ShotFarm on your next design today.
+        </p>
+        <button
+          type="button"
+          onClick={onStart}
+          className="mt-4 inline-flex items-center justify-center min-h-[48px] px-8 rounded-full border border-white/15 text-white text-[15px] font-light tracking-[0.02em] cursor-pointer hover:border-white/30 hover:bg-white/5 transition-colors"
+          style={{ backgroundColor: "rgb(0, 2, 11)" }}
+        >
+          {startLabel}
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function FaqSection() {
   return (
-    <section id="faq" className="faq-section px-6 pt-16 pb-20 bg-white">
-      <div className="max-w-2xl mx-auto">
-        <h2 className="type-headline text-[32px] sm:text-[40px] text-center mb-8">FAQ</h2>
-        <div className="flex flex-col gap-2.5">
+    <section id="faq" className="faq-section px-6 sm:px-8 pt-20 pb-20 bg-white">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="type-headline text-[36px] sm:text-[44px] tracking-[-0.03em] leading-[1.1] mb-10 sm:mb-12">
+          Frequently asked questions
+        </h2>
+        <div className="border-t border-[#eee]">
           {FAQS.map((item) => (
-            <details key={item.q} className="faq-card group rounded-3xl overflow-hidden">
-              <summary className="list-none px-6 py-6 cursor-pointer [-webkit-tap-highlight-color:transparent] [&::-webkit-details-marker]:hidden">
-                <div className="flex items-center gap-3">
-                  <span className="type-headline flex-1 text-[16px] sm:text-[18px]">{item.q}</span>
-                  <span className="relative w-7 h-7 rounded-full bg-[#111]/8 flex-shrink-0" aria-hidden>
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-[#111]" />
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-[#111] origin-center transition-transform duration-200 group-open:scale-y-0" />
-                  </span>
-                </div>
+            <details key={item.q} className="faq-row group border-b border-[#eee]">
+              <summary className="list-none py-5 sm:py-6 cursor-pointer flex items-center justify-between gap-6 [-webkit-tap-highlight-color:transparent] [&::-webkit-details-marker]:hidden">
+                <span className="type-headline text-[16px] sm:text-[17px] font-medium leading-snug">{item.q}</span>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  aria-hidden
+                  className="flex-shrink-0 text-[#bbb] transition-transform duration-200 group-open:rotate-180"
+                >
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </summary>
-              <p className="type-subtext px-6 pb-6 text-[15px] sm:text-base text-[#666]">
+              <p className="type-subtext pb-5 sm:pb-6 pr-8 text-[15px] sm:text-base text-[#666] leading-relaxed max-w-3xl">
                 {item.a}
               </p>
             </details>
@@ -1319,6 +1362,130 @@ function TermsPage({ onBack }: { onBack: () => void }) {
   );
 }
 
+function FooterColumn({
+  title,
+  links,
+  inverted = false,
+}: {
+  title: string;
+  links: { label: string; onClick?: () => void; href?: string }[];
+  inverted?: boolean;
+}) {
+  const headingClass = inverted ? "text-white" : "text-[#111]";
+  const linkClass = inverted
+    ? "text-white/55 hover:text-white"
+    : "text-[#5f6775] hover:text-[#111]";
+
+  return (
+    <div>
+      <p className={`type-headline text-[14px] font-semibold mb-3 ${headingClass}`}>{title}</p>
+      <ul className="space-y-2.5">
+        {links.map((link) => (
+          <li key={link.label}>
+            {link.href ? (
+              <a href={link.href} className={`text-[14px] transition-colors ${linkClass}`}>
+                {link.label}
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={link.onClick}
+                className={`text-[14px] transition-colors cursor-pointer text-left ${linkClass}`}
+              >
+                {link.label}
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function LandingFooter({
+  onStart,
+  onLooks,
+  onPrivacy,
+  onTerms,
+  showSignIn,
+  onSignIn,
+  inverted = false,
+}: {
+  onStart: () => void;
+  onLooks: () => void;
+  onPrivacy: () => void;
+  onTerms: () => void;
+  showSignIn: boolean;
+  onSignIn: () => void;
+  inverted?: boolean;
+}) {
+  return (
+    <footer
+      className={`relative z-10 px-6 sm:px-8 pb-10 ${
+        inverted ? "text-white pt-4" : "bg-[#f3f5f7] pt-14"
+      }`}
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className={inverted ? "[&_.type-headline]:text-white" : undefined}>
+          <BrandLockup light={inverted} />
+        </div>
+
+        <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+          <FooterColumn
+            inverted={inverted}
+            title="Product"
+            links={[
+              { label: "Get started", onClick: onStart },
+              { label: "Templates", onClick: onLooks },
+              { label: "Pricing", href: "#faq" },
+            ]}
+          />
+          <FooterColumn
+            inverted={inverted}
+            title="Resources"
+            links={[
+              { label: "FAQ", href: "#faq" },
+              { label: "How it works", href: "#how-it-works" },
+            ]}
+          />
+          <FooterColumn
+            inverted={inverted}
+            title="Account"
+            links={[
+              ...(showSignIn ? [{ label: "Sign in", onClick: onSignIn }] : []),
+              { label: "Generate", onClick: onStart },
+            ]}
+          />
+          <FooterColumn
+            inverted={inverted}
+            title="Support"
+            links={[
+              { label: "Privacy Policy", onClick: onPrivacy },
+              { label: "Terms of Service", onClick: onTerms },
+              { label: "Contact", href: "mailto:support@shotfarm.io" },
+            ]}
+          />
+        </div>
+
+        <div
+          className={`mt-8 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] ${
+            inverted
+              ? "border border-white/15 bg-white/10 text-white/60"
+              : "border border-[#e2e5ea] bg-white/70 text-[#666]"
+          }`}
+        >
+          <span className="h-2 w-2 rounded-full bg-[#22c55e]" aria-hidden />
+          All systems operational
+        </div>
+
+        <p className={`mt-8 text-[12px] ${inverted ? "text-white/45" : "text-[#aaa]"}`}>
+          © 2026 ShotFarm. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
 function LandingPage({
   onStart,
   onLooks,
@@ -1399,7 +1566,7 @@ function LandingPage({
       </section>
       </div>
 
-      <section className="px-6 pt-20 pb-16 bg-white">
+      <section id="how-it-works" className="px-6 pt-20 pb-16 bg-white">
         <div className="max-w-6xl mx-auto text-left mb-10">
           <h2 className="type-headline text-[30px] tracking-[-0.043em] leading-[1.25]">Turn your mockup into a real product image</h2>
         </div>
@@ -1489,14 +1656,16 @@ function LandingPage({
 
       <div className="footer-stars-wrap">
         <StarsGalaxy className="hero-smoke" edgeFade="top" stableHeight />
-        <footer className="relative z-10 px-6 pt-24 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[12px] text-white/45">© 2026 ShotFarm</p>
-          <nav className="flex items-center gap-5 text-[12px] text-white/55">
-            <button type="button" onClick={onLooks} className="hover:text-white cursor-pointer">Looks</button>
-            <button type="button" onClick={() => openView("privacy")} className="hover:text-white cursor-pointer">Privacy</button>
-            <button type="button" onClick={() => openView("terms")} className="hover:text-white cursor-pointer">Terms</button>
-          </nav>
-        </footer>
+        <LandingCtaSection onStart={onStart} startLabel={signedIn ? "Generate" : "Create your first shot"} />
+        <LandingFooter
+          inverted
+          onStart={onStart}
+          onLooks={onLooks}
+          onPrivacy={() => openView("privacy")}
+          onTerms={() => openView("terms")}
+          showSignIn={showSignIn}
+          onSignIn={onSignIn}
+        />
       </div>
       </div>
     </div>

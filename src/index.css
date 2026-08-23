@@ -154,7 +154,7 @@ input[type='range'] {
   top: 0;
   left: 0;
   right: 0;
-  height: 10rem;
+  height: 14rem;
   z-index: 2;
   pointer-events: none;
   background: linear-gradient(
@@ -179,16 +179,6 @@ input[type='range'] {
   min-height: 100%;
   pointer-events: none;
   display: block;
-}
-
-.faq-card {
-  background: #fafafa;
-  border: 1px solid #ebebeb;
-}
-
-.faq-card:hover {
-  background: #f4f4f4;
-  border-color: #ddd;
 }
 
 .faq-glass {
