@@ -1649,6 +1649,7 @@ function AppShell({ session }: { session: Session }) {
   const outOfCredits = PAYWALL_ENABLED && imagesLeft <= 0;
   const paywallLocked = outOfCredits && !needsSignIn;
   const generateLocked = paywallLocked && (page === "generate" || page === "history");
+  const mobileMenuAbovePaywall = generateLocked;
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -1939,7 +1940,7 @@ function AppShell({ session }: { session: Session }) {
       ) : (
         <>
       {/* ── Mobile top bar ─────────────────────────────────────────────── */}
-      <header className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-[#ebebeb] bg-white flex-shrink-0 z-30">
+      <header className={`lg:hidden flex items-center gap-3 px-4 py-3 border-b border-[#ebebeb] bg-white flex-shrink-0 ${mobileMenuAbovePaywall ? "relative z-[85]" : "z-30"}`}>
         <button
           type="button"
           aria-label="Open menu"
@@ -1957,14 +1958,18 @@ function AppShell({ session }: { session: Session }) {
         type="button"
         aria-label="Close menu"
         onClick={() => setMenuOpen(false)}
-        className={`fixed inset-0 z-40 bg-black/40 lg:hidden transition-opacity duration-200 ${
+        className={`fixed inset-0 lg:hidden transition-opacity duration-200 ${
+          mobileMenuAbovePaywall ? "z-[80]" : "z-40"
+        } bg-black/40 ${
           menuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
 
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[min(280px,86vw)] flex flex-col border-r border-[#ebebeb] bg-white transition-transform duration-200 ease-out lg:relative lg:z-auto lg:w-[210px] lg:flex-shrink-0 lg:translate-x-0 lg:pointer-events-auto ${
+        className={`fixed inset-y-0 left-0 w-[min(280px,86vw)] flex flex-col border-r border-[#ebebeb] bg-white transition-transform duration-200 ease-out lg:relative lg:z-auto lg:w-[210px] lg:flex-shrink-0 lg:translate-x-0 lg:pointer-events-auto ${
+          mobileMenuAbovePaywall ? "z-[90]" : "z-50"
+        } ${
           menuOpen ? "translate-x-0 shadow-2xl lg:shadow-none" : "-translate-x-full pointer-events-none"
         }`}
       >
