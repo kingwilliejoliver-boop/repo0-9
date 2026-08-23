@@ -473,27 +473,36 @@ function LibraryCard({
   tpl,
   onPreview,
   onUse,
+  locked = false,
 }: {
   tpl: typeof TEMPLATES[0];
   onPreview: () => void;
   onUse: () => void;
+  locked?: boolean;
 }) {
   return (
     <article className="group flex flex-col">
       <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#f4f4f4]">
         <button type="button" onClick={onPreview} className="absolute inset-0 cursor-pointer">
           <img
-            src={imageSrc(tpl.img, 700)}
+            src={imageSrc(tpl.img, locked ? 280 : 700)}
             alt={tpl.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${
+              locked ? "blur-[6px] scale-105 opacity-80" : ""
+            }`}
           />
         </button>
+        {locked ? (
+          <span className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-semibold text-white/90 tracking-wide pointer-events-none">
+            Buy to preview
+          </span>
+        ) : null}
         <button
           type="button"
           onClick={onUse}
           className="absolute bottom-3 right-3 z-10 px-3 py-1.5 rounded-lg bg-white/90 text-[11px] font-semibold text-[#111] tracking-wide hover:bg-white cursor-pointer shadow-sm"
         >
-          Use look
+          {locked ? "Unlock" : "Use look"}
         </button>
         {tpl.summary.startsWith("Placeholder") && (
           <span className="absolute top-3 left-3 z-10 px-2 py-1 rounded-md bg-white/90 text-[10px] font-semibold text-[#888] tracking-wide">
@@ -692,11 +701,15 @@ function Paywall({
   onSelectPlan,
   onClose,
   onSubscribe,
+  dismissible = true,
+  inset = false,
 }: {
   selectedPlan: (typeof PLANS)[number]["id"];
   onSelectPlan: (id: (typeof PLANS)[number]["id"]) => void;
   onClose: () => void;
   onSubscribe: () => Promise<void> | void;
+  dismissible?: boolean;
+  inset?: boolean;
 }) {
   const plan = PLANS.find((p) => p.id === selectedPlan) ?? PLANS[0];
   const [busy, setBusy] = useState(false);
@@ -714,13 +727,17 @@ function Paywall({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6">
-      <button
-        type="button"
-        aria-label="Close paywall"
-        onClick={onClose}
-        className="absolute inset-0 bg-black/50 cursor-pointer"
-      />
+    <div className={`${inset ? "absolute" : "fixed"} inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6 pointer-events-auto`}>
+      {dismissible ? (
+        <button
+          type="button"
+          aria-label="Close paywall"
+          onClick={onClose}
+          className="absolute inset-0 bg-black/50 cursor-pointer"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-black/40" aria-hidden />
+      )}
       <div className="relative w-full sm:max-w-[420px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
         <div className="px-6 pt-6 pb-5 border-b border-[#ebebeb]">
           <div className="flex items-start justify-between gap-3">
@@ -728,16 +745,18 @@ function Paywall({
               <p className="type-headline text-2xl">Get images</p>
               <p className="type-subtext text-[15px] sm:text-base mt-2">Buy a Pack or Pro to apply looks to your mockups.</p>
             </div>
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={onClose}
-              className="w-9 h-9 flex items-center justify-center rounded-lg text-[#888] hover:bg-[#f4f4f4] hover:text-[#111] cursor-pointer flex-shrink-0"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
+            {dismissible ? (
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={onClose}
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#888] hover:bg-[#f4f4f4] hover:text-[#111] cursor-pointer flex-shrink-0"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -1367,11 +1386,12 @@ function LibraryPage({
   total,
   query,
   onQuery,
-  garmentFilter,
   onGarmentFilter,
+  garmentFilter,
   onPreview,
   onUse,
   onStart,
+  locked = false,
 }: {
   templates: typeof TEMPLATES;
   total: number;
@@ -1382,6 +1402,7 @@ function LibraryPage({
   onPreview: (id: number) => void;
   onUse: (id: number) => void;
   onStart: () => void;
+  locked?: boolean;
 }) {
   const [setIndex, setSetIndex] = useState(0);
   const pageCount = Math.max(1, Math.ceil(templates.length / LOOKS_PER_PAGE));
@@ -1402,7 +1423,9 @@ function LibraryPage({
         <div className="flex items-start sm:items-end justify-between gap-4">
           <div className="min-w-0">
             <h1 className="type-headline text-2xl sm:text-[28px]">Templates</h1>
-            <p className="type-subtext text-[15px] sm:text-base mt-2">The set we apply to your mockup.</p>
+            <p className="type-subtext text-[15px] sm:text-base mt-2">
+              {locked ? "Browse the set. Buy a Pack to preview and apply." : "The set we apply to your mockup."}
+            </p>
           </div>
           <button
             type="button"
@@ -1450,6 +1473,7 @@ function LibraryPage({
                       <LibraryCard
                         key={tpl.id}
                         tpl={tpl}
+                        locked={locked}
                         onPreview={() => onPreview(tpl.id)}
                         onUse={() => onUse(tpl.id)}
                       />
@@ -1604,6 +1628,11 @@ function AppShell({ session }: { session: Session }) {
       : localPaidCredits;
   const canSignIn = session.configured && session.ready && !session.signedIn;
   const needsSignIn = PAYWALL_ENABLED && canSignIn;
+  const freeLeft = Math.max(0, FREE_IMAGE_LIMIT - freeUsed);
+  const imagesLeft = freeLeft + paidCredits;
+  const outOfCredits = PAYWALL_ENABLED && imagesLeft <= 0;
+  const paywallLocked = outOfCredits && !needsSignIn;
+  const generateLocked = paywallLocked && (page === "generate" || page === "history");
 
   const goTo = (next: Page) => {
     setPage(next);
@@ -1629,11 +1658,30 @@ function AppShell({ session }: { session: Session }) {
     }
   }, [session.signedIn]);
 
+  const openPaywall = () => setPaywallOpen(true);
+
+  const handleLibraryPreview = (id: number) => {
+    if (paywallLocked) {
+      openPaywall();
+      return;
+    }
+    setPreviewId(id);
+  };
+
+  const handleLibraryUse = (id: number) => {
+    if (paywallLocked) {
+      openPaywall();
+      return;
+    }
+    setSelectedTemplate(id);
+    goTo("generate");
+  };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (previewId !== null) setPreviewId(null);
-        else if (paywallOpen) setPaywallOpen(false);
+        else if (paywallOpen && !generateLocked) setPaywallOpen(false);
         else setMenuOpen(false);
       }
     };
@@ -1643,13 +1691,13 @@ function AppShell({ session }: { session: Session }) {
     };
     window.addEventListener("keydown", onKey);
     mq.addEventListener("change", onBreakpoint);
-    document.body.style.overflow = menuOpen || paywallOpen || previewId !== null ? "hidden" : "";
+    document.body.style.overflow = menuOpen || (paywallOpen && !generateLocked) || previewId !== null ? "hidden" : "";
     return () => {
       window.removeEventListener("keydown", onKey);
       mq.removeEventListener("change", onBreakpoint);
       document.body.style.overflow = "";
     };
-  }, [menuOpen, paywallOpen, previewId]);
+  }, [menuOpen, paywallOpen, previewId, generateLocked]);
 
   useEffect(() => {
     setLookSetIndex(0);
@@ -1733,9 +1781,6 @@ function AppShell({ session }: { session: Session }) {
   const previewLook = TEMPLATES.find((t) => t.id === previewId) ?? null;
   const hatLook = selectedLook?.garment === "Hat";
   const showHatUpload = hatLook || (!selectedLook && garmentFilter === "Hat");
-  const freeLeft = Math.max(0, FREE_IMAGE_LIMIT - freeUsed);
-  const imagesLeft = freeLeft + paidCredits;
-  const outOfCredits = PAYWALL_ENABLED && imagesLeft <= 0;
   const hasMockup = hatLook ? Boolean(hatShots.front) : mockups.length > 0;
   const canGenerate = hasMockup && selectedTemplate !== null && !generating && !outOfCredits;
 
@@ -1980,7 +2025,7 @@ function AppShell({ session }: { session: Session }) {
         </div>
       </aside>
 
-      <div className={`flex-1 flex flex-col min-h-0 ${page === "library" || page === "settings" ? "overflow-hidden" : "md:flex-row overflow-y-auto overscroll-contain md:overflow-hidden"}`}>
+      <div className={`flex-1 flex flex-col min-h-0 relative ${page === "library" || page === "settings" ? "overflow-hidden" : "md:flex-row overflow-y-auto overscroll-contain md:overflow-hidden"}`}>
 
       {page === "library" ? (
         <LibraryPage
@@ -1990,11 +2035,9 @@ function AppShell({ session }: { session: Session }) {
           onQuery={setLookQuery}
           garmentFilter={garmentFilter}
           onGarmentFilter={setGarmentFilter}
-          onPreview={setPreviewId}
-          onUse={(id) => {
-            setSelectedTemplate(id);
-            goTo("generate");
-          }}
+          locked={paywallLocked}
+          onPreview={handleLibraryPreview}
+          onUse={handleLibraryUse}
           onStart={() => goTo("generate")}
         />
       ) : page === "settings" ? (
@@ -2007,6 +2050,7 @@ function AppShell({ session }: { session: Session }) {
         )
       ) : (
       <>
+      <div className={`flex-1 flex flex-col min-h-0 md:flex-row ${generateLocked ? "pointer-events-none select-none opacity-50 blur-[1px]" : ""}`}>
       {/* ── Control Panel ────────────────────────────────────────────────── */}
       <div className="w-full md:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col min-h-0 md:h-full border-b md:border-b-0 md:border-r border-[#ebebeb] bg-[#fafafa]">
 
@@ -2238,6 +2282,17 @@ function AppShell({ session }: { session: Session }) {
         </div>
       </main>
       )}
+      </div>
+      {generateLocked && (
+        <Paywall
+          selectedPlan={selectedPlan}
+          onSelectPlan={setSelectedPlan}
+          onClose={() => {}}
+          onSubscribe={startCheckout}
+          dismissible={false}
+          inset
+        />
+      )}
       </>
       )}
       </div>
@@ -2254,12 +2309,13 @@ function AppShell({ session }: { session: Session }) {
           }}
         />
       )}
-      {PAYWALL_ENABLED && paywallOpen && page !== "home" && (
+      {PAYWALL_ENABLED && paywallOpen && page === "library" && (
         <Paywall
           selectedPlan={selectedPlan}
           onSelectPlan={setSelectedPlan}
           onClose={() => setPaywallOpen(false)}
           onSubscribe={startCheckout}
+          dismissible
         />
       )}
     </div>
