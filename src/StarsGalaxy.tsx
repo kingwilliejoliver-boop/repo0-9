@@ -16,6 +16,7 @@ export default function StarsGalaxy({
   background = "#000000",
   starColor = "#ffffff",
   edgeFade = "none",
+  stableHeight = false,
   className,
 }: {
   stars?: number;
@@ -31,11 +32,13 @@ export default function StarsGalaxy({
   background?: string;
   starColor?: string;
   edgeFade?: "none" | "top" | "bottom";
+  stableHeight?: boolean;
   className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouse = useRef({ x: 0.5, y: 0.5 });
   const starsRef = useRef<Star[]>([]);
+  const bufferSize = useRef({ w: 0, h: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -56,10 +59,22 @@ export default function StarsGalaxy({
     const resize = () => {
       const rect = parent.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
+
+      const nextW = Math.max(1, Math.floor(rect.width * dpr));
+      const nextH = Math.max(1, Math.floor(rect.height * dpr));
+      const widthChanged = nextW !== bufferSize.current.w;
+      const heightChanged = nextH !== bufferSize.current.h;
+
+      if (stableHeight && bufferSize.current.h > 0 && !widthChanged && heightChanged) {
+        return;
+      }
+      if (!widthChanged && !heightChanged) return;
+
+      bufferSize.current = { w: nextW, h: nextH };
+      canvas.width = nextW;
+      canvas.height = nextH;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
@@ -140,7 +155,7 @@ export default function StarsGalaxy({
       observer.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
     };
-  }, [stars, speed, spread, focal, twinkle, trail, size, fadeInRange, reverseFly, followCursor, background, starColor, edgeFade]);
+  }, [stars, speed, spread, focal, twinkle, trail, size, fadeInRange, reverseFly, followCursor, background, starColor, edgeFade, stableHeight]);
 
   return (
     <canvas

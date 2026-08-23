@@ -953,54 +953,30 @@ const FAQS = [
 ];
 
 function FaqSection() {
-  const [open, setOpen] = useState<number | null>(null);
-
   return (
     <section id="faq" className="px-6 pt-20 pb-10">
       <div className="max-w-2xl mx-auto">
         <h2 className="type-headline text-[32px] sm:text-[40px] text-center mb-8" style={{ color: "#ffffff" }}>FAQ</h2>
         <div className="flex flex-col gap-2.5">
-          {FAQS.map((item, i) => {
-            const isOpen = open === i;
-            return (
-              <div key={item.q} className="faq-glass rounded-3xl overflow-hidden">
-                <button
-                  type="button"
-                  aria-expanded={isOpen}
-                  onClick={() => setOpen(isOpen ? null : i)}
-                  className="w-full text-left px-6 py-6 cursor-pointer [-webkit-tap-highlight-color:transparent]"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="type-headline flex-1 text-[16px] sm:text-[18px]" style={{ color: "#ffffff" }}>{item.q}</span>
-                    <span className="relative w-7 h-7 rounded-full bg-white/15 flex-shrink-0" aria-hidden>
-                      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-white" />
-                      <span
-                        className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-white origin-center transition-transform duration-200 ${
-                          isOpen ? "scale-y-0" : "scale-y-100"
-                        }`}
-                      />
-                    </span>
-                  </div>
-                </button>
-                <div
-                  className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
-                    isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                  }`}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    <p
-                      className={`type-subtext px-6 pb-6 text-[15px] sm:text-base transition-opacity duration-200 motion-reduce:transition-none ${
-                        isOpen ? "opacity-100" : "opacity-0"
-                      }`}
-                      style={{ color: "rgba(255,255,255,0.78)" }}
-                    >
-                      {item.a}
-                    </p>
-                  </div>
+          {FAQS.map((item) => (
+            <details key={item.q} className="faq-glass group rounded-3xl overflow-hidden">
+              <summary className="list-none px-6 py-6 cursor-pointer [-webkit-tap-highlight-color:transparent] [&::-webkit-details-marker]:hidden">
+                <div className="flex items-center gap-3">
+                  <span className="type-headline flex-1 text-[16px] sm:text-[18px]" style={{ color: "#ffffff" }}>{item.q}</span>
+                  <span className="relative w-7 h-7 rounded-full bg-white/15 flex-shrink-0" aria-hidden>
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-px bg-white" />
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-3 bg-white origin-center transition-transform duration-200 group-open:scale-y-0" />
+                  </span>
                 </div>
-              </div>
-            );
-          })}
+              </summary>
+              <p
+                className="type-subtext px-6 pb-6 text-[15px] sm:text-base"
+                style={{ color: "rgba(255,255,255,0.78)" }}
+              >
+                {item.a}
+              </p>
+            </details>
+          ))}
         </div>
       </div>
     </section>
@@ -1335,7 +1311,7 @@ function LandingPage({
       </section>
 
       <div className="footer-stars-wrap">
-        <StarsGalaxy className="hero-smoke" edgeFade="top" />
+        <StarsGalaxy className="hero-smoke" edgeFade="top" stableHeight />
         <div className="relative z-10">
           <FaqSection />
           <footer className="px-6 pt-10 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
