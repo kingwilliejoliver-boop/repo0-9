@@ -17,9 +17,21 @@ type AccountRow = {
 
 let schemaReady = false;
 
+function databaseUrl() {
+  for (const value of [
+    process.env.POSTGRES_URL,
+    process.env.DATABASE_URL,
+    process.env.POSTGRES_URL_NON_POOLING,
+  ]) {
+    const trimmed = (value || "").trim();
+    if (trimmed) return trimmed;
+  }
+  return "";
+}
+
 function sql() {
-  const url = (process.env.DATABASE_URL || "").trim();
-  if (!url) throw new Error("DATABASE_URL is not set. Add a Neon database on Vercel.");
+  const url = databaseUrl();
+  if (!url) throw new Error("DATABASE_URL is not set. Connect Neon on Vercel or add DATABASE_URL.");
   return neon(url);
 }
 
@@ -33,7 +45,7 @@ function asAccount(row: AccountRow): Account {
 }
 
 export function databaseConfigured() {
-  return Boolean((process.env.DATABASE_URL || "").trim());
+  return Boolean(databaseUrl());
 }
 
 export async function ensureSchema() {

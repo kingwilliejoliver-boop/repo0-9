@@ -30,7 +30,9 @@ export default async function handler(
       freeLeft: Math.max(0, FREE_IMAGE_LIMIT - account.freeUsed),
       imagesLeft: Math.max(0, FREE_IMAGE_LIMIT - account.freeUsed) + account.paidCredits,
     });
-  } catch {
-    res.status(500).json({ error: "Accounts are not available." });
+  } catch (err) {
+    console.error("[api/me]", err);
+    const message = err instanceof Error ? err.message : "Accounts are not available.";
+    res.status(500).json({ error: message || "Accounts are not available." });
   }
 }
