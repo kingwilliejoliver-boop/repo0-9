@@ -1659,8 +1659,18 @@ function AppShell({ session }: { session: Session }) {
     } catch {
       /* ignore quota / private mode */
     }
-    if (PAYWALL_ENABLED && next === "generate" && freeUsed >= FREE_IMAGE_LIMIT && paidCredits <= 0) setPaywallOpen(true);
     if (next === "home") setPaywallOpen(false);
+  };
+
+  const openGenerate = (lookId?: number) => {
+    if (lookId != null) setSelectedTemplate(lookId);
+    setPaywallOpen(false);
+    setPreviewId(null);
+    if (needsSignIn) {
+      writeAfterAuth("generate");
+      session.openSignIn();
+    }
+    goTo("generate");
   };
 
   useEffect(() => {
@@ -1686,12 +1696,7 @@ function AppShell({ session }: { session: Session }) {
   };
 
   const handleLibraryUse = (id: number) => {
-    if (paywallLocked) {
-      openPaywall();
-      return;
-    }
-    setSelectedTemplate(id);
-    goTo("generate");
+    openGenerate(id);
   };
 
   useEffect(() => {
@@ -1924,14 +1929,7 @@ function AppShell({ session }: { session: Session }) {
     <div className={`flex flex-col h-dvh overflow-hidden font-sans ${page === "home" ? "bg-black" : "lg:flex-row bg-white"}`}>
       {page === "home" ? (
         <LandingPage
-          onStart={() => {
-            if (needsSignIn) {
-              writeAfterAuth("generate");
-              session.openSignIn();
-              return;
-            }
-            goTo("generate");
-          }}
+          onStart={() => openGenerate()}
           onLooks={() => goTo("library")}
           signedIn={session.signedIn}
           showSignIn={canSignIn}
@@ -1992,7 +1990,7 @@ function AppShell({ session }: { session: Session }) {
         {/* Nav */}
         <nav className="flex-1 p-3 flex flex-col gap-0.5">
           <NavItem icon={<IconHome />} label="Home" active={false} onClick={() => goTo("home")} />
-          <NavItem icon={<IconGenerate />} label="Generate" active={page === "generate"} onClick={() => goTo("generate")} />
+          <NavItem icon={<IconGenerate />} label="Generate" active={page === "generate"} onClick={() => openGenerate()} />
           <NavItem icon={<IconLibrary />} label="Templates" active={page === "library"} onClick={() => goTo("library")} />
           <NavItem icon={<IconHistory />} label="History" active={page === "history"} onClick={() => goTo("history")} />
         </nav>
@@ -2059,7 +2057,7 @@ function AppShell({ session }: { session: Session }) {
           locked={paywallLocked}
           onPreview={handleLibraryPreview}
           onUse={handleLibraryUse}
-          onStart={() => goTo("generate")}
+          onStart={() => openGenerate()}
         />
       ) : page === "settings" ? (
         import.meta.env.DEV ? (
@@ -2330,9 +2328,7 @@ function AppShell({ session }: { session: Session }) {
           look={previewLook}
           onClose={() => setPreviewId(null)}
           onUse={() => {
-            setSelectedTemplate(previewLook.id);
-            setPreviewId(null);
-            goTo("generate");
+            openGenerate(previewLook.id);
           }}
         />
       )}
