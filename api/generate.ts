@@ -210,32 +210,34 @@ export default async function handler(
   if (PAYWALL_ENABLED) {
     try {
       const { clerkConfigured, requireUser } = await import("../lib/auth");
-      if (clerkConfigured()) {
-        const user = await requireUser(req);
-        if (!user) {
-          res.status(401).json({ error: "Sign in to generate." });
-          return;
-        }
-        const { databaseConfigured, spendCredit } = await import("../lib/db");
-        if (databaseConfigured()) {
-          const spent = await spendCredit(user.userId);
-          if (!spent.ok) {
-            res.status(402).json({
-              error: "No images left.",
-              code: "out_of_credits",
-              freeUsed: spent.account.freeUsed,
-              paidCredits: spent.account.paidCredits,
-            });
-            return;
-          }
-          billed = {
-            userId: user.userId,
-            usedFree: spent.usedFree,
-            freeUsed: spent.account.freeUsed,
-            paidCredits: spent.account.paidCredits,
-          };
-        }
+      const { databaseConfigured, spendCredit } = await import("../lib/db");
+      if (!clerkConfigured() || !databaseConfigured()) {
+        res.status(503).json({ error: "Generation is unavailable. Billing is not configured." });
+        return;
       }
+
+      const user = await requireUser(req);
+      if (!user) {
+        res.status(401).json({ error: "Sign in to generate." });
+        return;
+      }
+
+      const spent = await spendCredit(user.userId);
+      if (!spent.ok) {
+        res.status(402).json({
+          error: "No images left.",
+          code: "out_of_credits",
+          freeUsed: spent.account.freeUsed,
+          paidCredits: spent.account.paidCredits,
+        });
+        return;
+      }
+      billed = {
+        userId: user.userId,
+        usedFree: spent.usedFree,
+        freeUsed: spent.account.freeUsed,
+        paidCredits: spent.account.paidCredits,
+      };
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not start this look.";
       res.status(500).json({ error: message || "Could not start this look." });

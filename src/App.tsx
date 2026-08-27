@@ -43,14 +43,6 @@ function IconLibrary() {
     </svg>
   );
 }
-function IconHistory() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="12 8 12 12 14 14" />
-      <path d="M3.05 11a9 9 0 1 0 .5-4.5" /><polyline points="3 3 3 7 7 7" />
-    </svg>
-  );
-}
 function IconSettings() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -79,14 +71,6 @@ function IconDownload() {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
       <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  );
-}
-function IconShare() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
     </svg>
   );
 }
@@ -248,7 +232,9 @@ type Page = "home" | "generate" | "library" | "history" | "settings";
 function readSavedPage(): Page {
   try {
     const saved = sessionStorage.getItem(PAGE_KEY);
-    if (saved === "home" || saved === "generate" || saved === "library" || saved === "history" || saved === "settings") {
+    if (saved === "history") return "generate";
+    if (saved === "settings" && import.meta.env.DEV) return "settings";
+    if (saved === "home" || saved === "generate" || saved === "library") {
       return saved;
     }
   } catch {
@@ -354,22 +340,6 @@ function readFreeUsed() {
 const PLANS = [
   { id: "starter" as const, name: "Pack", price: 9, images: 20, blurb: "No monthly plan", interval: "once" as const, recommended: false },
   { id: "pro" as const, name: "Pro", price: 49, images: 150, blurb: "For ongoing collections", interval: "month" as const, recommended: true },
-];
-
-const HISTORY = [
-  { id: 3, img: saintDistressedTee, prompt: "Saint distressed tee" },
-  { id: 5, img: raspberryHillsTemplate, prompt: "Raspberry Hills tee" },
-  { id: 6, img: archivesTee, prompt: "Archives tee" },
-  { id: 7, img: prettyToxicTee, prompt: "Pretty Toxic tee" },
-  { id: 8, img: palywoodTee, prompt: "Palywood tee" },
-  { id: 9, img: shimTee, prompt: "Shim tee" },
-  { id: 10, img: aliceGalerieTee, prompt: "Alice Galerie tee" },
-  { id: 11, img: trinityTee, prompt: "Trinity tee" },
-  { id: 12, img: washedZipHoodie, prompt: "Washed zip hoodie" },
-  { id: 13, img: prizemanCap, prompt: "Prizeman cap" },
-  { id: 14, img: dhsCap, prompt: "DHS cap" },
-  { id: 15, img: tinosCap, prompt: "Tino's cap" },
-  { id: 16, img: stinkyDogCap, prompt: "Stinky Dog cap" },
 ];
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
@@ -1903,6 +1873,7 @@ function AppShell({ session }: { session: Session }) {
   const [previewId, setPreviewId] = useState<number | null>(null);
   const [lookSetIndex, setLookSetIndex] = useState(0);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [legalView, setLegalView] = useState<"privacy" | "terms" | null>(null);
 
   const freeUsed = session.signedIn && session.account ? session.account.freeUsed : localFreeUsed;
   const paidCredits =
@@ -1917,18 +1888,21 @@ function AppShell({ session }: { session: Session }) {
   const authLocked = needsSignIn;
   const paywallLocked = outOfCredits && session.signedIn;
   const appLocked = authLocked || paywallLocked;
-  const generateLocked = appLocked && (page === "generate" || page === "history");
+  const generateLocked = appLocked && page === "generate";
   const mobileMenuAbovePaywall = generateLocked;
 
   const goTo = (next: Page) => {
-    setPage(next);
+    let target: Page = next;
+    if (target === "history") target = "generate";
+    if (target === "settings" && !import.meta.env.DEV) target = "generate";
+    setPage(target);
     setMenuOpen(false);
     try {
-      sessionStorage.setItem(PAGE_KEY, next);
+      sessionStorage.setItem(PAGE_KEY, target);
     } catch {
       /* ignore quota / private mode */
     }
-    if (next === "home") setPaywallOpen(false);
+    if (target === "home") setPaywallOpen(false);
   };
 
   const openGenerate = (lookId?: number) => {
@@ -1956,7 +1930,7 @@ function AppShell({ session }: { session: Session }) {
 
   useEffect(() => {
     if (!session.ready || session.signedIn) return;
-    if (page === "generate" || page === "history" || page === "library") {
+    if (page === "generate" || page === "library") {
       setPaywallOpen(false);
       session.openSignIn();
     }
@@ -2282,11 +2256,20 @@ function AppShell({ session }: { session: Session }) {
           <NavItem icon={<IconHome />} label="Home" active={false} onClick={() => goTo("home")} />
           <NavItem icon={<IconGenerate />} label="Generate" active={page === "generate"} onClick={() => openGenerate()} />
           <NavItem icon={<IconLibrary />} label="Templates" active={page === "library"} onClick={() => goTo("library")} />
-          <NavItem icon={<IconHistory />} label="History" active={page === "history"} onClick={() => goTo("history")} />
         </nav>
 
         <div className="p-3 border-t border-[#ebebeb] flex flex-col gap-0.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:pb-3">
-          <NavItem icon={<IconSettings />} label="Settings" active={page === "settings"} onClick={() => goTo("settings")} />
+          {import.meta.env.DEV ? (
+            <NavItem icon={<IconSettings />} label="Settings" active={page === "settings"} onClick={() => goTo("settings")} />
+          ) : null}
+          <nav className="flex items-center gap-3 px-3 pt-1 text-[11px] text-[#bbb]">
+            <button type="button" onClick={() => setLegalView("privacy")} className="hover:text-[#111] cursor-pointer">
+              Privacy
+            </button>
+            <button type="button" onClick={() => setLegalView("terms")} className="hover:text-[#111] cursor-pointer">
+              Terms
+            </button>
+          </nav>
           {session.configured && (
             <div className="mt-2 px-1">
               {session.signedIn ? (
@@ -2541,9 +2524,6 @@ function AppShell({ session }: { session: Session }) {
 
         {result && !generating && (
           <div className="flex-shrink-0 flex items-center justify-end gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-[#ebebeb]">
-            <button className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg border border-[#e8e8e8] text-[#555] text-sm hover:border-[#ccc] hover:text-[#111] transition-all cursor-pointer">
-              <IconShare /> <span className="hidden sm:inline">Share</span>
-            </button>
             <button
               type="button"
               onClick={async () => {
@@ -2580,29 +2560,6 @@ function AppShell({ session }: { session: Session }) {
               className="rounded-2xl shadow-sm max-h-full max-w-full w-auto h-auto object-contain border border-[#ebebeb]"
             />
           )}
-          </div>
-        </div>
-
-        {/* History strip */}
-        <div className="flex-shrink-0 relative z-10 border-t border-[#ebebeb] px-4 sm:px-6 lg:px-8 py-4 bg-white pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <p className="text-[10px] font-semibold text-[#bbb] tracking-wide mb-3">Recent</p>
-          <div className="flex gap-2">
-            {HISTORY.map((h) => (
-              <button
-                key={h.id}
-                onClick={() => setResult(h.img)}
-                className="group relative w-14 h-14 rounded-xl overflow-hidden border border-[#ebebeb] hover:border-[#999] transition-all duration-150 cursor-pointer flex-shrink-0"
-              >
-                <img
-                  src={imageSrc(h.img, 112)}
-                  alt={h.prompt}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                />
-              </button>
-            ))}
-            <button className="w-14 h-14 rounded-xl border border-dashed border-[#e8e8e8] flex items-center justify-center text-[#ccc] hover:border-[#ccc] hover:text-[#888] transition-all cursor-pointer text-[10px] font-semibold tracking-wide">
-              ALL
-            </button>
           </div>
         </div>
       </main>
@@ -2642,6 +2599,16 @@ function AppShell({ session }: { session: Session }) {
           dismissible
         />
       )}
+      {legalView === "privacy" ? (
+        <div className="fixed inset-0 z-[300]">
+          <PrivacyPage onBack={() => setLegalView(null)} />
+        </div>
+      ) : null}
+      {legalView === "terms" ? (
+        <div className="fixed inset-0 z-[300]">
+          <TermsPage onBack={() => setLegalView(null)} />
+        </div>
+      ) : null}
     </div>
   );
 }
