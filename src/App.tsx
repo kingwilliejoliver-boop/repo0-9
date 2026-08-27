@@ -6,6 +6,7 @@ import raspberryHillsTemplate from "./assets/templates/raspberry-hills-tee.jpg";
 import landingMockup from "./assets/landing-mockup.jpg";
 import completeControlLongSleeve from "./assets/gTtqOYCJbVo5MUj9JPBzm_kNXFQ69K.jpg";
 import completeControlDistressedTee from "./assets/LXtAAMhNx7GBk_8PmuMw2_bReF0ypb.jpg";
+import vintageCreamTee from "./assets/templates/vintage-cream-tee.jpg";
 import archivesTee from "./assets/templates/archives-tee.jpg";
 import prettyToxicTee from "./assets/templates/pretty-toxic-tee.jpg";
 import palywoodTee from "./assets/templates/palywood-tee.jpg";
@@ -22,6 +23,7 @@ import { LOOKS } from "./looks";
 import { FREE_IMAGE_LIMIT, PAYWALL_ENABLED } from "../lib/billing";
 import LooksEditor from "./LooksEditor";
 import StarsGalaxy from "./StarsGalaxy";
+import { encodeLookSources, fileToJpegDataUrl, preloadLookSources, toJpegDataUrl } from "./images";
 import { clerkAppearance, clerkLocalization, fetchAccount, localSession, type AccountSnap, type Session } from "./session";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -199,80 +201,6 @@ async function loadImageBlob(src: string) {
   return proxied.blob();
 }
 
-function parseAspectRatio(ratio: string) {
-  const [w, h] = ratio.split(":").map(Number);
-  if (!w || !h) return null;
-  return { w, h };
-}
-
-function canvasSizeForAspect(ratio: string, max: number) {
-  const parsed = parseAspectRatio(ratio);
-  if (!parsed) return { width: max, height: max };
-  if (parsed.w >= parsed.h) {
-    return { width: max, height: Math.max(1, Math.round(max * (parsed.h / parsed.w))) };
-  }
-  return { width: Math.max(1, Math.round(max * (parsed.w / parsed.h))), height: max };
-}
-
-function edgeFillColor(bitmap: ImageBitmap) {
-  const tw = Math.min(64, bitmap.width);
-  const th = Math.min(64, bitmap.height);
-  const sample = document.createElement("canvas");
-  sample.width = tw;
-  sample.height = th;
-  const ctx = sample.getContext("2d", { willReadFrequently: true });
-  if (!ctx) return "#ffffff";
-  ctx.drawImage(bitmap, 0, 0, tw, th);
-  const { data } = ctx.getImageData(0, 0, tw, th);
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  let n = 0;
-  const add = (i: number) => {
-    r += data[i];
-    g += data[i + 1];
-    b += data[i + 2];
-    n += 1;
-  };
-  for (let x = 0; x < tw; x += 1) {
-    add(x * 4);
-    add(((th - 1) * tw + x) * 4);
-  }
-  for (let y = 0; y < th; y += 1) {
-    add(y * tw * 4);
-    add((y * tw + tw - 1) * 4);
-  }
-  return `rgb(${Math.round(r / n)}, ${Math.round(g / n)}, ${Math.round(b / n)})`;
-}
-
-async function toJpegDataUrl(src: string, max = 1280, aspectRatio?: string) {
-  const blob = await loadImageBlob(src);
-  const bitmap = await createImageBitmap(blob);
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not read this image.");
-
-  if (aspectRatio && parseAspectRatio(aspectRatio)) {
-    const { width, height } = canvasSizeForAspect(aspectRatio, max);
-    canvas.width = width;
-    canvas.height = height;
-    ctx.fillStyle = edgeFillColor(bitmap);
-    ctx.fillRect(0, 0, width, height);
-    const scale = Math.min(width / bitmap.width, height / bitmap.height);
-    const dw = bitmap.width * scale;
-    const dh = bitmap.height * scale;
-    ctx.drawImage(bitmap, (width - dw) / 2, (height - dh) / 2, dw, dh);
-  } else {
-    const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  }
-
-  bitmap.close();
-  return canvas.toDataURL("image/jpeg", 0.88);
-}
-
 const LOOK_IMAGES: Record<number, string> = {
   3: saintDistressedTee,
   5: raspberryHillsTemplate,
@@ -289,6 +217,7 @@ const LOOK_IMAGES: Record<number, string> = {
   16: stinkyDogCap,
   17: completeControlLongSleeve,
   18: completeControlDistressedTee,
+  19: vintageCreamTee,
 };
 
 const TEMPLATES = LOOKS.map((look) => ({
@@ -544,16 +473,21 @@ function Label({ children }: { children: React.ReactNode }) {
 
 function MockupDropzone({ images, onAdd, onRemove }: { images: string[]; onAdd: (s: string) => void; onRemove: (i: number) => void }) {
   const ref = useRef<HTMLInputElement>(null);
+  const addFiles = useCallback(async (files: File[]) => {
+    for (const file of files.slice(0, 4 - images.length)) {
+      onAdd(await fileToJpegDataUrl(file));
+    }
+  }, [images.length, onAdd]);
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
-    files.slice(0, 4 - images.length).forEach((f) => onAdd(URL.createObjectURL(f)));
-  }, [images.length, onAdd]);
+    void addFiles(files);
+  }, [addFiles]);
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    files.slice(0, 4 - images.length).forEach((f) => onAdd(URL.createObjectURL(f)));
+    void addFiles(files);
     e.target.value = "";
-  }, [images.length, onAdd]);
+  }, [addFiles]);
 
   return (
     <div>
@@ -665,7 +599,9 @@ function HatMockupDropzone({
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) onSet(slot.key, URL.createObjectURL(file));
+                  if (file) {
+                    void fileToJpegDataUrl(file).then((src) => onSet(slot.key, src));
+                  }
                   e.target.value = "";
                 }}
               />
@@ -2146,6 +2082,13 @@ function AppShell({ session }: { session: Session }) {
 
   const selectedLook = TEMPLATES.find((t) => t.id === selectedTemplate) ?? null;
   const previewLook = TEMPLATES.find((t) => t.id === previewId) ?? null;
+
+  useEffect(() => {
+    if (!selectedLook) return;
+    const sources = selectedLook.refs.length > 0 ? selectedLook.refs : [selectedLook.img];
+    preloadLookSources(sources);
+  }, [selectedLook]);
+
   const hatLook = selectedLook?.garment === "Hat";
   const showHatUpload = hatLook || (!selectedLook && garmentFilter === "Hat");
   const hasMockup = hatLook ? Boolean(hatShots.front) : mockups.length > 0;
@@ -2189,9 +2132,11 @@ function AppShell({ session }: { session: Session }) {
     try {
       const hatAngles = (["front", "side", "back"] as const).filter((key) => hatShots[key]);
       const mockupSources = hatLook ? hatAngles.map((key) => hatShots[key] as string) : mockups;
-      const encodedMockups = await Promise.all(mockupSources.map((src) => toJpegDataUrl(src, 1280)));
+      const encodedMockups = mockupSources.every((src) => src.startsWith("data:image/"))
+        ? mockupSources
+        : await Promise.all(mockupSources.map((src) => toJpegDataUrl(src, 1280)));
       const lookSources = selectedLook.refs.length > 0 ? selectedLook.refs : [selectedLook.img];
-      const lookImages = await Promise.all(lookSources.map((src) => toJpegDataUrl(src, 1280)));
+      const lookImages = await encodeLookSources(lookSources, 1280);
       const token = session.configured ? await session.getToken() : null;
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (token) headers.Authorization = `Bearer ${token}`;

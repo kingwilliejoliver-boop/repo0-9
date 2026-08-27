@@ -99,6 +99,56 @@ function falMessage(data: unknown) {
   return "Fal could not apply this look.";
 }
 
+function falAttempts() {
+  const n = Number(process.env.FAL_MAX_ATTEMPTS || 2);
+  return Number.isFinite(n) && n > 0 ? Math.min(3, Math.floor(n)) : 2;
+}
+
+async function callFal(
+  key: string,
+  model: string,
+  payload: {
+    prompt: string;
+    system_prompt: string;
+    image_urls: string[];
+    aspect_ratio: string;
+  },
+) {
+  const fal = await fetch(`https://fal.run/${model}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Key ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ...payload,
+      num_images: 1,
+      output_format: "jpeg",
+      resolution: "1K",
+      thinking_level: "high",
+      limit_generations: true,
+    }),
+  });
+
+  const data = (await fal.json()) as {
+    images?: Array<{ url?: string }>;
+    detail?: unknown;
+    error?: unknown;
+    message?: unknown;
+  };
+
+  if (!fal.ok) {
+    return { ok: false as const, error: falMessage(data) };
+  }
+
+  const image = data.images?.[0]?.url;
+  if (!image) {
+    return { ok: false as const, error: "Fal did not return an image. Try another mockup." };
+  }
+
+  return { ok: true as const, image };
+}
+
 export default async function handler(
   req: {
     method?: string;
@@ -139,12 +189,22 @@ export default async function handler(
   const lookImages = (Array.isArray(req.body?.lookImages) ? req.body.lookImages : [req.body?.lookImage])
     .map(asImageDataUrl)
     .filter((src): src is string => Boolean(src));
+  if (lookImages.length === 0) {
+    res.status(400).json({ error: "This look's template image did not load. Pick the look again and retry." });
+    return;
+  }
   const hat = req.body?.garment === "Hat" || prompt.includes("locked hat photograph");
   const angles = hatAngles(mockups.length, req.body?.mockupAngles);
   const lockedPrefix = hat ? HAT_LOCKED_PREFIX : LOCKED_PREFIX;
   const systemPrompt = hat ? HAT_SYSTEM_PROMPT : SYSTEM_PROMPT;
   const model = process.env.FAL_MODEL || "fal-ai/nano-banana-2/edit";
-  const imageUrls = lookImages.length > 0 ? [...lookImages, ...mockups] : mockups;
+  const imageUrls = [...lookImages, ...mockups];
+  const falPayload = {
+    prompt: `${lockedPrefix}\n\n${withImageRefs(prompt, mockups.length, lookImages.length, hat, angles)}`,
+    system_prompt: systemPrompt,
+    image_urls: imageUrls,
+    aspect_ratio: "auto",
+  };
 
   let billed: { userId: string; usedFree: boolean; freeUsed: number; paidCredits: number } | null = null;
   if (PAYWALL_ENABLED) {
@@ -184,46 +244,22 @@ export default async function handler(
   }
 
   try {
-    const fal = await fetch(`https://fal.run/${model}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Key ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: `${lockedPrefix}\n\n${withImageRefs(prompt, mockups.length, lookImages.length, hat, angles)}`,
-        system_prompt: systemPrompt,
-        image_urls: imageUrls,
-        num_images: 1,
-        aspect_ratio: "auto",
-        output_format: "jpeg",
-        resolution: "1K",
-        thinking_level: "high",
-        limit_generations: true,
-      }),
-    });
+    let image: string | null = null;
+    let lastError = "Fal could not apply this look.";
+    const attempts = falAttempts();
 
-    const data = (await fal.json()) as {
-      images?: Array<{ url?: string }>;
-      detail?: unknown;
-      error?: unknown;
-      message?: unknown;
-    };
-
-    if (!fal.ok) {
-      if (billed) {
-        try {
-          const { refundCredit } = await import("../lib/db");
-          await refundCredit(billed.userId, billed.usedFree);
-        } catch {
-          /* keep the 502 */
-        }
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 600));
       }
-      res.status(502).json({ error: falMessage(data) });
-      return;
+      const result = await callFal(key, model, falPayload);
+      if (result.ok) {
+        image = result.image;
+        continue;
+      }
+      lastError = result.error;
     }
 
-    const image = data.images?.[0]?.url;
     if (!image) {
       if (billed) {
         try {
@@ -233,7 +269,7 @@ export default async function handler(
           /* keep the 502 */
         }
       }
-      res.status(502).json({ error: "Fal did not return an image. Try another mockup." });
+      res.status(502).json({ error: lastError });
       return;
     }
 
