@@ -18,36 +18,58 @@ export type Look = {
 /**
  * Edit these in Settings while running locally. Save writes this file.
  */
-export const TEMPLATE_TRANSFER_PROMPT = `Edit the first image. That is the locked template photograph. Return that same photo.
+export const TEMPLATE_TRANSFER_PROMPT = `Edit the first attached image (the locked template photograph) and return that same photograph.
 
-The last image is the customer's garment mockup — their finished piece, not a logo file. It is the source of truth for the exact design:
-- Garment colors
-- Every print, graphic, embroidery, and tag: spelling, colors, scale, and where each mark sits
-- Neck, sleeve, and hem details that belong to their design
+CRITICAL — two images, two roles:
+- IMAGE 1 (template): mockup style and garment structure ONLY. Not a design reference.
+- IMAGE LAST (customer mockup): the ONLY source for all color, artwork, and placement.
 
-Keep from the first image only the mock style: fabric, wash, distressing, wrinkles, drape, shot type, camera, background, lighting, shadows, and silhouette.
+FROM THE TEMPLATE (image 1) — take ONLY:
+- Shot type, camera angle, framing, background, lighting, and shadows
+- Fabric texture, wash, distressing, wrinkles, and drape
+- Garment silhouette and construction as an empty photographic canvas
 
-Do not copy the template's graphic or logo layout. Do not restamp their art into the template's print box. Rebuild their exact mockup design in this template's photographic style.
+FROM THE CUSTOMER MOCKUP (last image) — take EVERYTHING about the design:
+- Garment body color and any color blocking
+- Every graphic, print, logo, embroidery, tag, and text: exact artwork, colors, spelling, scale, and position
+- Chest, back, sleeve, and hem graphics only where they appear on the customer mockup
 
-Do not output the last image. Do not put the last image on a new background.
+NEVER take from the template:
+- Template artwork, logos, graphics, text, or brand marks
+- Template garment color or ink/print colors
+- Template print placement, logo boxes, or graphic layout — do not snap the customer's design into where the template had art
+- Any sample branding on the template garment
+
+Rebuild the customer's exact mockup design in this template's photographic style. The output should look like the customer's piece was shot in this template's setup — their design, this photo's fabric and lighting.
+
+Do not output the customer mockup unchanged. Do not paste it onto a new background.
 `;
 
-export const HAT_TRANSFER_PROMPT = `Edit the first image. That is the locked hat photograph. Return that same photo.
+export const HAT_TRANSFER_PROMPT = `Edit the first attached image (the locked hat photograph) and return that same photograph.
 
-The other images are the customer's real hat, shot from different angles. They are the source of truth for:
+CRITICAL — template vs customer photos:
+- IMAGE 1 (template): hat mockup style and structure ONLY. Not a logo reference.
+- OTHER IMAGES (customer hat): the ONLY source for crown/brim color and every mark's artwork and placement.
+
+FROM THE TEMPLATE (image 1) — take ONLY:
+- Shot type, camera angle, framing, background, lighting, and shadows
+- Fabric texture, wash, distressing, brim shape, and construction
+- Photographic presentation as an empty hat canvas
+
+FROM THE CUSTOMER'S HAT PHOTOS — take EVERYTHING about the design:
 - Crown and brim colors
-- Every logo, embroidery, patch, and text: spelling, colors, scale
-- Which panel each mark sits on: front, left/right side, back, brim
+- Every logo, embroidery, patch, and text: exact artwork, colors, spelling, scale
+- Which panel each mark sits on: front, side, back, brim — only where shown in their photos
 
-Strip the template's original branding completely. Do not keep, restyle, or restamp those logos. Do not put the customer's art in the template's logo box just because a logo was there.
+NEVER take from the template:
+- Template logos, patches, embroidery, or text
+- Template hat color or thread colors
+- Template logo placement or panel layout — do not put the customer's art where the template had a logo
+- Any sample branding on the template hat
 
-Place marks only where they appear on the customer's hat, at the same relative size and position on that panel. If a panel has no mark in their photos, leave it blank (hat color only). Do not invent a front lockup because the template has one.
+Erase all template branding. Place customer marks only on panels where they appear in the customer's photos, at the same relative size and position. Blank panels stay blank.
 
-If they included a side photo, use it for side marks. If they included a back photo, use it for rear marks and the closure. If an angle is missing, do not guess extra logos on the hidden side.
-
-Keep from the first image: fabric, wash, distressing, wrinkles, brim shape, construction, mockup style, shot type, camera, background, lighting, shadows.
-
-Do not output the customer's photos. Do not put those photos on a new background.
+Do not output the customer's photos unchanged. Do not paste them onto a new background.
 `;
 
 /* looks:start */

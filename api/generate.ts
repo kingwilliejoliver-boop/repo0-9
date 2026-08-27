@@ -50,35 +50,37 @@ function withImageRefs(prompt: string, mockupCount: number, lookRefCount: number
   for (let i = 0; i < lookRefCount; i += 1) {
     refs.push(
       hat
-        ? `#${i + 1} locked hat template — edit this photograph. Keep this fabric, construction, and shot.`
-        : `#${i + 1} locked template — edit this photograph. Keep this fabric, mockup style, and shot type.`,
+        ? `#${i + 1} locked hat template — STYLE ONLY: fabric, wash, shot, lighting, background, brim shape. Remove all template logos. Do not copy template colors or artwork.`
+        : `#${i + 1} locked template — STYLE ONLY: fabric, wash, shot, lighting, background, silhouette. Remove all template graphics. Do not copy template colors or artwork.`,
     );
   }
   for (let i = 0; i < mockupCount; i += 1) {
     refs.push(
       hat
-        ? `#${lookRefCount + i + 1} customer's hat ${angles[i] || "detail"} — color and marks on this side only. Do not copy the template logo box. Do not output this photo.`
-        : `#${lookRefCount + i + 1} customer's garment mockup — keep this exact design (colors, prints, placement). Apply the template's mock style. Do not output this photo.`,
+        ? `#${lookRefCount + i + 1} customer's hat ${angles[i] || "detail"} — ONLY source for hat color and every mark on this panel: exact artwork, colors, scale, placement. Do not output this photo.`
+        : `#${lookRefCount + i + 1} customer's garment mockup — ONLY source for garment color and every graphic: exact artwork, colors, spelling, scale, placement. Do not output this photo.`,
     );
   }
   return `${prompt.trim()}\n\n${refs.join("\n")}`;
 }
 
-const LOCKED_PREFIX = `The first attached image is the locked product template. Edit that photograph and return it.
-The last attached image is the customer's garment mockup. Keep their exact design — colors, prints, spelling, scale, and placement.
-Apply only the template's mock style: fabric, wash, distressing, lighting, camera, and background.
-Do not copy the template's graphic. Do not output the last image. Do not put the last image on a new background.`;
+const LOCKED_PREFIX = `Edit the first attached image (locked template) and return that photograph.
+The last image is the customer's mockup — the ONLY source for garment color, graphics, text, and placement.
+From the template take ONLY mockup style: fabric, wash, distressing, lighting, camera, background, silhouette.
+NEVER copy template artwork, template colors, or template print placement. Erase template graphics before applying the customer's design.
+Do not output the mockup unchanged. Do not paste it onto a new background.`;
 
-const HAT_LOCKED_PREFIX = `The first attached image is the locked hat photograph. Edit that photo and return it.
-The other attached images are the customer's hat from different angles. Use them for hat color and for which panel each logo sits on.
-Erase the template's original branding. Do not restamp the customer's art into the template's logo box.
-Do not output the customer's photos. Do not put those photos on a new background.`;
+const HAT_LOCKED_PREFIX = `Edit the first attached image (locked hat template) and return that photograph.
+The other images are the customer's hat — the ONLY source for hat color and every logo's artwork and placement.
+From the template take ONLY mockup style: fabric, wash, lighting, camera, background, brim shape.
+NEVER copy template logos, template colors, or template panel layout. Erase all template branding.
+Do not output the customer's photos unchanged.`;
 
 const SYSTEM_PROMPT =
-  "Edit the first attached image (the locked template) and return that same photograph. The last image is the customer's garment mockup. Keep their exact design. Apply only the template's mock style (fabric, wash, shot, lighting, background). Do not stamp their art into the template logo. Never output the last image. Never put the last image on a new background.";
+  "Template image = photographic style only (fabric, wash, shot, lighting, background). Customer mockup = sole source for ALL color, graphics, text, and placement. Never transfer template artwork or template colors onto the output. Erase template graphics; rebuild the customer's exact design in the template's photo style.";
 
 const HAT_SYSTEM_PROMPT =
-  "Edit the first attached image (the locked hat template) and return that same photograph. The other images are the customer's hat from front, side, and/or back. Use them for color and for exact logo placement by panel. Strip the template logos. Do not force a front lockup. Leave blank any panel with no mark in the customer's photos. Never output the customer's photos.";
+  "Template hat = photographic style only (fabric, wash, shot, lighting, brim shape). Customer hat photos = sole source for crown/brim color and every mark's artwork and panel placement. Never keep template logos or template colors. Blank panels stay blank.";
 
 function asImageDataUrl(value: unknown) {
   if (typeof value !== "string") return null;
