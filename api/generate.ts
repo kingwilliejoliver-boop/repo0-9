@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** Keep in sync with lib/billing.ts. Do not import lib/* here — it crashes this Vercel function. */
-const PAYWALL_ENABLED = true;
+const PAYWALL_ENABLED = false;
 
 export const config = {
   api: { bodyParser: { sizeLimit: "8mb" } },
